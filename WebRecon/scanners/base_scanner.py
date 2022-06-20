@@ -51,14 +51,14 @@ class ScanManager:
             print(f"[{self.target_hostname}] {(self.__class__.__name__ + ' ').ljust(20, '-')}> {text}")
 
     @lru_cache
-    def _get_results_directory(self) -> str:
+    def _get_results_directory(self, *args, **kwargs) -> str:
         path = os.path.join(self.output_folder,
                             self.target_hostname.replace('.', '_'),
                             self.target_url.replace(f'{self.scheme}://', '').replace('.', '_'))
 
         return path
 
-    def _get_results_filename(self) -> str:
+    def _get_results_filename(self, *args, **kwargs) -> str:
         return f"{self.__class__.__name__}.txt"
 
     def _save_results(self, results):

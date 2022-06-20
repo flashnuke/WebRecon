@@ -113,13 +113,13 @@ class WebRecon(ScanManager):
         return results
     
     @lru_cache
-    def _get_results_directory(self) -> str:
+    def _get_results_directory(self, *args, **kwargs) -> str:
         # overwrite the default output path
         path = os.path.join(self.output_folder,
                             self.target_hostname.replace('.', '_'))
         return path
 
-    def _get_results_filename(self) -> str:
+    def _get_results_filename(self, *args, **kwargs) -> str:
         return str()
 
 

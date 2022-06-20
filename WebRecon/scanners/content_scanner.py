@@ -7,6 +7,7 @@ import time
 from urllib.error import URLError
 from .base_scanner import Scanner
 from .exploiters import Bypass403
+from functools import lru_cache
 
 #   --------------------------------------------------------------------------------------------------------------------
 #
@@ -96,31 +97,22 @@ class ContentScanner(Scanner):
 
                     if len(response.read()):
                         self._log(f"{url} = [{scode}] status code")
-                        self._save_results(scode, url)
+                        self.ret_results[scode].append(url)
 
                     if scode == 403 and self.try_bypass:
                         self.results_bypass[url] = Bypass403(self.target_url, path).start_bypasser()
-                        self._save_results("bypass", str(self.results_bypass[url]))
+                        self.ret_results["bypass"].append(str(self.results_bypass[url]))
 
                 except URLError as url_exc:
                     if hasattr(url_exc, 'code') and url_exc.code != 404:  # this might indicate something interesting
                         self._log(f"{url} = [{url_exc.code}] status code")
-                        self._save_results(url_exc.code, url)
+                        self.ret_results[url_exc.code].append(url)
 
                 except Exception as exc:
                     self._log(f"exception {exc} for {url}")
 
                 finally:
                     time.sleep(self.request_cooldown)
-
-    def _save_results(self, code, url):
-        results_filename = f'WebBruter_{self.hostname.replace(".", "_")}.txt'
-
-        if self.save_results_to_file:
-            with open(f"{self._DEF_RESULTS_PATH}{code}_{results_filename}", "a") as res_file:
-                res_file.write(f"\n{url} -> {code}")
-
-        self.ret_results[code].append(url)
 
     def _start_scanner(self):
         threads = list()
@@ -130,6 +122,14 @@ class ContentScanner(Scanner):
             threads.append(t)
         for t in threads:
             t.join()
+
+        results_str = str()
+        for code, urls in self.ret_results.items():  # TODO why doesnt save
+            results_str += f"{code} status code\n\n"
+            for url in urls:
+                results_str += f"{url}\n"
+            results_str += "\n\n================================\n\n"
+        self._save_results(results_str)
 
         return self.ret_results
 

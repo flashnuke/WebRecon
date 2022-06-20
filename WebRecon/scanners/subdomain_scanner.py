@@ -60,7 +60,7 @@ class DNSScanner(Scanner):
 
                 if res.status_code:
                     self._log(f"{url_path} = [{res.status_code}] status code")
-                    self._save_results(f"\n{url_path}")
+                    self._save_results(f"{url_path}\n")
                     self.results_queue.put(url_path)
 
             except Exception as exc:  # TODO if exception is not related to dns, then print!! (i.e save file)
@@ -81,7 +81,7 @@ class DNSScanner(Scanner):
         return self.results_queue
     
     @lru_cache
-    def _get_results_directory(self) -> str:
+    def _get_results_directory(self, *args, **kwargs) -> str:
         # overwrite the default output path
         path = os.path.join(self.output_folder,
                             self.target_hostname.replace('.', '_'))

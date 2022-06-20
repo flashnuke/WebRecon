@@ -42,8 +42,9 @@ class NmapScanner(Scanner):
         nm.scan(hosts=self.target_hostname, ports=self.ports, arguments=self.cmdline_args)
         for host in nm.all_hosts():
             self.ret_results[host] = nm[host]
-        self._log(pprint.pformat(self.ret_results))
-        self._save_results(f"\n{pprint.pformat(self.ret_results)}")
+        results_str = pprint.pformat(self.ret_results)
+        self._log(f"\n{results_str}")
+        self._save_results(results_str)
 
         return self.ret_results
 
