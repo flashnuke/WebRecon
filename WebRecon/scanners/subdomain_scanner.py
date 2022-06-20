@@ -1,9 +1,10 @@
 import requests
-import urllib.parse
+import os
 import threading
 import queue
 import time
 from .base_scanner import Scanner
+from functools import lru_cache
 
 #   --------------------------------------------------------------------------------------------------------------------
 #
@@ -41,7 +42,7 @@ class DNSScanner(Scanner):
         self.words_queue: queue.Queue = self.load_words()
 
     def generate_urlpath(self, dnsname):
-        return f"{self.scheme}://{dnsname}.{self.hostname}"
+        return f"{self.scheme}://{dnsname}.{self.target_hostname}"
 
     def load_words(self) -> queue.Queue:
         with open(self.wordlist_path, "r") as wl:
@@ -58,11 +59,11 @@ class DNSScanner(Scanner):
                 res = self.session.get(url=url_path, headers=self.headers, timeout=self.request_timeout)
 
                 if res.status_code:
-                    self.log(f"{url_path} = [{res.status_code}] status code")
-                    self.save_results(f"\n{url_path}")
+                    self._log(f"{url_path} = [{res.status_code}] status code")
+                    self._save_results(f"\n{url_path}")
                     self.results_queue.put(url_path)
 
-            except Exception as exc:
+            except Exception as exc:  # TODO if exception is not related to dns, then print!! (i.e save file)
                 continue
 
             finally:
@@ -78,6 +79,14 @@ class DNSScanner(Scanner):
             t.join()
 
         return self.results_queue
+    
+    @lru_cache
+    def _get_results_directory(self) -> str:
+        # overwrite the default output path
+        path = os.path.join(self.output_folder,
+                            self.target_hostname.replace('.', '_'))
+
+        return path
 
 
 if __name__ == "__main__":

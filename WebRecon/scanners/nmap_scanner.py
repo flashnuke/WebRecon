@@ -24,13 +24,13 @@ class NmapScanner(Scanner):
 
         self.save_results_to_file = kwargs.get("save_results_to_file", False)  # TODO ? to scanner?
 
-        self.cmdline_args = kwargs.get("cmdline_args", "-sV -sU -sS")
+        self.cmdline_args = kwargs.get("cmdline_args", "-sV")  # TODO revert to flags "-sV -sU -sS"
         self.ports = kwargs.get("ports", "22-443")
 
-        self.ret_results = collections.defaultdict(nmap.PortScannerHostDict)
+        self.ret_results = dict()
 
     # TODO save results below dont forget it
-    # def save_results(self):
+    # def _save_results(self):
     #     results_filename = f'NmapScanner__{self.hostname.replace(".", "_")}.txt'
     #
     #     if self.save_results_to_file:
@@ -39,11 +39,11 @@ class NmapScanner(Scanner):
 
     def _start_scanner(self):
         nm = nmap.PortScanner()
-        nm.scan(hosts=self.hostname, ports=self.ports, arguments=self.cmdline_args)
+        nm.scan(hosts=self.target_hostname, ports=self.ports, arguments=self.cmdline_args)
         for host in nm.all_hosts():
             self.ret_results[host] = nm[host]
-        pprint.pprint(self.ret_results)
-        # self.save_results() TODO
+        self._log(pprint.pformat(self.ret_results))
+        self._save_results(f"\n{pprint.pformat(self.ret_results)}")
 
         return self.ret_results
 

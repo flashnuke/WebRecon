@@ -95,25 +95,25 @@ class ContentScanner(Scanner):
                     scode = response.code
 
                     if len(response.read()):
-                        self.log(f"{url} = [{scode}] status code")
-                        self.save_results(scode, url)
+                        self._log(f"{url} = [{scode}] status code")
+                        self._save_results(scode, url)
 
                     if scode == 403 and self.try_bypass:
                         self.results_bypass[url] = Bypass403(self.target_url, path).start_bypasser()
-                        self.save_results("bypass", str(self.results_bypass[url]))
+                        self._save_results("bypass", str(self.results_bypass[url]))
 
                 except URLError as url_exc:
                     if hasattr(url_exc, 'code') and url_exc.code != 404:  # this might indicate something interesting
-                        self.log(f"{url} = [{url_exc.code}] status code")
-                        self.save_results(url_exc.code, url)
+                        self._log(f"{url} = [{url_exc.code}] status code")
+                        self._save_results(url_exc.code, url)
 
                 except Exception as exc:
-                    self.log(f"exception {exc} for {url}")
+                    self._log(f"exception {exc} for {url}")
 
                 finally:
                     time.sleep(self.request_cooldown)
 
-    def save_results(self, code, url):
+    def _save_results(self, code, url):
         results_filename = f'WebBruter_{self.hostname.replace(".", "_")}.txt'
 
         if self.save_results_to_file:
