@@ -2,6 +2,7 @@ import nmap
 import urllib.parse
 import collections
 import pprint  # todo requirements
+from .base_scanner import Scanner
 
 #   --------------------------------------------------------------------------------------------------------------------
 #
@@ -14,34 +15,35 @@ import pprint  # todo requirements
 #   --------------------------------------------------------------------------------------------------------------------
 
 
-class NmapScanner:
+class NmapScanner(Scanner):
     # TODO save into folder of hostname (if exists or make)
     _DEF_RESULTS_PATH = "nmap_results"
 
-    def __init__(self, config_json):
-        self.target_url = config_json.get("target_url")
-        self.hostname = urllib.parse.urlparse(self.target_url).netloc
-        self.save_results_to_file = config_json.get("save_results_to_file", False)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-        self.cmdline_args = config_json.get("cmdline_args", "-sV -sU -sS")
-        self.ports = config_json.get("ports", "22-443")
+        self.save_results_to_file = kwargs.get("save_results_to_file", False)  # TODO ? to scanner?
 
-        self.ret_results = collections.defaultdict(list)
+        self.cmdline_args = kwargs.get("cmdline_args", "-sV -sU -sS")
+        self.ports = kwargs.get("ports", "22-443")
 
-    def save_results(self):
-        results_filename = f'NmapScanner__{self.hostname.replace(".", "_")}.txt'
+        self.ret_results = collections.defaultdict(nmap.PortScannerHostDict)
 
-        if self.save_results_to_file:
-            with open(f"{self._DEF_RESULTS_PATH}/{results_filename}", "a") as res_file:
-                pprint.pprint(self.ret_results, res_file)
+    # TODO save results below dont forget it
+    # def save_results(self):
+    #     results_filename = f'NmapScanner__{self.hostname.replace(".", "_")}.txt'
+    #
+    #     if self.save_results_to_file:
+    #         with open(f"{self._DEF_RESULTS_PATH}/{results_filename}", "a") as res_file:
+    #             pprint.pprint(self.ret_results, res_file)
 
-    def start_scanner(self):
+    def _start_scanner(self):
         nm = nmap.PortScanner()
         nm.scan(hosts=self.hostname, ports=self.ports, arguments=self.cmdline_args)
         for host in nm.all_hosts():
             self.ret_results[host] = nm[host]
         pprint.pprint(self.ret_results)
-        self.save_results()
+        # self.save_results() TODO
 
         return self.ret_results
 

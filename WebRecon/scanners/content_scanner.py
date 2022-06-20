@@ -5,7 +5,8 @@ import threading
 import queue
 import time
 from urllib.error import URLError
-from WebRecon.exploiters.bypass_403 import Bypass403
+from .base_scanner import Scanner
+from .exploiters import Bypass403
 
 #   --------------------------------------------------------------------------------------------------------------------
 #
@@ -23,37 +24,41 @@ from WebRecon.exploiters.bypass_403 import Bypass403
 #
 #   --------------------------------------------------------------------------------------------------------------------
 
+# TODO renew session to avoid 429? or handle 429 in such way that you retry?
+# TODO change to requests lib
+# TODO example below dict to kwargs
 
-class ContentScanner:
-    _DEF_USERAGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/19.0"
+
+class ContentScanner(Scanner):
+    _DEF_USERAGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/19.0"  # enum useragents
     _DEF_WORD_EXT = []  # [".php", ".bak", ".orig", ".inc"]
     # TODO save into folder of hostname (if exists or make)
     _DEF_RESULTS_PATH = "/content_results/"
+    _DEF_WL_PATH = "scanners/wordlists/test_webcontent_brute.txt"
 
-    def __init__(self, config_json):
-        self.target_url = config_json.get("target_url")
-        parsed_target = urllib.parse.urlparse(self.target_url)
-        self.hostname = parsed_target.netloc.strip("w").strip(".")
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-        self.wordlist_path = config_json.get("wordlist_path")
         self.headers = {
             'User-Agent': self._DEF_USERAGENT
         }
-        self.word_extensions = config_json.get("word_extensions", self._DEF_WORD_EXT)
 
-        self.request_cooldown = config_json.get("request_cooldown", 1)
-        self.thread_count = config_json.get("thread_count", 8)
-        self.request_timeout = config_json.get("request_timeout", 1)
+        self.wordlist_path = kwargs.get("wordlist_path", self._DEF_WL_PATH)  # TODO def
+
+        self.word_extensions = kwargs.get("word_extensions", self._DEF_WORD_EXT)  # TODO DEF
+
+        self.request_cooldown = kwargs.get("request_cooldown", 0.1)
+        self.thread_count = kwargs.get("thread_count", 4)  # TODO by max threads count? OS cmd
+        self.request_timeout = kwargs.get("request_timeout", 1)
 
         self.words_queue: queue.Queue = self.load_words()
 
-        self.save_results_to_file = config_json.get("save_results_to_file", False)
+        self.save_results_to_file = kwargs.get("save_results_to_file", False)  # TODO ? to scanner?
 
-        self.try_bypass = config_json.get("try_bypass", False)
+        self.try_bypass = kwargs.get("try_bypass", False)
         if self.try_bypass:
             self.results_bypass = collections.defaultdict(dict)
-
-            self.ret_results = collections.defaultdict(list)
+        self.ret_results = collections.defaultdict(list)
 
     def load_words(self) -> queue.Queue:
         with open(self.wordlist_path, "r") as wl:
@@ -90,7 +95,7 @@ class ContentScanner:
                     scode = response.code
 
                     if len(response.read()):
-                        print(f"[{scode}] -> {url}")
+                        self.log(f"{url} = [{scode}] status code")
                         self.save_results(scode, url)
 
                     if scode == 403 and self.try_bypass:
@@ -99,11 +104,11 @@ class ContentScanner:
 
                 except URLError as url_exc:
                     if hasattr(url_exc, 'code') and url_exc.code != 404:  # this might indicate something interesting
-                        print(f"[{url_exc.code}] -> {url}")
+                        self.log(f"{url} = [{url_exc.code}] status code")
                         self.save_results(url_exc.code, url)
 
                 except Exception as exc:
-                    print(f"[!] - exception {exc} for {url}")
+                    self.log(f"exception {exc} for {url}")
 
                 finally:
                     time.sleep(self.request_cooldown)
@@ -117,7 +122,7 @@ class ContentScanner:
 
         self.ret_results[code].append(url)
 
-    def start_scanner(self):
+    def _start_scanner(self):
         threads = list()
         for _ in range(self.thread_count):
             t = threading.Thread(target=self.single_bruter)

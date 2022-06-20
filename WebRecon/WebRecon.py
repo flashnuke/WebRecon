@@ -3,6 +3,7 @@ import threading
 from typing import Dict, List
 from copy import deepcopy
 import pprint
+from scanners import ScanManager
 
 # TODO bruter class base abstract
 # todo dnsclass and all other classes print start
@@ -41,9 +42,9 @@ import pprint
 #   --------------------------------------------------------------------------------------------------------------------
 
 
-class WebRecon:
-    def __init__(self, target: str):
-        self.target = target
+class WebRecon(ScanManager):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.domains = None
         self.domains_count = 0
 
@@ -52,82 +53,67 @@ class WebRecon:
             "nmap_scan": dict()
         }
 
-    def perform_dns_scan(self):
-        dns_scan_conf = {  # todo def params wordlist
-            "target_url": self.target,
-            "wordlist_path": "../../wordlists/subdomain_brute.txt",
-            "request_cooldown": 0.1,
-            "thread_count": 4
-        }
-        return subdomain_scanner.DNSScanner(dns_scan_conf).start_scanner()
-
     def start_recon(self):
-        print(f"[*] starting DNS scan...")
-        self.domains = self.perform_dns_scan()
+        self.log("starting DNS scan...")
+        self.domains = self._perform_dns_scan()
         self.domains_count = self.domains.qsize()
-        print(f"[*] found {self.domains_count} domains")
+        self.log(f"found {self.domains_count} domains")
 
-        successes = 0
+        success_count = 0
         while not self.domains.empty():
             target = self.domains.get()
             try:
                 results_cb, results_nmap = dict(), dict()
 
-                print(f"[*] starting content brute for {target}...")
-                t_cb = threading.Thread(target=self.do_content_brute, args=(target, results_cb))
+                self.log(f"preparing a thread for content brute... target {target}")
+                t_cb = threading.Thread(target=self._do_content_brute, args=(target, results_cb))
                 t_cb.start()
 
-                print(f"[*] starting nmap port scanning for {target}...")
-                t_nmap = threading.Thread(target=self.do_nmap_scan, args=(target, results_cb))
+                self.log(f"preparing a thread for nmap port scanning... target {target}")
+                t_nmap = threading.Thread(target=self._do_nmap_scan, args=(target, results_cb))
                 t_nmap.start()
 
                 t_cb.join()
                 t_nmap.join()
-                print(f"[*] finished, saving results for {target}...")
+                self.log(f"finished, saving results... target {target}")
 
                 self.recon_results[target] = dict()
                 self.recon_results[target]["content_brute"] = deepcopy(results_cb)
                 self.recon_results[target]["nmap_scan"] = deepcopy(results_nmap)
-                successes += 1
+                success_count += 1
             except Exception as exc:
-                print(f"[!] exception {exc} for {target}, skipping...")
+                self.log(f"exception {exc} for {target}, skipping...")
 
-        print(f"[*] finished {successes}/{self.domains_count} subdomain targets, shutting down...")
+        self.log(f"finished {success_count} out of {self.domains_count} subdomain targets, shutting down...")
 
-    def do_content_brute(self, target, results):
-        # todo params
-        conf = {
-            "target_url": target,
-            "wordlist_path": "../../wordlists/webcontent_brute.txt",
-            "save_results_to_file": False,
-            "request_cooldown": 0.1,
-            "thread_count": 4
-        }
-        bruter = content_scanner.ContentScanner(conf)
+    def _perform_dns_scan(self):
+        return subdomain_scanner.DNSScanner(target_url=self.target_url).start_scanner()
+
+    def _do_content_brute(self, target, results):
+        bruter = content_scanner.ContentScanner(target_url=target)
         results = bruter.start_scanner()
+        self.log(f"finished content brute for {target}...")
 
-    def do_nmap_scan(self, target, results):
-        conf = {
-            "target_url": target,
-            "save_results_to_file": False,
-            "cmdline_args": "-sV, -sU, -sS",
-            "ports": "22-443"
-        }
-        scanner = nmap_scanner.NmapScanner(conf)
+
+    def _do_nmap_scan(self, target, results):
+        scanner = nmap_scanner.NmapScanner(target_url=target)
         results = scanner.start_scanner()
+        self.log(f"finished nmap port scanning for {target}...")
 
 
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description='Perform web reconnaissance on all subdomains of a given host.')
-    parser.add_argument('target_url', metavar='t', type=str, nargs='+',
-                        help='target url (subdomain will be stripped)')
-    parser.add_argument('--do-dnmap', dest='do_nmap', action='store_const',
-                        const=sum, default=max,
-                        help='perform an nmap scan')
+    # parser = argparse.ArgumentParser(description='Perform web reconnaissance on all subdomains of a given host.')
+    # parser.add_argument('target_url', metavar='t', type=str, nargs='+',
+    #                     help='target url (subdomain will be stripped)')
+    # parser.add_argument('--do-dnmap', dest='do_nmap', action='store_const',
+    #                     const=sum, default=max,
+    #                     help='perform an nmap scan')
+    #
+    # args = parser.parse_args()
+    # print(args.accumulate(args.integers))
 
-    args = parser.parse_args()
-    print(args.accumulate(args.integers))
-
-    # WebRecon("https://example.com")
+    WebRecon(target_url="https://example.com").start_recon()
+    # TODO only dns / only brute / etc...
+    # TODO params like max thread count, etc, to external ENUM class

@@ -1,4 +1,5 @@
 import urllib.parse
+import os
 from typing import Any
 
 from abc import abstractmethod
@@ -16,25 +17,52 @@ from abc import abstractmethod
 #   --------------------------------------------------------------------------------------------------------------------
 
 
-class Scanner:
-    _DEF_RESULTS_PATH = "../dns_results/"
+class ScanManager:
+    _DEF_RESULTS_DIRECTORY = "results"
 
-    def __init__(self, config_json):
-        self.target_url = config_json.get("target_url")
+    def __init__(self, *args, **kwargs):
+        self.target_url = kwargs.get("target_url")
+        if not self.target_url:
+            raise Exception("Missing target url")  # TODO exceptions class?
+
         parsed_target = urllib.parse.urlparse(self.target_url)
         self.hostname = parsed_target.netloc.strip("w").strip(".")
         self.scheme = parsed_target.scheme
+        if not self.scheme:
+            raise Exception("Missing scheme url")  # TODO exceptions class?
+
+        self.results_path = kwargs.get("output_path",
+                                       f'{self._DEF_RESULTS_DIRECTORY}/'
+                                       f'{self.__class__.__name__}_{self.hostname.replace(".", "_")}.txt')
+        try:
+            os.remove(self.results_path)
+        except FileNotFoundError:
+            pass
+
+    def log(self, text):
+        # TODO with colors based on type of message
+        print(f"[{self.hostname} {self.__class__.__name__.rjust(12)}] -> {text}")
+
+    def save_results(self, results):
+        with open(self.results_path, "a") as res_file:
+            res_file.write(f"\n{results}")
+
+
+class Scanner(ScanManager):
+    _DEF_RESULTS_PATH = "../dns_results/"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def start_scanner(self) -> Any:
+        try:
+            self._start_scanner()
+        except Exception as exc:
+            self.log(f"aborting due to exception: {exc}")
 
     @abstractmethod
-    def start_scanner(self) -> Any:
+    def _start_scanner(self) -> Any:
         ...
-
-    def save_results(self, filename, data):
-        pass
-        results_filename = f'DNSBruter_{self.hostname.replace(".", "_")}.txt'
-
-        with open(f"{self._DEF_RESULTS_PATH}{results_filename}", "a") as res_file:
-            res_file.write(f"\n{target_url}")
 
 
 if __name__ == "__main__":
