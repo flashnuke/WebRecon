@@ -18,7 +18,7 @@ from abc import abstractmethod
 
 
 class ScanManager:
-    _DEF_RESULTS_DIRECTORY = "results"
+    _DEF_OUTPUT_DIRECTORY = "results"
 
     def __init__(self, *args, **kwargs):
         self.target_url = kwargs.get("target_url")
@@ -32,20 +32,21 @@ class ScanManager:
             raise Exception("Missing scheme url")  # TODO exceptions class?
 
         self.results_path = kwargs.get("output_path",
-                                       f'{self._DEF_RESULTS_DIRECTORY}/'
+                                       f'{self._DEF_OUTPUT_DIRECTORY}/'
                                        f'{self.__class__.__name__}_{self.hostname.replace(".", "_")}.txt')
+
         try:
-            os.remove(self.results_path)
+            os.remove(self.results_path)  # remove old files
         except FileNotFoundError:
             pass
 
     def log(self, text):
         # TODO with colors based on type of message
-        print(f"[{self.hostname} {self.__class__.__name__.rjust(12)}] -> {text}")
+        print(f"[{self.hostname}] {(self.__class__.__name__ + ' ').ljust(20, '-')}> {text}")
 
     def save_results(self, results):
         with open(self.results_path, "a") as res_file:
-            res_file.write(f"\n{results}")
+            res_file.write(f"{results}")
 
 
 class Scanner(ScanManager):
@@ -56,7 +57,10 @@ class Scanner(ScanManager):
 
     def start_scanner(self) -> Any:
         try:
-            self._start_scanner()
+            self.log(f"starting scanner...")
+            scan_results = self._start_scanner()
+            self.log(f"scanner finished...")
+            return scan_results
         except Exception as exc:
             self.log(f"aborting due to exception: {exc}")
 

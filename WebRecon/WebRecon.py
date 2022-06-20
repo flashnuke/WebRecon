@@ -41,6 +41,8 @@ from scanners import ScanManager
 #
 #   --------------------------------------------------------------------------------------------------------------------
 
+# TODO rename content scan to endpoint scan?
+
 
 class WebRecon(ScanManager):
     def __init__(self, *args, **kwargs):
@@ -54,9 +56,7 @@ class WebRecon(ScanManager):
         }
 
     def start_recon(self):
-        self.log("starting DNS scan...")
-        self.domains = self._perform_dns_scan()
-        self.domains_count = self.domains.qsize()
+        self._do_dns_scan()
         self.log(f"found {self.domains_count} domains")
 
         success_count = 0
@@ -65,11 +65,11 @@ class WebRecon(ScanManager):
             try:
                 results_cb, results_nmap = dict(), dict()
 
-                self.log(f"preparing a thread for content brute... target {target}")
+                self.log(f"preparing a thread for content scanning...")
                 t_cb = threading.Thread(target=self._do_content_brute, args=(target, results_cb))
                 t_cb.start()
 
-                self.log(f"preparing a thread for nmap port scanning... target {target}")
+                self.log(f"preparing a thread for nmap port scanning...")
                 t_nmap = threading.Thread(target=self._do_nmap_scan, args=(target, results_cb))
                 t_nmap.start()
 
@@ -86,19 +86,21 @@ class WebRecon(ScanManager):
 
         self.log(f"finished {success_count} out of {self.domains_count} subdomain targets, shutting down...")
 
-    def _perform_dns_scan(self):
-        return subdomain_scanner.DNSScanner(target_url=self.target_url).start_scanner()
+    def _do_dns_scan(self):
+        self.domains = subdomain_scanner.DNSScanner(target_url=self.target_url).start_scanner()
+        self.domains_count = self.domains.qsize()
 
-    def _do_content_brute(self, target, results):
+    @staticmethod
+    def _do_content_brute(target, results):
         bruter = content_scanner.ContentScanner(target_url=target)
         results = bruter.start_scanner()
-        self.log(f"finished content brute for {target}...")
+        return results
 
-
-    def _do_nmap_scan(self, target, results):
+    @staticmethod
+    def _do_nmap_scan(target, results):
         scanner = nmap_scanner.NmapScanner(target_url=target)
         results = scanner.start_scanner()
-        self.log(f"finished nmap port scanning for {target}...")
+        return results
 
 
 if __name__ == "__main__":
