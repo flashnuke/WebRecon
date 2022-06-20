@@ -45,6 +45,7 @@ class NmapScanner(Scanner):
         results_str = pprint.pformat(self.ret_results)
         self._log(f"\n{results_str}")
         self._save_results(results_str)
+        # TODO try to log every line separately to preserve the format
 
         return self.ret_results
 
