@@ -17,8 +17,6 @@ from typing import Dict, List
 # TODO go over path, etc... useragent
 
 class Bypass403(Scanner):
-    _DEF_RESULTS_PATH = "../../../../blackhat-python/web_attacks/web_recon/scan_results/"
-
     def __init__(self, target_keyword, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

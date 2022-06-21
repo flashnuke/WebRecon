@@ -1,11 +1,13 @@
 import requests
 import os
+import queue
+import time
+
 from typing import Any, Union
 from pathlib import Path
 from functools import lru_cache
 from abc import abstractmethod
 import threading
-from enum import Enum
 from .utils import *
 import urllib3
 
@@ -72,9 +74,13 @@ class Scanner(ScanManager):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.request_cooldown = kwargs.get("request_cooldown", ScannerDefaultParams.RequestCooldown)
+        self.wordlist_path = kwargs.get("wordlist_path", getattr(WordlistDefaultPath, self.__class__.__name__, None))  # TODO argparse
+        if self.wordlist_path:
+            self.words_queue: queue.Queue = self.load_words()
+
+        self.request_cooldown = kwargs.get("request_cooldown", NetworkDefaultParams.RequestCooldown)
         self.thread_count = kwargs.get("thread_count", ScannerDefaultParams.ThreadCount)
-        self.request_timeout = kwargs.get("request_timeout", ScannerDefaultParams.RequestTimeout)
+        self.request_timeout = kwargs.get("request_timeout", NetworkDefaultParams.RequestTimeout)
 
         self._default_headers = dict()  # for rotating user agents
         self._session: Union[requests.Session, None] = None
@@ -82,6 +88,13 @@ class Scanner(ScanManager):
 
         self._session_refresh_interval = kwargs.get("request_timeout", 1000)  # TODO
         self._session_refresh_count = 0
+
+    def load_words(self) -> queue.Queue:
+        with open(self.wordlist_path, "r") as wl:
+            words = queue.Queue()
+            for word in wl.readlines():
+                words.put(word.rstrip("\n"))
+        return words
 
     def start_scanner(self) -> Any:
         try:
@@ -105,7 +118,7 @@ class Scanner(ScanManager):
             raise Exception("Missing target url")  # TODO exceptions class?
 
         self._default_headers.clear()
-        self._default_headers['User-Agent'] = get_random_useragent()  # TODO
+        self._default_headers['User-Agent'] = get_random_useragent()
 
         self._session = requests.Session()
 
@@ -116,25 +129,12 @@ class Scanner(ScanManager):
             headers = dict()
         headers.update(self._default_headers)
 
-        return self._session.request(method=method, url=url, headers=headers, timeout=self.request_timeout, **kwargs)
+        res = self._session.request(method=method, url=url, headers=headers, timeout=self.request_timeout, **kwargs)
 
-# ========= Default Scanner Params
+        if res.status_code == 429:
+            time.sleep(NetworkDefaultParams.TooManyReqSleep)
 
-
-class ExtendedEnum(Enum):
-    def __get__(self, *args, **kwargs):
-        """
-        needed so we can access the values directly
-        """
-        return self.value
-
-
-class ScannerDefaultParams(ExtendedEnum):
-    RequestCooldown = 0.1
-    ThreadCount = 4
-    RequestTimeout = 1
-    SuccessStatusCodes = [200, 301, 302]
-    TooManyReqSleep = 10
+        return res
 
 
 if __name__ == "__main__":

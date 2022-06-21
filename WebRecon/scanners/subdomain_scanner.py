@@ -20,16 +20,11 @@ from functools import lru_cache
 
 
 class DNSScanner(Scanner):
-    _DEF_WL_PATH = "scanners/wordlists/test_subdomain_brute.txt"
+    _DEF_WL_PATH = "scanners/"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.results_queue = queue.Queue()
-
-        self.wordlist_path = kwargs.get("wordlist_path", self._DEF_WL_PATH)  # TODO argparse ALSO use default wordlist path
-        self.words_queue: queue.Queue = self.load_words()
-
-        self.session = requests.Session()
 
     def generate_urlpath(self, dnsname):
         return f"{self.scheme}://{dnsname}.{self.target_hostname}"

@@ -1,9 +1,9 @@
 import collections
 import urllib.parse
 import threading
-import queue
 import time
-from .base_scanner import Scanner, ScannerDefaultParams
+from .base_scanner import Scanner
+from .utils import ScannerDefaultParams
 from .bypass_403 import Bypass403
 
 #   --------------------------------------------------------------------------------------------------------------------
@@ -24,27 +24,13 @@ from .bypass_403 import Bypass403
 
 
 class ContentScanner(Scanner):
-    _DEF_FILE_EXT = []  # [".php", ".bak", ".orig", ".inc"]
-    _DEF_WL_PATH = "scanners/wordlists/test_webcontent_brute.txt"
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        self.wordlist_path = kwargs.get("wordlist_path", self._DEF_WL_PATH)  # TODO def
-        self.word_extensions = kwargs.get("word_extensions", self._DEF_FILE_EXT)  # TODO DEF
-        self.words_queue: queue.Queue = self.load_words()
 
         self.try_bypass = kwargs.get("try_bypass", False)
         if self.try_bypass:
             self.results_bypass = collections.defaultdict(dict)
         self.ret_results = collections.defaultdict(list)
-
-    def load_words(self) -> queue.Queue:
-        with open(self.wordlist_path, "r") as wl:
-            words = queue.Queue()
-            for word in wl.readlines():
-                words.put(word.rstrip("\n"))
-        return words
 
     def single_bruter(self):
         while not self.words_queue.empty():
@@ -57,7 +43,7 @@ class ContentScanner(Scanner):
             else:
                 attempt_list.append(f"/{attempt}")
 
-                for extension in self.word_extensions:
+                for extension in ScannerDefaultParams.FileExtensions:
                     attempt_post = "." + attempt.split(".")[-1]
 
                     if attempt_post != extension:
@@ -79,9 +65,6 @@ class ContentScanner(Scanner):
                         self.results_bypass[url] = Bypass403(target_url=self.target_url,
                                                              target_keyword=path).start_scanner()
                         self.ret_results["bypass"].append(str(self.results_bypass[url]))
-
-                    if scode == 429:
-                        time.sleep(ScannerDefaultParams.TooManyReqSleep)
 
                 except Exception as exc:
                     self._log(f"exception {exc} for {url}")
