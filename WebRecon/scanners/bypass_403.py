@@ -1,6 +1,5 @@
-import requests
 import time
-import urllib3
+from .base_scanner import Scanner, ScannerDefaultParams
 from typing import Dict, List
 
 
@@ -8,33 +7,23 @@ from typing import Dict, List
 #
 #   Attempt to bypass 403 using different methods
 #
-#   ⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸ
 #   Ⓒ                                                                                                                Ⓒ
 #   Ⓒ    This module was written in Python in order to integrate better with WebRecon, most methods were taken from  Ⓒ
 #   Ⓒ    from this repo     ->      https://github.com/iamj0ker/bypass-403                                           Ⓒ
 #   Ⓒ                                                                                                                Ⓒ
-#   ⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸⒸ
 #
 #   --------------------------------------------------------------------------------------------------------------------
 
-# TODO also scanner?
 # TODO go over path, etc... useragent
-# TODO scanner
 
-class Bypass403:
-    _DEF_USERAGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/19.0"
-    _SUCCESS_STATUSCODES = [200, 301, 302]  # TODO remove
+class Bypass403(Scanner):
     _DEF_RESULTS_PATH = "../../../../blackhat-python/web_attacks/web_recon/scan_results/"
 
-    def __init__(self, target_url, target_keyword, request_cooldown=0.1):
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    def __init__(self, target_keyword, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-        self.target_url = target_url.strip("/")
+        self.target_url = self.target_url.strip("/")
         self.target_keyword = target_keyword.strip("/")
-
-        self._request_cooldown = request_cooldown
-
-        self._session = requests.Session()
 
     def try_bypass(self) -> dict:
         results = dict()
@@ -141,19 +130,17 @@ class Bypass403:
         return results
 
     def send_request(self, method, path, headers=None) -> int:
-        time.sleep(self._request_cooldown)
-        req = requests.Request(method=method,
-                               url=path,
-                               headers=headers)
-        return self._session.send(req.prepare(), verify=False, allow_redirects=True).status_code
+        time.sleep(self.request_cooldown)
+        return self._make_request(method=method, url=path, headers=headers,
+                                  verify=False, allow_redirects=True).status_code
 
-    def start_bypasser(self, results_filename=None) -> Dict[int, List[str]]:
+    def _start_scanner(self, results_filename=None) -> Dict[int, List[str]]:
         results = self.try_bypass()
-        ret_results = {scode: list() for scode in self._SUCCESS_CODES}
+        ret_results = {scode: list() for scode in ScannerDefaultParams.SuccessStatusCodes}
 
         res_repr = str()
         for scode, req in results.items():
-            if scode in self._SUCCESS_CODES:
+            if scode in ScannerDefaultParams.SuccessStatusCodes:
                 res_repr += f"\n{scode} -> {req}"
                 ret_results[scode].append(req)
 
@@ -163,15 +150,8 @@ class Bypass403:
                 print(f"saved results -> {results_filename}")
         return ret_results
 
-    @staticmethod
-    def _save_results(results_filename, results):
-        # TODO maybe not needed?
-        with open(results_filename, "a") as res_file:
-            for scode, req in results:
-                res_file.write(f"\n{scode} -> {req}")
-
 
 if __name__ == "__main__":
     bruter = Bypass403("https://owasp.org/", "/test")
-    x = bruter.start_bypasser()
+    x = bruter.start_scanner()
     print(x)

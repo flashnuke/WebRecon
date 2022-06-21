@@ -7,6 +7,10 @@ from abc import abstractmethod
 import threading
 from enum import Enum
 from .utils import *
+import urllib3
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 
 #   --------------------------------------------------------------------------------------------------------------------
 #
@@ -44,7 +48,8 @@ class ScanManager:
     def _log(self, text):
         # TODO with colors based on type of message
         with ScanManager._LOGGER_MUTEX:
-            print(f"[{self.target_hostname}] {(self.__class__.__name__ + ' ').ljust(20, '-')}> {text}")
+            for line in text.split("\n"):
+                print(f"[{self.target_hostname}] {(self.__class__.__name__ + ' ').ljust(20, '-')}> {line}")
 
     @lru_cache
     def _get_results_directory(self, *args, **kwargs) -> str:
@@ -104,14 +109,14 @@ class Scanner(ScanManager):
 
         self._session = requests.Session()
 
-    def _make_request(self, method: str, url: str, headers=None):
+    def _make_request(self, method: str, url: str, headers=None, **kwargs):
         if not self._session_refresh_count % self._session_refresh_interval:
             self._setup_session()
         if not headers:
             headers = dict()
         headers.update(self._default_headers)
 
-        return self._session.request(method=method, url=url, headers=headers, timeout=self.request_timeout)
+        return self._session.request(method=method, url=url, headers=headers, timeout=self.request_timeout, **kwargs)
 
 # ========= Default Scanner Params
 

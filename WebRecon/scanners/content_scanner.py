@@ -22,10 +22,6 @@ from .bypass_403 import Bypass403
 #
 #   --------------------------------------------------------------------------------------------------------------------
 
-# TODO change to requests lib
-# TODO example below dict to kwargs
-# todo generate new user-agent headers after X (configurable) requests (renew session)
-
 
 class ContentScanner(Scanner):
     _DEF_FILE_EXT = []  # [".php", ".bak", ".orig", ".inc"]
@@ -80,7 +76,8 @@ class ContentScanner(Scanner):
                         self.ret_results[scode].append(url)
 
                     if scode == 403 and self.try_bypass:
-                        self.results_bypass[url] = Bypass403(self.target_url, path).start_bypasser()
+                        self.results_bypass[url] = Bypass403(target_url=self.target_url,
+                                                             target_keyword=path).start_scanner()
                         self.ret_results["bypass"].append(str(self.results_bypass[url]))
 
                     if scode == 429:
@@ -102,7 +99,7 @@ class ContentScanner(Scanner):
             t.join()
 
         results_str = str()
-        for code, urls in self.ret_results.items():  # TODO why doesnt save
+        for code, urls in self.ret_results.items():
             results_str += f"{code} status code\n\n"
             for url in urls:
                 results_str += f"{url}\n"
