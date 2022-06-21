@@ -19,10 +19,11 @@ from typing import Dict, List
 
 # TODO also scanner?
 # TODO go over path, etc... useragent
+# TODO scanner
 
 class Bypass403:
     _DEF_USERAGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/19.0"
-    _SUCCESS_CODES = [200, 301, 302]
+    _SUCCESS_STATUSCODES = [200, 301, 302]  # TODO remove
     _DEF_RESULTS_PATH = "../../../../blackhat-python/web_attacks/web_recon/scan_results/"
 
     def __init__(self, target_url, target_keyword, request_cooldown=0.1):

@@ -1,13 +1,10 @@
 import collections
-import urllib.request
 import urllib.parse
 import threading
 import queue
 import time
-from urllib.error import URLError
-from .base_scanner import Scanner
-from .exploiters import Bypass403
-from functools import lru_cache
+from .base_scanner import Scanner, ScannerDefaultParams
+from .bypass_403 import Bypass403
 
 #   --------------------------------------------------------------------------------------------------------------------
 #
@@ -25,36 +22,21 @@ from functools import lru_cache
 #
 #   --------------------------------------------------------------------------------------------------------------------
 
-# TODO renew session to avoid 429? or handle 429 in such way that you retry?
 # TODO change to requests lib
 # TODO example below dict to kwargs
+# todo generate new user-agent headers after X (configurable) requests (renew session)
 
 
 class ContentScanner(Scanner):
-    _DEF_USERAGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/19.0"  # enum useragents
-    _DEF_WORD_EXT = []  # [".php", ".bak", ".orig", ".inc"]
-    # TODO save into folder of hostname (if exists or make)
-    _DEF_RESULTS_PATH = "/content_results/"
+    _DEF_FILE_EXT = []  # [".php", ".bak", ".orig", ".inc"]
     _DEF_WL_PATH = "scanners/wordlists/test_webcontent_brute.txt"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.headers = {
-            'User-Agent': self._DEF_USERAGENT
-        }
-
         self.wordlist_path = kwargs.get("wordlist_path", self._DEF_WL_PATH)  # TODO def
-
-        self.word_extensions = kwargs.get("word_extensions", self._DEF_WORD_EXT)  # TODO DEF
-
-        self.request_cooldown = kwargs.get("request_cooldown", 0.1)
-        self.thread_count = kwargs.get("thread_count", 4)  # TODO by max threads count? OS cmd
-        self.request_timeout = kwargs.get("request_timeout", 1)
-
+        self.word_extensions = kwargs.get("word_extensions", self._DEF_FILE_EXT)  # TODO DEF
         self.words_queue: queue.Queue = self.load_words()
-
-        self.save_results_to_file = kwargs.get("save_results_to_file", False)  # TODO ? to scanner?
 
         self.try_bypass = kwargs.get("try_bypass", False)
         if self.try_bypass:
@@ -90,12 +72,10 @@ class ContentScanner(Scanner):
                 url = f"{self.target_url}{path}"
 
                 try:
+                    response = self._make_request(method="GET", url=url)
+                    scode = response.status_code
 
-                    req = urllib.request.Request(url, headers=self.headers)
-                    response = urllib.request.urlopen(req, timeout=self.request_timeout)
-                    scode = response.code
-
-                    if len(response.read()):
+                    if scode in ScannerDefaultParams.SuccessStatusCodes:
                         self._log(f"{url} = [{scode}] status code")
                         self.ret_results[scode].append(url)
 
@@ -103,10 +83,8 @@ class ContentScanner(Scanner):
                         self.results_bypass[url] = Bypass403(self.target_url, path).start_bypasser()
                         self.ret_results["bypass"].append(str(self.results_bypass[url]))
 
-                except URLError as url_exc:
-                    if hasattr(url_exc, 'code') and url_exc.code != 404:  # this might indicate something interesting
-                        self._log(f"{url} = [{url_exc.code}] status code")
-                        self.ret_results[url_exc.code].append(url)
+                    if scode == 429:
+                        time.sleep(ScannerDefaultParams.TooManyReqSleep)
 
                 except Exception as exc:
                     self._log(f"exception {exc} for {url}")

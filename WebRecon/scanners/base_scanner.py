@@ -1,10 +1,12 @@
-import urllib.parse
+import requests
 import os
-from typing import Any
+from typing import Any, Union
 from pathlib import Path
 from functools import lru_cache
 from abc import abstractmethod
 import threading
+from enum import Enum
+from .utils import *
 
 #   --------------------------------------------------------------------------------------------------------------------
 #
@@ -27,13 +29,7 @@ class ScanManager:
     def __init__(self, *args, **kwargs):
         self.target_hostname = kwargs.get("target_hostname")
         self.target_url = kwargs.get("target_url")
-        if not self.target_url:
-            raise Exception("Missing target url")  # TODO exceptions class?
-
         self.scheme = kwargs.get("scheme")
-        if self.scheme not in self._ACCEPTED_SCHEMES:
-            raise Exception(f"Missing / unsupported url scheme, should be one of: {', '.join(self._ACCEPTED_SCHEMES)}")
-            # TODO exceptions class?
 
         self.output_folder = kwargs.get("output_folder", f'{self._DEF_OUTPUT_DIRECTORY}')
         self._setup_results_path()
@@ -71,6 +67,17 @@ class Scanner(ScanManager):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.request_cooldown = kwargs.get("request_cooldown", ScannerDefaultParams.RequestCooldown)
+        self.thread_count = kwargs.get("thread_count", ScannerDefaultParams.ThreadCount)
+        self.request_timeout = kwargs.get("request_timeout", ScannerDefaultParams.RequestTimeout)
+
+        self._default_headers = dict()  # for rotating user agents
+        self._session: Union[requests.Session, None] = None
+        self._setup_session()
+
+        self._session_refresh_interval = kwargs.get("request_timeout", 1000)  # TODO
+        self._session_refresh_count = 0
+
     def start_scanner(self) -> Any:
         try:
             self._log(f"starting scanner...")
@@ -83,6 +90,46 @@ class Scanner(ScanManager):
     @abstractmethod
     def _start_scanner(self) -> Any:
         ...
+
+    def _setup_session(self):
+        if self.scheme not in self._ACCEPTED_SCHEMES:
+            raise Exception(f"Missing / unsupported url scheme, should be one of: {', '.join(self._ACCEPTED_SCHEMES)}")
+            # TODO exceptions class?
+
+        if not self.target_url:
+            raise Exception("Missing target url")  # TODO exceptions class?
+
+        self._default_headers.clear()
+        self._default_headers['User-Agent'] = get_random_useragent()  # TODO
+
+        self._session = requests.Session()
+
+    def _make_request(self, method: str, url: str, headers=None):
+        if not self._session_refresh_count % self._session_refresh_interval:
+            self._setup_session()
+        if not headers:
+            headers = dict()
+        headers.update(self._default_headers)
+
+        return self._session.request(method=method, url=url, headers=headers, timeout=self.request_timeout)
+
+# ========= Default Scanner Params
+
+
+class ExtendedEnum(Enum):
+    def __get__(self, *args, **kwargs):
+        """
+        needed so we can access the values directly
+        """
+        return self.value
+
+
+class ScannerDefaultParams(ExtendedEnum):
+    RequestCooldown = 0.1
+    ThreadCount = 4
+    RequestTimeout = 1
+    SuccessStatusCodes = [200, 301, 302]
+    TooManyReqSleep = 10
 
 
 if __name__ == "__main__":

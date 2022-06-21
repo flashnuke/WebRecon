@@ -21,25 +21,16 @@ from functools import lru_cache
 
 class DNSScanner(Scanner):
     _DEF_USERAGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/19.0"  # TODO ROTATING
-    _DEF_RESULTS_PATH = "../dns_results/"  # TODO
     _DEF_WL_PATH = "scanners/wordlists/test_subdomain_brute.txt"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.results_queue = queue.Queue()
 
-        self.headers = {
-            'User-Agent': self._DEF_USERAGENT
-        }
-
         self.wordlist_path = kwargs.get("wordlist_path", self._DEF_WL_PATH)  # TODO argparse ALSO use default wordlist path
-
-        self.request_cooldown = kwargs.get("request_cooldown", 0.1)
-        self.thread_count = kwargs.get("thread_count", 4)  # TODO by max threads count? OS cmd
-        self.request_timeout = kwargs.get("request_timeout", 1)
-        self.session = requests.Session()
-
         self.words_queue: queue.Queue = self.load_words()
+
+        self.session = requests.Session()
 
     def generate_urlpath(self, dnsname):
         return f"{self.scheme}://{dnsname}.{self.target_hostname}"
@@ -56,14 +47,15 @@ class DNSScanner(Scanner):
             url_path = self.generate_urlpath(self.words_queue.get())
 
             try:
-                res = self.session.get(url=url_path, headers=self.headers, timeout=self.request_timeout)
+                res = self._make_request(method="GET", url=url_path)
 
                 if res.status_code:
                     self._log(f"{url_path} = [{res.status_code}] status code")
                     self._save_results(f"{url_path}\n")
                     self.results_queue.put(url_path)
 
-            except Exception as exc:  # TODO if exception is not related to dns, then print!! (i.e save file)
+            except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout):
+                # other exceptions should not occur
                 continue
 
             finally:
@@ -96,5 +88,5 @@ if __name__ == "__main__":
         "request_cooldown": 0.1,
         "thread_count": 4
     }
-    bruter = DNSScanner(ex_conf)
+    bruter = DNSScanner(target_url="https://example.com")
     bruter.start_scanner()
