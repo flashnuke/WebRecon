@@ -1,13 +1,13 @@
 import os
 import urllib.parse
-
-from scanners import *
+import argparse
 import threading
-from typing import Dict, List
-from copy import deepcopy
 import pprint
+
+from copy import deepcopy
 from scanners import ScanManager
 from functools import lru_cache
+from scanners import *
 
 # TODO lru imports maybe once using package?
 # TODO bruter class base abstract
@@ -61,10 +61,7 @@ class WebRecon(ScanManager):
         self.domains = None
         self.domains_count = 0
 
-        self.recon_results = {
-            "content_brute": dict(),
-            "nmap_scan": dict()
-        }
+        self.recon_results = dict()
 
     def start_recon(self):
         self._do_dns_scan()
@@ -73,44 +70,44 @@ class WebRecon(ScanManager):
         success_count = 0
         while not self.domains.empty():
             target = self.domains.get()
-            try:
-                results_cb, results_nmap = dict(), dict()
+            self.recon_results[target] = dict()
 
+            try:
                 self._log(f"preparing a thread for content scanning...")
-                t_cb = threading.Thread(target=self._do_content_brute, args=(target, results_cb))
+                t_cb = threading.Thread(target=self._do_content_brute, args=(target,))
                 t_cb.start()
 
                 self._log(f"preparing a thread for nmap port scanning...")
-                t_nmap = threading.Thread(target=self._do_nmap_scan, args=(target, results_cb))
+                t_nmap = threading.Thread(target=self._do_nmap_scan, args=(target,))
                 t_nmap.start()
 
                 t_cb.join()
                 t_nmap.join()
                 self._log(f"finished, saving results... target {target}")
 
-                self.recon_results[target] = dict()
-                self.recon_results[target]["content_brute"] = deepcopy(results_cb)
-                self.recon_results[target]["nmap_scan"] = deepcopy(results_nmap)
                 success_count += 1
             except Exception as exc:
                 self._log(f"exception {exc} for {target}, skipping...")
 
+        pprint.pprint(self.recon_results) # TODO make beautiful summary
+        print(self.recon_results)
         self._log(f"finished {success_count} out of {self.domains_count} subdomain targets, shutting down...")
 
     def _do_dns_scan(self):
         self.domains = subdomain_scanner.DNSScanner(target_url=self.target_url,
                                                     **self._default_scanner_args).start_scanner()
-        self.domains_count = self.domains.qsize()
+        if self.domains:
+            self.domains_count = self.domains.qsize()
 
-    def _do_content_brute(self, target, results):
+    def _do_content_brute(self, target):
         bruter = content_scanner.ContentScanner(target_url=target, **self._default_scanner_args)
         results = bruter.start_scanner()
-        return results
+        self.recon_results[target]["content_brute"] = deepcopy(results)
 
-    def _do_nmap_scan(self, target, results):
+    def _do_nmap_scan(self, target):
         scanner = nmap_scanner.NmapScanner(target_url=target, **self._default_scanner_args)
         results = scanner.start_scanner()
-        return results
+        self.recon_results[target]["nmap_scan"] = deepcopy(results)
     
     @lru_cache
     def _get_results_directory(self, *args, **kwargs) -> str:
@@ -124,17 +121,14 @@ class WebRecon(ScanManager):
 
 
 if __name__ == "__main__":
-    import argparse
+    parser = argparse.ArgumentParser()
 
-    # parser = argparse.ArgumentParser(description='Perform web reconnaissance on all subdomains of a given host.')
-    # parser.add_argument('target_url', metavar='t', type=str, nargs='+',
-    #                     help='target url (subdomain will be stripped)')
-    # parser.add_argument('--do-dnmap', dest='do_nmap', action='store_const',
-    #                     const=sum, default=max,
-    #                     help='perform an nmap scan')
-    #
+    # Add an argument
+    # parser.add_argument('--name', type=str, required=True)
+    # Parse the argument
     # args = parser.parse_args()
-    # print(args.accumulate(args.integers))
+    # Print "Hello" + the user input argument
+    # print('Hello,', args.name)
 
     WebRecon(target_url="https://example.com").start_recon()
     # TODO only dns / only brute / etc...

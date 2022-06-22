@@ -2,6 +2,7 @@ import requests
 import os
 import queue
 import time
+import traceback
 
 from typing import Any, Union
 from pathlib import Path
@@ -104,6 +105,7 @@ class Scanner(ScanManager):
             return scan_results
         except Exception as exc:
             self._log(f"aborting due to exception: {exc}")
+            self._log(traceback.format_exc())
 
     @abstractmethod
     def _start_scanner(self) -> Any:

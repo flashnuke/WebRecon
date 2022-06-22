@@ -28,7 +28,7 @@ class ContentScanner(Scanner):
         super().__init__(*args, **kwargs)
 
         self.try_bypass = kwargs.get("try_bypass", False)
-        if self.try_bypass:
+        if True:  # TODO self.try_bypass:
             self.results_bypass = collections.defaultdict(dict)
         self.ret_results = collections.defaultdict(list)
 
@@ -56,14 +56,17 @@ class ContentScanner(Scanner):
                 try:
                     response = self._make_request(method="GET", url=url)
                     scode = response.status_code
-
+                    if 'test' in brute: #TODO
+                        scode = 403
                     if scode in ScannerDefaultParams.SuccessStatusCodes:
                         self._log(f"{url} = [{scode}] status code")
                         self.ret_results[scode].append(url)
 
-                    if scode == 403 and self.try_bypass:
+                    if scode == 403:  # TODO  and self.try_bypass:
                         self.results_bypass[url] = Bypass403(target_url=self.target_url,
-                                                             target_keyword=path).start_scanner()
+                                                             target_keyword=path,
+                                                             target_hostname=self.target_hostname,
+                                                             scheme=self.scheme).start_scanner()
                         self.ret_results["bypass"].append(str(self.results_bypass[url]))
 
                 except Exception as exc:
