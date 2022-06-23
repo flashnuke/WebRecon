@@ -54,6 +54,14 @@ class ScanManager:
             for line in text.split("\n"):
                 print(f"[{self.target_hostname}] {(self.__class__.__name__ + ' ').ljust(20, '-')}> {line}")
 
+    def _save_results(self, results: str):
+        path = os.path.join(self._get_results_directory(), self._get_results_filename())
+        with open(path, "a") as res_file:
+            res_file.write(f"{results}")
+
+    def _get_results_filename(self, *args, **kwargs) -> str:
+        return f"{self.__class__.__name__}.txt"
+
     @lru_cache
     def _get_results_directory(self, *args, **kwargs) -> str:
         path = os.path.join(self.output_folder,
@@ -62,17 +70,11 @@ class ScanManager:
 
         return path
 
-    def _get_results_filename(self, *args, **kwargs) -> str:
-        return f"{self.__class__.__name__}.txt"
-
-    def _save_results(self, results: str):
-        path = os.path.join(self._get_results_directory(), self._get_results_filename())
-        with open(path, "a") as res_file:
-            res_file.write(f"{results}")
-
-    def generate_urlpath(self, dnsname: str) -> str:
+    @lru_cache(maxsize=5)
+    def generate_url_base_path(self, dnsname: str) -> str:
         return f"{self.scheme}://{dnsname}.{self.target_hostname}"
 
+    @lru_cache(maxsize=5)
     def _format_name_for_path(self, name: str) -> str:
         return name.replace(f'{self.scheme}://', '').replace('.', '_')
 

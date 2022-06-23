@@ -74,7 +74,7 @@ class WebRecon(ScanManager):
 
         self.recon_results = dict()
 
-        super().__init__(target_url=self.generate_urlpath(self.subdomain),
+        super().__init__(target_url=self.generate_url_base_path(self.subdomain),
                          *args, **kwargs, **self._default_scanner_args)
 
     def _parse_scan_list(self, scan_list: List[str]) -> List[Type[Scanner]]:
@@ -148,15 +148,15 @@ class WebRecon(ScanManager):
         scanner = scanner_cls(target_url=target, **self._default_scanner_args)
         results = scanner.start_scanner()
         self.recon_results[target][scanner_name].update(results)
-    
+
+    def _get_results_filename(self, *args, **kwargs) -> str:
+        return "results_summary.txt"
+
     @lru_cache
     def _get_results_directory(self, *args, **kwargs) -> str:
         path = os.path.join(self.output_folder,
                             self._format_name_for_path('.'))
         return path
-
-    def _get_results_filename(self, *args, **kwargs) -> str:
-        return "results_summary.txt"
 
     @staticmethod
     def _contains_subdomain(target_url: str):

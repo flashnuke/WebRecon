@@ -35,7 +35,7 @@ class DNSScanner(Scanner):
 
     def single_bruter(self):
         while not self.words_queue.empty():
-            url_path = self.generate_urlpath(self.words_queue.get())
+            url_path = self.generate_url_base_path(self.words_queue.get())
 
             try:
                 res = self._make_request(method="GET", url=url_path)
