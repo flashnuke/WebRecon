@@ -178,3 +178,7 @@ if __name__ == "__main__":
              scan_names=["content_brute", "nmap_scan"]).start_recon()
     # TODO only dns / only brute / etc...
     # TODO argparse help -> must be without "www" (also add "raise exc" if something) you can also wait for input and check it
+
+    # TODO check COLOR:
+    # TODO "Color.clear_entire_line()
+    # TODO        Color.p(status)"
