@@ -1,3 +1,4 @@
 python-nmap==0.7.1
 requests~=2.28.0
 urllib3~=1.26.9
+tld~=0.12.6

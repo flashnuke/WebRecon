@@ -1,5 +1,6 @@
 import nmap
 import pprint
+from .utils import PPrintDefaultParams
 from .base_scanner import Scanner
 
 #   --------------------------------------------------------------------------------------------------------------------
@@ -28,7 +29,8 @@ class NmapScanner(Scanner):
         nm.scan(hosts=self.target_hostname, ports=self.ports, arguments=self.cmdline_args)
         for host in nm.all_hosts():
             self.ret_results[host] = nm[host]
-        results_str = pprint.pformat(self.ret_results)
+        results_str = pprint.pformat(self.ret_results,
+                                     compact=PPrintDefaultParams.Compact, width=PPrintDefaultParams.Width)
         self._log(f"\n{results_str}")
         self._save_results(results_str)
 

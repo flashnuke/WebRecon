@@ -33,10 +33,10 @@ class ScanManager:
     _DEF_OUTPUT_DIRECTORY = "results"
     _ACCEPTED_SCHEMES = ["http", "https"]
 
-    def __init__(self, *args, **kwargs):
-        self.target_hostname = kwargs.get("target_hostname")
-        self.target_url = kwargs.get("target_url")
-        self.scheme = kwargs.get("scheme")
+    def __init__(self, scheme, target_hostname, target_url, *args, **kwargs):
+        self.target_hostname = target_hostname
+        self.target_url = target_url
+        self.scheme = scheme
 
         self.output_folder = kwargs.get("output_folder", f'{self._DEF_OUTPUT_DIRECTORY}')
         self._setup_results_path()
@@ -65,10 +65,13 @@ class ScanManager:
     def _get_results_filename(self, *args, **kwargs) -> str:
         return f"{self.__class__.__name__}.txt"
 
-    def _save_results(self, results):
+    def _save_results(self, results: str):
         path = os.path.join(self._get_results_directory(), self._get_results_filename())
         with open(path, "a") as res_file:
             res_file.write(f"{results}")
+
+    def generate_urlpath(self, dnsname: str) -> str:
+        return f"{self.scheme}://{dnsname}.{self.target_hostname}"
 
 
 class Scanner(ScanManager):
@@ -87,7 +90,8 @@ class Scanner(ScanManager):
         self._session: Union[requests.Session, None] = None
         self._setup_session()
 
-        self._session_refresh_interval = kwargs.get("request_timeout", 1000)  # TODO
+        self._session_refresh_interval = kwargs.get("session_refresh_interval",
+                                                    NetworkDefaultParams.SessionRefreshInterval)
         self._session_refresh_count = 0
 
     def load_words(self) -> queue.Queue:

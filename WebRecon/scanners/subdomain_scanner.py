@@ -22,12 +22,9 @@ from functools import lru_cache
 class DNSScanner(Scanner):
     _DEF_WL_PATH = "scanners/"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, domains_queue, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.results_queue = queue.Queue()
-
-    def generate_urlpath(self, dnsname):
-        return f"{self.scheme}://{dnsname}.{self.target_hostname}"
+        self.domains_queue = domains_queue
 
     def load_words(self) -> queue.Queue:
         with open(self.wordlist_path, "r") as wl:
@@ -46,7 +43,7 @@ class DNSScanner(Scanner):
                 if res.status_code:
                     self._log(f"{url_path} = [{res.status_code}] status code")
                     self._save_results(f"{url_path}\n")
-                    self.results_queue.put(url_path)
+                    self.domains_queue.put(url_path)
 
             except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout):
                 # other exceptions should not occur
@@ -64,7 +61,7 @@ class DNSScanner(Scanner):
         for t in threads:
             t.join()
 
-        return self.results_queue
+        return self.domains_queue
     
     @lru_cache
     def _get_results_directory(self, *args, **kwargs) -> str:
@@ -77,7 +74,6 @@ class DNSScanner(Scanner):
 
 if __name__ == "__main__":
     ex_conf = {
-        "target_url": "https://www.wafa.ps",
         "wordlist_path": "../../../wordlists/subdomain_brute.txt",
         "request_cooldown": 0.1,
         "thread_count": 4

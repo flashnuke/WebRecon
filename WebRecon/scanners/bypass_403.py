@@ -14,7 +14,6 @@ from typing import Dict, List
 #
 #   --------------------------------------------------------------------------------------------------------------------
 
-# TODO go over path, etc... useragent
 
 class Bypass403(Scanner):
     def __init__(self, target_keyword, *args, **kwargs):
@@ -25,7 +24,6 @@ class Bypass403(Scanner):
 
     def try_bypass(self) -> dict:
         results = {scode: list() for scode in ScannerDefaultParams.SuccessStatusCodes}
-        results[404] = list() # TODO
 
         # methods
 
@@ -34,11 +32,11 @@ class Bypass403(Scanner):
 
         req_path = f"{self.target_url}/{self.target_keyword}"
         headers = {"Content-Length": "0"}
-        results[self.send_request("POST", req_path, headers=headers)].append(f"POST {req_path} -H Content-Length:0")
+        results[self.send_request("POST", req_path, headers=headers)].append(f"POST {req_path} -H 'Content-Length: 0'")
 
         req_path = f"{self.target_url}/{self.target_keyword}"
         headers = {"Content-Length": "0"}
-        results[self.send_request("PUT", req_path, headers=headers)].append(f"PUT {req_path} -H Content-Length:0")
+        results[self.send_request("PUT", req_path, headers=headers)].append(f"PUT {req_path} -H 'Content-Length: 0'")
 
         req_path = f"{self.target_url}/{self.target_keyword}"
         results[self.send_request("TRACE", req_path)].append(f"TRACE {req_path}")
@@ -97,31 +95,31 @@ class Bypass403(Scanner):
         req_path = f"{self.target_url}/{self.target_keyword}"
         headers = {"X-Original-URL": self.target_keyword}
         results[self.send_request("GET", req_path,
-                                  headers=headers)].append(f"GET {req_path} -H X-Original-URL: {self.target_keyword}")
+                                  headers=headers)].append(f"GET {req_path} -H 'X-Original-URL: {self.target_keyword}'")
 
         req_path = f"{self.target_url}/{self.target_keyword}"
         headers = {"X-Custom-IP-Authorization": "127.0.0.1"}
         results[self.send_request("GET", req_path,
-                                  headers=headers)].append(f"GET {req_path} -H X-Custom-IP-Authorization: 127.0.0.1")
+                                  headers=headers)].append(f"GET {req_path} -H 'X-Custom-IP-Authorization: 127.0.0.1'")
 
         req_path = f"{self.target_url}/{self.target_keyword}"
         headers = {"X-Forwarded-For": "http://127.0.0.1"}
         results[self.send_request("GET", req_path,
-                                  headers=headers)].append(f"GET {req_path} -H X-Forwarded-For: http://127.0.0.1")
+                                  headers=headers)].append(f"GET {req_path} -H 'X-Forwarded-For: http://127.0.0.1'")
 
         req_path = f"{self.target_url}/{self.target_keyword}"
         headers = {"X-Forwarded-For": "127.0.0.1:80"}
         results[self.send_request("GET", req_path,
-                                  headers=headers)].append(f"GET {req_path} -H X-Forwarded-For: 127.0.0.1:80")
+                                  headers=headers)].append(f"GET {req_path} -H 'X-Forwarded-For: 127.0.0.1:80'")
 
         req_path = f"{self.target_url}"
         headers = {"X-rewrite-url": self.target_keyword}
         results[self.send_request("GET", req_path,
-                                  headers=headers)].append(f"GET {req_path} -H X-rewrite-url: {self.target_keyword}")
+                                  headers=headers)].append(f"GET {req_path} -H 'X-rewrite-url: {self.target_keyword}'")
 
         req_path = f"{self.target_url}/{self.target_keyword}"
         headers = {"X-Host": "127.0.0.1"}
-        results[self.send_request("GET", req_path, headers=headers)].append(f"GET {req_path} -H X-Host: 127.0.0.1")
+        results[self.send_request("GET", req_path, headers=headers)].append(f"GET {req_path} -H 'X-Host: 127.0.0.1'")
 
         return results
 
@@ -134,7 +132,7 @@ class Bypass403(Scanner):
         results = self.try_bypass()
 
         for scode, req in results.items():
-            if scode: # TODO in ScannerDefaultParams.SuccessStatusCodes:
+            if scode in ScannerDefaultParams.SuccessStatusCodes:
                 self._log(f"{scode} -> {req}")
 
         return results

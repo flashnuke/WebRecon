@@ -12,9 +12,17 @@ class _ExtendedEnum(Enum):
 
 
 class ScannerDefaultParams(_ExtendedEnum):
-    ThreadCount = 4
-    SuccessStatusCodes = [200, 301, 302]
+    DefaultSubdomain = "www"
     FileExtensions = []  # [".php", ".bak", ".orig", ".inc"]
+    SuccessStatusCodes = [200, 301, 302]
+    ThreadCount = 4
+
+
+class NetworkDefaultParams(_ExtendedEnum):
+    RequestCooldown = 0.1
+    RequestTimeout = 1
+    SessionRefreshInterval = 1000
+    TooManyReqSleep = 10
 
 # ========= Default Wordlist Paths
 
@@ -24,9 +32,8 @@ class WordlistDefaultPath(_ExtendedEnum):
     DNSScanner = "wordlists/test_subdomain_brute.txt"
 
 
-# ========= Default Wordlist Paths
+# ========= Misc Wordlist Paths
 
-class NetworkDefaultParams(_ExtendedEnum):
-    RequestCooldown = 0.1
-    RequestTimeout = 1
-    TooManyReqSleep = 10
+class PPrintDefaultParams(_ExtendedEnum):
+    Compact = False
+    Width = 200

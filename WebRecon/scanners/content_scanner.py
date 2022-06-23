@@ -2,6 +2,7 @@ import collections
 import urllib.parse
 import threading
 import time
+from typing import Dict, List, Union
 from .base_scanner import Scanner
 from .utils import ScannerDefaultParams
 from .bypass_403 import Bypass403
@@ -27,10 +28,11 @@ class ContentScanner(Scanner):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.ret_results: Dict[str, Union[Dict, List]] = collections.defaultdict(list)
         self.try_bypass = kwargs.get("try_bypass", False)
-        if True:  # TODO self.try_bypass:
+        if self.try_bypass:
+            self.ret_results['bypass'] = dict()
             self.results_bypass = collections.defaultdict(dict)
-        self.ret_results = collections.defaultdict(list)
 
     def single_bruter(self):
         while not self.words_queue.empty():
@@ -56,18 +58,15 @@ class ContentScanner(Scanner):
                 try:
                     response = self._make_request(method="GET", url=url)
                     scode = response.status_code
-                    if 'test' in brute: #TODO
-                        scode = 403
                     if scode in ScannerDefaultParams.SuccessStatusCodes:
                         self._log(f"{url} = [{scode}] status code")
                         self.ret_results[scode].append(url)
 
-                    if scode == 403:  # TODO  and self.try_bypass:
-                        self.results_bypass[url] = Bypass403(target_url=self.target_url,
-                                                             target_keyword=path,
-                                                             target_hostname=self.target_hostname,
-                                                             scheme=self.scheme).start_scanner()
-                        self.ret_results["bypass"].append(str(self.results_bypass[url]))
+                    if scode == 403 and self.try_bypass:
+                        self.ret_results["bypass"] = Bypass403(target_url=self.target_url,
+                                                               target_keyword=path,
+                                                               target_hostname=self.target_hostname,
+                                                               scheme=self.scheme).start_scanner()
 
                 except Exception as exc:
                     self._log(f"exception {exc} for {url}")
@@ -96,17 +95,4 @@ class ContentScanner(Scanner):
 
 
 if __name__ == "__main__":
-    config_path = None  # sys.argv[1]
-    targetlist_path = "../../../blackhat-python/web_attacks/web_recon/targets/ps_sites.txt"  # sys.argv[2]
-    website_targets = [i.strip("\n") for i in open(targetlist_path, "r").readlines()]
-
-    for website in website_targets:
-        ex_conf = {
-            "target_url": website,
-            "wordlist_path": "../../test_webcontent.txt",
-            "results_filename": "results_bruter.txt",
-            "request_cooldown": 0.1,
-            "thread_count": 4
-        }
-        bruter = ContentScanner(ex_conf)
-        bruter.start_scanner()
+    pass
