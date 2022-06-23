@@ -22,9 +22,9 @@ from functools import lru_cache
 class DNSScanner(Scanner):
     _DEF_WL_PATH = "scanners/"
 
-    def __init__(self, domains_queue, *args, **kwargs):
+    def __init__(self, domains_queue=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.domains_queue = domains_queue
+        self.domains_queue = domains_queue if domains_queue else queue.Queue()
 
     def load_words(self) -> queue.Queue:
         with open(self.wordlist_path, "r") as wl:
@@ -67,7 +67,7 @@ class DNSScanner(Scanner):
     def _get_results_directory(self, *args, **kwargs) -> str:
         # overwrite the default output path
         path = os.path.join(self.output_folder,
-                            self.target_hostname.replace('.', '_'))
+                            self._format_name_for_path(self.target_hostname))
 
         return path
 

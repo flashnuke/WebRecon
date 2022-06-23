@@ -57,8 +57,8 @@ class ScanManager:
     @lru_cache
     def _get_results_directory(self, *args, **kwargs) -> str:
         path = os.path.join(self.output_folder,
-                            self.target_hostname.replace('.', '_'),
-                            self.target_url.replace(f'{self.scheme}://', '').replace('.', '_'))
+                            self._format_name_for_path(self.target_hostname),
+                            self._format_name_for_path(self.target_url))
 
         return path
 
@@ -72,6 +72,9 @@ class ScanManager:
 
     def generate_urlpath(self, dnsname: str) -> str:
         return f"{self.scheme}://{dnsname}.{self.target_hostname}"
+
+    def _format_name_for_path(self, name: str) -> str:
+        return name.replace(f'{self.scheme}://', '').replace('.', '_')
 
 
 class Scanner(ScanManager):

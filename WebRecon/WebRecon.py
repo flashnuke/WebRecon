@@ -152,7 +152,7 @@ class WebRecon(ScanManager):
     @lru_cache
     def _get_results_directory(self, *args, **kwargs) -> str:
         path = os.path.join(self.output_folder,
-                            self.target_hostname.replace('.', '_'))
+                            self._format_name_for_path('.'))
         return path
 
     def _get_results_filename(self, *args, **kwargs) -> str:
