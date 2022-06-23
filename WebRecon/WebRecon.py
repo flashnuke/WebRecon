@@ -5,7 +5,7 @@ import argparse
 import threading
 import pprint
 
-from typing import Tuple
+from typing import Tuple, List, Callable, Type
 from scanners.utils import PPrintDefaultParams, ScannerDefaultParams
 from functools import lru_cache
 from scanners import *
@@ -24,7 +24,7 @@ from tld import get_tld, get_tld_names
 #
 #         self.recon_results = {
 #             "domain_name": {
-#                 "content_brute": {
+#                 "ContentScanner": {
 #                     "code": [results],
 #                     "code2": [results],
 #                     "bypass": {
@@ -38,7 +38,7 @@ from tld import get_tld, get_tld_names
 #                         }
 #                     }
 #                 }
-#                 "nmap_scan": {
+#                 "NmapScanner": {
 #                   ```nmap scan report format```
 #               }
 #             },
@@ -49,8 +49,19 @@ from tld import get_tld, get_tld_names
 
 
 class WebRecon(ScanManager):
-    def __init__(self, target_url, dns_recursion=False, *args, **kwargs):
+    _SCANNAME_TO_METHOD_MAP = {
+        "nmap_scan": NmapScanner,
+        "content_brute": ContentScanner
+    }
+
+    def __init__(self,
+                 target_url: str,
+                 scan_names: List[str],
+                 dns_recursion=False,
+                 *args, **kwargs):
         get_tld_names()
+
+        self._scans = self._parse_scan_list(scan_names)
 
         self.scheme, self.subdomain, self.target_hostname = self._parse_target_url(target_url)
         self._default_scanner_args = {
@@ -66,6 +77,15 @@ class WebRecon(ScanManager):
         super().__init__(target_url=self.generate_urlpath(self.subdomain),
                          *args, **kwargs, **self._default_scanner_args)
 
+    def _parse_scan_list(self, scan_list: List[str]) -> List[Type[Scanner]]:
+        scans = list()
+        for scan_name in scan_list:
+            scanner = self._SCANNAME_TO_METHOD_MAP.get(scan_name, None)
+            if not scanner:
+                raise Exception("Bad scanner name")  # TODO exceptions
+            scans.append(scanner)
+        return scans
+
     def _parse_target_url(self, target_url: str) -> Tuple[str, str, str]:
         parsed_target = urllib.parse.urlparse(target_url)
         scheme = parsed_target.scheme
@@ -75,6 +95,16 @@ class WebRecon(ScanManager):
 
         return scheme, sub, hostname
 
+    def _start_scans_for_target(self, target: str) -> List[threading.Thread]:
+        threads = list()
+        for scanner in self._scans:
+            scanner_name = scanner.__class__.__name__
+            self._log(f"preparing a thread for {scanner_name}...")
+            t = threading.Thread(target=self._do_scan(scanner, scanner_name, target))
+            t.start()
+            threads.append(t)
+        return threads
+
     def start_recon(self):
         targets_count = self._setup_targets()
         self._log(f"found {targets_count} domains")
@@ -82,19 +112,13 @@ class WebRecon(ScanManager):
         success_count = 0
         while not self.domains.empty():
             target = self.domains.get()
+            self._log(f"setting up for target {target}")
+
             self.recon_results[target] = dict()
-
             try:
-                self._log(f"preparing a thread for content scanning...")
-                t_cb = threading.Thread(target=self._do_content_brute, args=(target,))
-                t_cb.start()
-
-                self._log(f"preparing a thread for nmap port scanning...")
-                t_nmap = threading.Thread(target=self._do_nmap_scan, args=(target,))
-                t_nmap.start()
-
-                t_cb.join()
-                t_nmap.join()
+                scanner_threads = self._start_scans_for_target(target)
+                for t in scanner_threads:
+                    t.join()
                 self._log(f"finished, saving results... target {target}")
 
                 success_count += 1
@@ -115,17 +139,11 @@ class WebRecon(ScanManager):
                                          **self._default_scanner_args).start_scanner()
         return self.domains.qsize()
 
-    def _do_content_brute(self, target: str):
-        bruter = content_scanner.ContentScanner(target_url=target, **self._default_scanner_args)
-        results = bruter.start_scanner()
-        self.recon_results[target]["content_brute"] = dict()
-        self.recon_results[target]["content_brute"].update(results)
-
-    def _do_nmap_scan(self, target: str):
-        scanner = nmap_scanner.NmapScanner(target_url=target, **self._default_scanner_args)
+    def _do_scan(self, scanner_class: Type[Scanner], scanner_name: str, target: str):
+        self.recon_results[target][scanner_name] = dict()
+        scanner = scanner_class(target_url=target, **self._default_scanner_args)
         results = scanner.start_scanner()
-        self.recon_results[target]["nmap_scan"] = dict()
-        self.recon_results[target]["nmap_scan"].update(results)
+        self.recon_results[target][scanner_name].update(results)
     
     @lru_cache
     def _get_results_directory(self, *args, **kwargs) -> str:
@@ -151,7 +169,9 @@ if __name__ == "__main__":
     # Print "Hello" + the user input argument
     # print('Hello,', args.name)
 
-    WebRecon(target_url="https://example.com", dns_recursion=True).start_recon()
+    WebRecon(target_url="https://example.com",
+             dns_recursion=True,
+             scan_names=["content_brute", "nmap_scan"]).start_recon()
     # TODO only dns / only brute / etc...
     # TODO params like max thread count, etc, to external ENUM class
     # TODO argparse help -> must be without "www" (also add "raise exc" if something) you can also wait for input and check it
