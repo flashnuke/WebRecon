@@ -96,14 +96,14 @@ class WebRecon(ScanManager):
         return scheme, sub, hostname
 
     def _start_scans_for_target(self, target: str) -> List[threading.Thread]:
-        threads = list()
+        scanner_threads = list()
         for scanner in self._scans:
             scanner_name = scanner.__name__
             self._log(f"preparing a thread for {scanner_name}...")
             t = threading.Thread(target=self._do_scan(scanner, scanner_name, target))
             t.start()
-            threads.append(t)
-        return threads
+            scanner_threads.append(t)
+        return scanner_threads
 
     def start_recon(self):
         domains = self._setup_targets()
@@ -177,5 +177,4 @@ if __name__ == "__main__":
              dns_recursion=True,
              scan_names=["content_brute", "nmap_scan"]).start_recon()
     # TODO only dns / only brute / etc...
-    # TODO params like max thread count, etc, to external ENUM class
     # TODO argparse help -> must be without "www" (also add "raise exc" if something) you can also wait for input and check it
