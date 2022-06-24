@@ -34,6 +34,7 @@ class ScanManager:
     _ACCEPTED_SCHEMES = ["http", "https"]
 
     def __init__(self, scheme, target_hostname, target_url, *args, **kwargs):
+        OutputManager(self.__class__.__name__)
         self.target_hostname = target_hostname
         self.target_url = target_url
         self.scheme = scheme
@@ -52,7 +53,8 @@ class ScanManager:
         # TODO with colors based on type of message
         with ScanManager._LOGGER_MUTEX:
             for line in text.split("\n"):
-                print(f"[{self.target_hostname}] {(self.__class__.__name__ + ' ').ljust(20, '-')}> {line}")
+                OutputManager.print_output(self.__class__.__name__, line)
+                # print(f"[{self.target_hostname}] {( + ' ').ljust(20, '-')}> {line}")
 
     def _save_results(self, results: str):
         path = os.path.join(self._get_results_directory(), self._get_results_filename())

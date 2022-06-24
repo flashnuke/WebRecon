@@ -5,6 +5,7 @@ import argparse
 import threading
 import pprint
 
+
 from typing import Tuple, List, Callable, Type
 from scanners.utils import PPrintDefaultParams, ScannerDefaultParams
 from functools import lru_cache
