@@ -155,7 +155,7 @@ class WebRecon(ScanManager):
 
     @lru_cache
     def _get_results_directory(self, *args, **kwargs) -> str:
-        path = os.path.join(self.output_folder,
+        path = os.path.join(self.results_path,
                             self._format_name_for_path('.'))
         return path
 

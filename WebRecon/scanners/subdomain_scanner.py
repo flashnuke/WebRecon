@@ -66,7 +66,7 @@ class DNSScanner(Scanner):
     @lru_cache
     def _get_results_directory(self, *args, **kwargs) -> str:
         # overwrite the default output path
-        path = os.path.join(self.output_folder,
+        path = os.path.join(self.results_path,
                             self._format_name_for_path(self.target_hostname))
 
         return path

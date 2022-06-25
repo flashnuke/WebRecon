@@ -32,8 +32,15 @@ class WordlistDefaultPath(_ExtendedEnum):
     DNSScanner = "wordlists/test_subdomain_brute.txt"
 
 
-# ========= Misc Wordlist Paths
+# ========= Default PPrint Params
 
 class PPrintDefaultParams(_ExtendedEnum):
     Compact = False
     Width = 200
+
+# ========= OutputManager Settings
+
+
+class OutputType(_ExtendedEnum):
+    Lines = "lines"
+    Status = "status"

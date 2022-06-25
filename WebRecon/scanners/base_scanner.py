@@ -35,13 +35,21 @@ class ScanManager:
     _ERROR_LOG_NAME = "error_log"
 
     def __init__(self, scheme, target_hostname, target_url, *args, **kwargs):
-        OutputManager(self._ERROR_LOG_NAME, output_type="lines")
+        self._scanner_name = self.__class__.__name__
+        self._output_manager = self._output_manager_setup()
+        
         self.target_hostname = target_hostname
         self.target_url = target_url
         self.scheme = scheme
 
-        self.output_folder = kwargs.get("output_folder", f'{self._DEF_OUTPUT_DIRECTORY}')
+        self.results_path = kwargs.get("results_path", f'{self._DEF_OUTPUT_DIRECTORY}')
         self._setup_results_path()
+        
+    def _output_manager_setup(self) -> OutputManager:
+        output_manager = OutputManager()
+        output_manager.set_new_output(self._ERROR_LOG_NAME, OutputType.Lines)
+        output_manager.set_new_output(self._scanner_name, OutputType.Status)
+        return output_manager
 
     def _setup_results_path(self):
         Path(self._get_results_directory()).mkdir(parents=True, exist_ok=True)  # recursively make directories
@@ -50,11 +58,17 @@ class ScanManager:
             os.remove(full_path)  # remove old files
         self._log(f"scan results will be saved in\t{full_path}")
 
-    def _log(self, text):
+    def _log_line(self, log_name, line: str):
+        # TODO with colors based on type of message
+        # TODO not each line individually
+        with ScanManager._LOGGER_MUTEX:
+            self._output_manager.update_lines(log_name, line)
+                # print(f"[{self.target_hostname}] {( + ' ').ljust(20, '-')}> {line}")
+
+    def _log_status(self, lkey: str, lval: Any):
         # TODO with colors based on type of message
         with ScanManager._LOGGER_MUTEX:
-            for line in text.split("\n"):
-                OutputManager.print_output(self.__class__.__name__, line)
+            self._output_manager.update_status(self._scanner_name, lkey, lval)
                 # print(f"[{self.target_hostname}] {( + ' ').ljust(20, '-')}> {line}")
 
     def _save_results(self, results: str):
@@ -63,11 +77,11 @@ class ScanManager:
             res_file.write(f"{results}")
 
     def _get_results_filename(self, *args, **kwargs) -> str:
-        return f"{self.__class__.__name__}.txt"
+        return f"{self._scanner_name}.txt"
 
     @lru_cache
     def _get_results_directory(self, *args, **kwargs) -> str:
-        path = os.path.join(self.output_folder,
+        path = os.path.join(self.results_path,
                             self._format_name_for_path(self.target_hostname),
                             self._format_name_for_path(self.target_url))
 
@@ -86,7 +100,7 @@ class Scanner(ScanManager):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.wordlist_path = kwargs.get("wordlist_path", getattr(WordlistDefaultPath, self.__class__.__name__, None))  # TODO argparse
+        self.wordlist_path = kwargs.get("wordlist_path", getattr(WordlistDefaultPath, self._scanner_name, None))  # TODO argparse
         if self.wordlist_path:
             self.words_queue: queue.Queue = self.load_words()
 
