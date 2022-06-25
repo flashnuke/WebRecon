@@ -54,6 +54,7 @@ class DNSScanner(Scanner):
                 continue
             finally:
                 finished_count += 1
+                self._log_status(OutputStatusKeys.Left, total_count - finished_count)
                 self._update_progress_status(finished_count, total_count)
                 time.sleep(self.request_cooldown)
 
