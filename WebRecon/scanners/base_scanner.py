@@ -36,31 +36,30 @@ class ScanManager:
 
     def __init__(self, scheme, target_hostname, target_url, *args, **kwargs):
         self._scanner_name = self.__class__.__name__
-        self._output_manager = self._output_manager_setup()
-        self._current_progress_perc = int()
-        
+
         self.target_hostname = target_hostname
         self.target_url = target_url
         self.scheme = scheme
 
         self.results_path = kwargs.get("results_path", f'{self._DEF_OUTPUT_DIRECTORY}')
         self.results_path_full = self._setup_results_path()
-        
-    def _output_manager_setup(self) -> OutputManager:
-        output_manager = OutputManager()
-        output_manager.insert_output(self._ERROR_LOG_NAME, OutputType.Lines)
+
+        self._current_progress_perc = int()
+        self._output_manager = None
+        self._output_manager_setup()
+
+    def _output_manager_setup(self):
+        self._output_manager = OutputManager()
+        self._output_manager.insert_output(self._ERROR_LOG_NAME, OutputType.Lines)
         keys = self._define_status_output()
         if keys:
-            output_manager.insert_output(self._scanner_name, OutputType.Status)
-        return output_manager
+            self._output_manager.insert_output(self._scanner_name, OutputType.Status, keys)
 
     def _setup_results_path(self) -> str:
         Path(self._get_results_directory()).mkdir(parents=True, exist_ok=True)  # recursively make directories
         full_path = os.path.join(self._get_results_directory(), self._get_results_filename())
         if os.path.isfile(full_path):
             os.remove(full_path)  # remove old files
-        self._log_status(f"{full_path}")
-
         return full_path
 
     def _log_line(self, log_name, line: str):
@@ -113,7 +112,7 @@ class ScanManager:
             print_prog_mod = 5  # TODO params
             print_prog_count = progress // print_prog_mod  # TODO params
             print_prog_max = (100 // print_prog_mod)  # TODO params
-            prog_str = f"[{('#' * print_prog_count).rjust(print_prog_max - print_prog_count, '-')}]"
+            prog_str = f"[{('#' * print_prog_count).ljust(print_prog_max - print_prog_count, '-')}]"
             self._log_status(OutputStatusKeys.Progress, prog_str)
             self._current_progress_perc = progress
 
