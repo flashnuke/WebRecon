@@ -81,10 +81,6 @@ class ScanManager:
     def _format_name_for_path(self, name: str) -> str:
         return name.replace(f'{self.scheme}://', '').replace('.', '_')
 
-    @lru_cache(maxsize=5)
-    def _format_name_for_path(self, name: str) -> str:
-        return name.replace(f'{self.scheme}://', '').replace('.', '_')
-
 
 class Scanner(ScanManager):
     def __init__(self, *args, **kwargs):
