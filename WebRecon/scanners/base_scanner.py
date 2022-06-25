@@ -4,7 +4,7 @@ import queue
 import time
 import traceback
 
-from typing import Any, Union
+from typing import Any, Dict, Union
 from pathlib import Path
 from functools import lru_cache
 from abc import abstractmethod
@@ -32,7 +32,7 @@ class ScanManager:
     _LOGGER_MUTEX = threading.RLock()
     _DEF_OUTPUT_DIRECTORY = "results"
     _ACCEPTED_SCHEMES = ["http", "https"]
-    _ERROR_LOG_NAME = "error_log"
+    _ERROR_LOG_NAME = "error_log"  # TODO to default values?
 
     def __init__(self, scheme, target_hostname, target_url, *args, **kwargs):
         self._scanner_name = self.__class__.__name__
@@ -43,20 +43,24 @@ class ScanManager:
         self.scheme = scheme
 
         self.results_path = kwargs.get("results_path", f'{self._DEF_OUTPUT_DIRECTORY}')
-        self._setup_results_path()
+        self.results_path_full = self._setup_results_path()
         
     def _output_manager_setup(self) -> OutputManager:
         output_manager = OutputManager()
-        output_manager.set_new_output(self._ERROR_LOG_NAME, OutputType.Lines)
-        output_manager.set_new_output(self._scanner_name, OutputType.Status)
+        output_manager.insert_output(self._ERROR_LOG_NAME, OutputType.Lines)
+        keys = self._define_status_output()
+        if keys:
+            output_manager.insert_output(self._scanner_name, OutputType.Status)
         return output_manager
 
-    def _setup_results_path(self):
+    def _setup_results_path(self) -> str:
         Path(self._get_results_directory()).mkdir(parents=True, exist_ok=True)  # recursively make directories
         full_path = os.path.join(self._get_results_directory(), self._get_results_filename())
         if os.path.isfile(full_path):
             os.remove(full_path)  # remove old files
-        self._log(f"scan results will be saved in\t{full_path}")
+        self._log_status(f"{full_path}")
+
+        return full_path
 
     def _log_line(self, log_name, line: str):
         # TODO with colors based on type of message
@@ -71,6 +75,9 @@ class ScanManager:
             self._output_manager.update_status(self._scanner_name, lkey, lval)
                 # print(f"[{self.target_hostname}] {( + ' ').ljust(20, '-')}> {line}")
 
+    def _log_exception(self, exc_text, abort: bool):
+        self._log_line(self._ERROR_LOG_NAME, f"exception - {exc_text}, aborting - {abort}")
+
     def _save_results(self, results: str):
         path = os.path.join(self._get_results_directory(), self._get_results_filename())
         with open(path, "a") as res_file:
@@ -78,6 +85,10 @@ class ScanManager:
 
     def _get_results_filename(self, *args, **kwargs) -> str:
         return f"{self._scanner_name}.txt"
+
+    @abstractmethod
+    def _define_status_output(self) -> Dict[str, Any]:
+        ...
 
     @lru_cache
     def _get_results_directory(self, *args, **kwargs) -> str:
@@ -94,6 +105,11 @@ class ScanManager:
     @lru_cache(maxsize=5)
     def _format_name_for_path(self, name: str) -> str:
         return name.replace(f'{self.scheme}://', '').replace('.', '_')
+
+    def _update_progress_status(self, finished_c, total_c):
+        progress = finished_c // total_c
+        if progress % ScannerDefaultParams.ProgBarIntvl == 0:
+            self._log_status(OutputStatusKeys.Progress, progress)
 
 
 class Scanner(ScanManager):
@@ -125,16 +141,19 @@ class Scanner(ScanManager):
 
     def start_scanner(self) -> Any:
         try:
-            self._log(f"starting scanner...")
+            self._log_status(OutputStatusKeys.State, OutputValues.StateSetup)
             scan_results = self._start_scanner()
-            self._log(f"scanner finished...")
+            self._log_status(OutputStatusKeys.State, OutputValues.StateComplete)
             return scan_results
         except Exception as exc:
-            self._log(f"aborting due to exception: {exc}")
-            self._log(traceback.format_exc())
+            self._log_exception(exc, True)  # TODO try to have our own exceptions
 
     @abstractmethod
     def _start_scanner(self) -> Any:
+        ...
+
+    @abstractmethod
+    def _define_status_output(self) -> Dict[str, Any]:
         ...
 
     def _setup_session(self):
@@ -159,7 +178,7 @@ class Scanner(ScanManager):
 
         res = self._session.request(method=method, url=url, headers=headers, timeout=self.request_timeout, **kwargs)
 
-        if res.status_code == 429:
+        if res.status_code == 429:  # to default values?
             time.sleep(NetworkDefaultParams.TooManyReqSleep)
 
         return res

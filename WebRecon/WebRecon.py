@@ -100,41 +100,50 @@ class WebRecon(ScanManager):
         scanner_threads = list()
         for scanner in self._scans:
             scanner_name = scanner.__name__
-            self._log(f"preparing a thread for {scanner_name}...")
+            # self._log(f"preparing a thread for {scanner_name}...")
             t = threading.Thread(target=self._do_scan(scanner, scanner_name, target))
             t.start()
             scanner_threads.append(t)
         return scanner_threads
 
     def start_recon(self):
-        domains = self._setup_targets()
-        self._log(f"found {domains.qsize()} domains")
+        try:
+            domains = self._setup_targets()
+            domains_count = domains.qsize()
+            self._log_status(OutputStatusKeys.State, OutputValues.StateRunning)
+            self._log_status(OutputStatusKeys.Left, domains_count)
 
-        success_count, total_count = 0, 0
-        while not domains.empty():
-            target = domains.get()
-            if total_count and target == self.target_url:
-                continue
-            self._log(f"setting up for target {target}")
+            success_count, total_count = 0, 0
+            while not domains.empty():
+                target = domains.get()
+                if total_count and target == self.target_url:
+                    continue
+                self._log_status(OutputStatusKeys.Current, target)
+                # self._log(f"setting up for target {target}")
 
-            self.recon_results[target] = dict()
-            try:
-                scanner_threads = self._start_scans_for_target(target)
-                for t in scanner_threads:
-                    t.join()
-                self._log(f"finished, saving results... target {target}")
-                success_count += 1
-            except Exception as exc:
-                self._log(f"exception {exc} for {target}, skipping...")
-            finally:
-                total_count += 1
+                self.recon_results[target] = dict()
+                try:
+                    scanner_threads = self._start_scans_for_target(target)
+                    for t in scanner_threads:
+                        t.join()
+                    # self._log(f"finished, saving results... target {target}")
+                    success_count += 1  # TODO not needed?
+                except Exception as exc:
+                    self._log_exception(f"target {target} exception {exc}", False)
+                finally:
+                    total_count += 1
+                    self._log_status(OutputStatusKeys.Left, domains_count - total_count)
+                    self._update_progress_status(total_count, domains_count)
 
-        results_str = pprint.pformat(self.recon_results,
-                                     compact=PPrintDefaultParams.Compact, width=PPrintDefaultParams.Width)
-        self._log(f"results: {results_str}")
-        self._log("saving results...")
-        self._save_results(results_str)
-        self._log(f"finished successfully {success_count} out of {total_count} targets, shutting down...")
+            results_str = pprint.pformat(self.recon_results,
+                                         compact=PPrintDefaultParams.Compact, width=PPrintDefaultParams.Width)
+            # self._log(f"results: {results_str}")
+            # self._log("saving results...")
+            self._save_results(results_str)
+            # self._log(f"finished successfully {success_count} out of {total_count} targets, shutting down...")
+        except Exception as exc:
+            self._log_status(OutputStatusKeys.State, OutputValues.StateFail)
+            self._log_exception(exc, True)
 
     def _setup_targets(self) -> queue.Queue:
         domains = queue.Queue()
@@ -162,6 +171,16 @@ class WebRecon(ScanManager):
     @staticmethod
     def _contains_subdomain(target_url: str):
         return len(target_url.replace(f'.{get_tld(target_url)}', '').split('.')) > 1
+
+    def _define_status_output(self) -> Dict[str, Any]:
+        status = dict()
+        status[OutputStatusKeys.State] = OutputValues.StateSetup
+        status[OutputStatusKeys.Current] = OutputValues.EmptyStatusVal
+        status[OutputStatusKeys.Progress] = OutputValues.EmptyStatusVal
+        status[OutputStatusKeys.ResultsPath] = self.results_path_full
+        status[OutputStatusKeys.Left] = OutputValues.EmptyStatusVal
+
+        return status
 
 
 if __name__ == "__main__":

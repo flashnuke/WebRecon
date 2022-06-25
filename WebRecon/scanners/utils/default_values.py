@@ -8,7 +8,7 @@ class _ExtendedEnum(Enum):
         """
         return self.value if self.value else None
 
-# ========= Default Scanner Params
+# ========= Default Scanner Generic Params
 
 
 class ScannerDefaultParams(_ExtendedEnum):
@@ -16,6 +16,7 @@ class ScannerDefaultParams(_ExtendedEnum):
     FileExtensions = []  # [".php", ".bak", ".orig", ".inc"]
     SuccessStatusCodes = [200, 301, 302]
     ThreadCount = 4
+    ProgBarIntvl = 1
 
 
 class NetworkDefaultParams(_ExtendedEnum):
@@ -23,6 +24,7 @@ class NetworkDefaultParams(_ExtendedEnum):
     RequestTimeout = 1
     SessionRefreshInterval = 1000
     TooManyReqSleep = 10
+
 
 # ========= Default Wordlist Paths
 
@@ -44,3 +46,24 @@ class PPrintDefaultParams(_ExtendedEnum):
 class OutputType(_ExtendedEnum):
     Lines = "lines"
     Status = "status"
+
+
+class OutputStatusKeys(_ExtendedEnum):
+    State = "State"
+    Progress = "Progress"  # todo method and print the iterated / amount numbers... maybe not every time to avoid overload
+    Current = "Current"
+    ResultsPath = "ResultsPath"
+    Found = "Found"
+    Left = "Left"
+
+
+class OutputValues(_ExtendedEnum):
+    StateSetup = "setting up"
+    StateRunning = "running"
+    StateComplete = "finished"
+    StateFail = "failed"  # TODO reason?
+
+    EmptyStatusVal = "---"
+    ZeroStatusVal = 0
+    EmptyLine = ""
+

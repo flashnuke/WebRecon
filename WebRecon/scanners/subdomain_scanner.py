@@ -3,8 +3,10 @@ import os
 import threading
 import queue
 import time
+from .utils import *
 from .base_scanner import Scanner
 from functools import lru_cache
+from typing import Dict, Any
 
 #   --------------------------------------------------------------------------------------------------------------------
 #
@@ -65,7 +67,6 @@ class DNSScanner(Scanner):
     
     @lru_cache
     def _get_results_directory(self, *args, **kwargs) -> str:
-        # overwrite the default output path
         path = os.path.join(self.results_path,
                             self._format_name_for_path(self.target_hostname))
 

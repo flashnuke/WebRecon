@@ -1,6 +1,8 @@
 import nmap
 import pprint
-from .utils import PPrintDefaultParams
+
+from typing import Any, Dict
+from .utils import *
 from .base_scanner import Scanner
 
 #   --------------------------------------------------------------------------------------------------------------------
@@ -35,6 +37,13 @@ class NmapScanner(Scanner):
         self._save_results(results_str)
 
         return self.ret_results
+
+    def _define_status_output(self) -> Dict[str, Any]:
+        status = dict()
+        status[OutputStatusKeys.State] = OutputValues.StateSetup
+        status[OutputStatusKeys.ResultsPath] = self.results_path_full
+
+        return status
 
 
 if __name__ == "__main__":

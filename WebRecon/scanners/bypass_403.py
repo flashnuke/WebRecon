@@ -1,6 +1,7 @@
 import time
-from .base_scanner import Scanner, ScannerDefaultParams
-from typing import Dict, List
+from .base_scanner import Scanner
+from .utils import *
+from typing import Any, Dict, List
 
 
 #   --------------------------------------------------------------------------------------------------------------------
@@ -16,6 +17,8 @@ from typing import Dict, List
 
 
 class Bypass403(Scanner):
+    _FOUND = 0
+
     def __init__(self, target_keyword, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -129,13 +132,25 @@ class Bypass403(Scanner):
                                   verify=False, allow_redirects=True).status_code
 
     def _start_scanner(self, results_filename=None) -> Dict[int, List[str]]:
-        results = self.try_bypass()
+        success_results = dict()
+        all_results = self.try_bypass()
 
-        for scode, req in results.items():
+        for scode, req in all_results.items():
             if scode in ScannerDefaultParams.SuccessStatusCodes:
-                self._log(f"{scode} -> {req}")
+                success_results[scode] = req
+                Bypass403._FOUND += 1
+                self._log_status(OutputStatusKeys.Found, Bypass403._FOUND)
 
-        return results
+        return success_results
+
+    def _define_status_output(self) -> Dict[str, Any]:
+        status = dict()
+        status[OutputStatusKeys.State] = OutputValues.StateSetup
+        status[OutputStatusKeys.Current] = f"{self.target_url}/{self.target_keyword}"
+        status[OutputStatusKeys.ResultsPath] = self.results_path_full
+        status[OutputStatusKeys.Found] = Bypass403._FOUND
+
+        return status
 
 
 if __name__ == "__main__":

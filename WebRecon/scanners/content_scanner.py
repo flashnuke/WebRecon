@@ -2,9 +2,9 @@ import collections
 import urllib.parse
 import threading
 import time
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 from .base_scanner import Scanner
-from .utils import ScannerDefaultParams
+from .utils import *
 from .bypass_403 import Bypass403
 
 #   --------------------------------------------------------------------------------------------------------------------
@@ -28,16 +28,35 @@ class ContentScanner(Scanner):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self._finished_counter = 0
+        self._finished_counter_lock = threading.RLock()
+
+        self._success_counter = 0
+        self._success_counter_lock = threading.RLock()
+
+        self._total_wordcount = self.words_queue.qsize()
         self.ret_results: Dict[str, Union[Dict, List]] = collections.defaultdict(list)
+
         self.try_bypass = kwargs.get("try_bypass", False)
         if self.try_bypass:
-            self.ret_results['bypass'] = dict()
-            self.results_bypass = collections.defaultdict(dict)
+            self.ret_results['bypass'] = {scode: list() for scode in ScannerDefaultParams.SuccessStatusCodes}+
+
+
+    def _update_finished_count(self):
+        with self._finished_counter_lock:
+            self._finished_counter += 1
+            self._update_progress_status(self._finished_counter, self._total_wordcount)
+
+    def _update_success_count(self):
+        with self._success_counter_lock:
+            self._success_counter += 1
+            self._log_status(OutputStatusKeys.Found, self._success_counter)
 
     def single_bruter(self):
+        attempt_list = list()
+
         while not self.words_queue.empty():
             attempt = self.words_queue.get()
-            attempt_list = list()
 
             # check if there is a file extension, if not then it's a directory we're bruting
             if "." not in attempt:
@@ -63,15 +82,19 @@ class ContentScanner(Scanner):
                         self.ret_results[scode].append(url)
 
                     if scode == 403 and self.try_bypass:
-                        self.ret_results["bypass"] = Bypass403(target_url=self.target_url,
-                                                               target_keyword=path,
-                                                               target_hostname=self.target_hostname,
-                                                               scheme=self.scheme).start_scanner()
+                        bypass_results = Bypass403(target_url=self.target_url,
+                                                   target_keyword=path,
+                                                   target_hostname=self.target_hostname,
+                                                   scheme=self.scheme).start_scanner()
+                        for bypass_scode, bypass_url in bypass_results.items():
+                            self.ret_results["bypass"][bypass_scode].append(bypass_url)
 
                 except Exception as exc:
-                    self._log(f"exception {exc} for {url}")
+                    self._log_exception(f"target {url} exception {exc}", False)
 
                 finally:
+                    attempt_list.clear()
+
                     time.sleep(self.request_cooldown)
 
     def _start_scanner(self):
@@ -92,6 +115,17 @@ class ContentScanner(Scanner):
         self._save_results(results_str)
 
         return self.ret_results
+
+    def _define_status_output(self) -> Dict[str, Any]:
+        status = dict()
+        status[OutputStatusKeys.State] = OutputValues.StateSetup
+        status[OutputStatusKeys.Current] = OutputValues.EmptyStatusVal
+        status[OutputStatusKeys.Progress] = OutputValues.EmptyStatusVal
+        status[OutputStatusKeys.ResultsPath] = self.results_path_full
+        status[OutputStatusKeys.Left] = OutputValues.EmptyStatusVal
+        status[OutputStatusKeys.Found] = OutputValues.ZeroStatusVal
+
+        return status
 
 
 if __name__ == "__main__":
