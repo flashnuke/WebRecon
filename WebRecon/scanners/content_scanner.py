@@ -93,12 +93,12 @@ class ContentScanner(Scanner):
                                                    scheme=self.scheme).start_scanner()
                         for bypass_scode, bypass_url in bypass_results.items():
                             self.ret_results["bypass"][bypass_scode].append(bypass_url)
-                            self._increment_finished_count()
                 except ConnectTimeoutError:
                     pass
                 except Exception as exc:
                     self._log_exception(f"{exc} - target {url}", False)
                 finally:
+                    self._increment_finished_count()
                     attempt_list.clear()
                     time.sleep(self.request_cooldown)
 
