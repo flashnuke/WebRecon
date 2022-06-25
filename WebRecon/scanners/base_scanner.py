@@ -37,6 +37,7 @@ class ScanManager:
     def __init__(self, scheme, target_hostname, target_url, *args, **kwargs):
         self._scanner_name = self.__class__.__name__
         self._output_manager = self._output_manager_setup()
+        self._current_progress_perc = int()
         
         self.target_hostname = target_hostname
         self.target_url = target_url
@@ -107,9 +108,14 @@ class ScanManager:
         return name.replace(f'{self.scheme}://', '').replace('.', '_')
 
     def _update_progress_status(self, finished_c, total_c):
-        progress = finished_c // total_c
-        if progress % ScannerDefaultParams.ProgBarIntvl == 0:
-            self._log_status(OutputStatusKeys.Progress, progress)
+        progress = (100 * finished_c) // total_c
+        if progress % ScannerDefaultParams.ProgBarIntvl == 0 and progress != self._current_progress_perc:
+            print_prog_mod = 5  # TODO params
+            print_prog_count = progress // print_prog_mod  # TODO params
+            print_prog_max = (100 // print_prog_mod)  # TODO params
+            prog_str = f"[{('#' * print_prog_count).rjust(print_prog_max - print_prog_count, '-')}]"
+            self._log_status(OutputStatusKeys.Progress, prog_str)
+            self._current_progress_perc = progress
 
 
 class Scanner(ScanManager):

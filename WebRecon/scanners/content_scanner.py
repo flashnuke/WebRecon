@@ -28,10 +28,10 @@ class ContentScanner(Scanner):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._finished_counter = 0
+        self._finished_counter = int()
         self._finished_counter_lock = threading.RLock()
 
-        self._success_counter = 0
+        self._success_counter = int()
         self._success_counter_lock = threading.RLock()
 
         self._total_wordcount = self.words_queue.qsize()
@@ -39,15 +39,15 @@ class ContentScanner(Scanner):
 
         self.try_bypass = kwargs.get("try_bypass", False)
         if self.try_bypass:
-            self.ret_results['bypass'] = {scode: list() for scode in ScannerDefaultParams.SuccessStatusCodes}+
+            self.ret_results['bypass'] = {scode: list() for scode in ScannerDefaultParams.SuccessStatusCodes}
 
-
-    def _update_finished_count(self):
+    def _increment_finished_count(self):
         with self._finished_counter_lock:
             self._finished_counter += 1
             self._update_progress_status(self._finished_counter, self._total_wordcount)
+            self._log_status(OutputStatusKeys.Left, self._total_wordcount - self._finished_counter)
 
-    def _update_success_count(self):
+    def _increment_success_count(self):
         with self._success_counter_lock:
             self._success_counter += 1
             self._log_status(OutputStatusKeys.Found, self._success_counter)
@@ -55,8 +55,10 @@ class ContentScanner(Scanner):
     def single_bruter(self):
         attempt_list = list()
 
+        self._log_status(OutputStatusKeys.Left, self._total_wordcount - self._finished_counter)
         while not self.words_queue.empty():
             attempt = self.words_queue.get()
+            self._log_status(OutputStatusKeys.Current, attempt)
 
             # check if there is a file extension, if not then it's a directory we're bruting
             if "." not in attempt:
@@ -78,23 +80,23 @@ class ContentScanner(Scanner):
                     response = self._make_request(method="GET", url=url)
                     scode = response.status_code
                     if scode in ScannerDefaultParams.SuccessStatusCodes:
-                        self._log(f"{url} = [{scode}] status code")
                         self.ret_results[scode].append(url)
+                        self._increment_success_count()
 
-                    if scode == 403 and self.try_bypass:
+                    if scode == 403 and self.try_bypass:  # TODO param 403
                         bypass_results = Bypass403(target_url=self.target_url,
                                                    target_keyword=path,
                                                    target_hostname=self.target_hostname,
                                                    scheme=self.scheme).start_scanner()
                         for bypass_scode, bypass_url in bypass_results.items():
                             self.ret_results["bypass"][bypass_scode].append(bypass_url)
+                            self._increment_finished_count()
 
                 except Exception as exc:
                     self._log_exception(f"target {url} exception {exc}", False)
 
                 finally:
                     attempt_list.clear()
-
                     time.sleep(self.request_cooldown)
 
     def _start_scanner(self):

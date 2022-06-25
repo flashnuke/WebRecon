@@ -53,7 +53,7 @@ class OutputStatusKeys(_ExtendedEnum):
     Progress = "Progress"  # todo method and print the iterated / amount numbers... maybe not every time to avoid overload
     Current = "Current"
     ResultsPath = "ResultsPath"
-    Found = "Found"
+    Found = "Found"  # TODO rename
     Left = "Left"
 
 

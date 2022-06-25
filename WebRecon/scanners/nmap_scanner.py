@@ -21,8 +21,8 @@ class NmapScanner(Scanner):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.cmdline_args = kwargs.get("cmdline_args", "-sV")  # TODO revert to flags "-sV -sU -sS"
-        self.ports = kwargs.get("ports", "22-443")
+        self.cmdline_args = kwargs.get("cmdline_args", "-sV")  # TODO ARGS and revert to flags "-sV -sU -sS"
+        self.ports = kwargs.get("ports", "22-443")  # TODO ARGS
 
         self.ret_results = dict()
 
@@ -33,7 +33,7 @@ class NmapScanner(Scanner):
             self.ret_results[host] = nm[host]
         results_str = pprint.pformat(self.ret_results,
                                      compact=PPrintDefaultParams.Compact, width=PPrintDefaultParams.Width)
-        self._log(f"\n{results_str}")
+        # self._log(f"\n{results_str}") TODO
         self._save_results(results_str)
 
         return self.ret_results
