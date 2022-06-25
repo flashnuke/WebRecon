@@ -32,9 +32,10 @@ class ScanManager:
     _LOGGER_MUTEX = threading.RLock()
     _DEF_OUTPUT_DIRECTORY = "results"
     _ACCEPTED_SCHEMES = ["http", "https"]
+    _ERROR_LOG_NAME = "error_log"
 
     def __init__(self, scheme, target_hostname, target_url, *args, **kwargs):
-        OutputManager(self.__class__.__name__)
+        OutputManager(self._ERROR_LOG_NAME, output_type="lines")
         self.target_hostname = target_hostname
         self.target_url = target_url
         self.scheme = scheme
@@ -75,6 +76,10 @@ class ScanManager:
     @lru_cache(maxsize=5)
     def generate_url_base_path(self, dnsname: str) -> str:
         return f"{self.scheme}://{dnsname}.{self.target_hostname}"
+
+    @lru_cache(maxsize=5)
+    def _format_name_for_path(self, name: str) -> str:
+        return name.replace(f'{self.scheme}://', '').replace('.', '_')
 
     @lru_cache(maxsize=5)
     def _format_name_for_path(self, name: str) -> str:
