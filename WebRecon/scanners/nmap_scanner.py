@@ -21,7 +21,7 @@ class NmapScanner(Scanner):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.cmdline_args = kwargs.get("cmdline_args", "-sV >/dev/null")  # TODO ARGS and revert to flags "-sV -sU -sS"
+        self.cmdline_args = kwargs.get("cmdline_args", "-sV") + " >/dev/null"  # TODO ARGS and revert to flags "-sV -sU -sS"
         self.ports = kwargs.get("ports", "22-443")  # TODO ARGS
 
         self.ret_results = dict()
