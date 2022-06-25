@@ -7,6 +7,9 @@ import sys
 
 print = lambda *args, **kwargs: None  # to disable prints
 
+# TODO x is lines limit... print x empty ones first to avoid deleting old user output
+
+
 class OutputManager(object):
     # TODO suppress all other output from other libraries to avoid messing up
     # TODO make singleton
