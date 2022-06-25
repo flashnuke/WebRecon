@@ -133,6 +133,7 @@ class Bypass403(Scanner):
 
     def _start_scanner(self, results_filename=None) -> Dict[int, List[str]]:
         success_results = dict()
+        self._log_status(OutputStatusKeys.State, OutputValues.StateRunning)
         all_results = self.try_bypass()
 
         for scode, req in all_results.items():

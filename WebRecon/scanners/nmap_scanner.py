@@ -27,6 +27,8 @@ class NmapScanner(Scanner):
         self.ret_results = dict()
 
     def _start_scanner(self):
+        self._log_status(OutputStatusKeys.State, OutputValues.StateRunning)
+
         nm = nmap.PortScanner()
         nm.scan(hosts=self.target_hostname, ports=self.ports, arguments=self.cmdline_args)
         for host in nm.all_hosts():

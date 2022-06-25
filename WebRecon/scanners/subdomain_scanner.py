@@ -58,6 +58,8 @@ class DNSScanner(Scanner):
 
     def _start_scanner(self) -> queue.Queue:
         threads = list()
+        self._log_status(OutputStatusKeys.State, OutputValues.StateRunning)
+
         for _ in range(self.thread_count):
             t = threading.Thread(target=self.single_bruter)
             t.start()
