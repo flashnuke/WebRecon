@@ -2,7 +2,10 @@ from collections import defaultdict, deque
 from copy import deepcopy
 from typing import Union, Dict, Any
 from .default_values import OutputType
+from functools import lru_cache
+import sys
 
+print = lambda *args, **kwargs: None  # to disable prints
 
 class OutputManager(object):
     # TODO suppress all other output from other libraries to avoid messing up
@@ -64,25 +67,26 @@ class OutputManager(object):
         self._clear()
         self._flush()
 
-    @staticmethod
-    def _flush():
+    def _flush(self):
         for source, status_dict in OutputManager._OUTPUT_CONT[OutputType.Status].items(): # TODO if initial dont remove
-            print(OutputManager._DELIMITER)
-            print(source)
+            sys.stdout.write(self._construct_line(OutputManager._DELIMITER))
+            sys.stdout.write(self._construct_line(source))
             for skey, sval in status_dict.items():
-                print(f"{skey} -> {sval}")
+                sys.stdout.write(self._construct_line(f"{skey} -> {sval}"))
         for source, line_deq in OutputManager._OUTPUT_CONT[OutputType.Lines].items():  # TODO if initial dont remove
-            print(OutputManager._DELIMITER)
-            print(source)
+            sys.stdout.write(self._construct_line(OutputManager._DELIMITER))
+            sys.stdout.write(self._construct_line(source))
             for line in line_deq:
-                print(line)
+                sys.stdout.write(self._construct_line(line))
+        sys.stdout.flush()
 
-    @staticmethod
-    def _clear():
-        print(OutputManager._OUTPUT_LEN * OutputManager._LINE_REMOVE)
+    def _clear(self):
+        sys.stdout.write(self._construct_line((OutputManager._OUTPUT_LEN + 1) * OutputManager._LINE_REMOVE))
 
+    @lru_cache(maxsize=50)
+    def _construct_line(self, output: Any) -> str:
+        return f"{output}\n"
 
-#
 # WebRecon
 # Host:
 # status:

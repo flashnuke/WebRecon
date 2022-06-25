@@ -48,7 +48,8 @@ class DNSScanner(Scanner):
                     self._log_status(OutputStatusKeys.Found, success_count)
                     self._save_results(f"{url_path}\n")
                     self.domains_queue.put(url_path)
-            except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout):
+            except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout,
+                    requests.exceptions.ReadTimeout):
                 # other exceptions should not occur
                 continue
             finally:

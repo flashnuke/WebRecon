@@ -3,6 +3,9 @@ import urllib.parse
 import threading
 import time
 from typing import Any, Dict, List, Union
+
+from urllib3.exceptions import ConnectTimeoutError
+
 from .base_scanner import Scanner
 from .utils import *
 from .bypass_403 import Bypass403
@@ -91,10 +94,10 @@ class ContentScanner(Scanner):
                         for bypass_scode, bypass_url in bypass_results.items():
                             self.ret_results["bypass"][bypass_scode].append(bypass_url)
                             self._increment_finished_count()
-
+                except ConnectTimeoutError:
+                    pass
                 except Exception as exc:
-                    self._log_exception(f"target {url} exception {exc}", False)
-
+                    self._log_exception(f"{exc} - target {url}", False)
                 finally:
                     attempt_list.clear()
                     time.sleep(self.request_cooldown)
