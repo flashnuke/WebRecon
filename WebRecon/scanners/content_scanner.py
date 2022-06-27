@@ -4,7 +4,7 @@ import threading
 import time
 from typing import Any, Dict, List, Union
 
-from urllib3.exceptions import ConnectTimeoutError
+from urllib3.exceptions import ConnectTimeoutError, NewConnectionError
 
 from .base_scanner import Scanner
 from .utils import *
@@ -93,7 +93,7 @@ class ContentScanner(Scanner):
                                                    scheme=self.scheme).start_scanner()
                         for bypass_scode, bypass_url in bypass_results.items():
                             self.ret_results["bypass"][bypass_scode].append(bypass_url)
-                except ConnectTimeoutError:
+                except (ConnectTimeoutError, NewConnectionError):
                     pass
                 except Exception as exc:
                     self._log_exception(f"{exc} - target {url}", False)
