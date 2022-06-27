@@ -2,13 +2,11 @@ import requests
 import os
 import queue
 import time
-import traceback
 
 from typing import Any, Dict, Union
 from pathlib import Path
 from functools import lru_cache
 from abc import abstractmethod
-import threading
 from .utils import *
 import urllib3
 
@@ -29,7 +27,6 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class ScanManager:
-    _LOGGER_MUTEX = threading.RLock()
     _DEF_OUTPUT_DIRECTORY = "results"
     _ACCEPTED_SCHEMES = ["http", "https"]
     _ERROR_LOG_NAME = "error_log"  # TODO to default values?
@@ -65,14 +62,14 @@ class ScanManager:
     def _log_line(self, log_name, line: str):
         # TODO with colors based on type of message
         # TODO not each line individually
-        with ScanManager._LOGGER_MUTEX:
-            self._output_manager.update_lines(log_name, line)
+        # TODO mutex into op manager
+        self._output_manager.update_lines(log_name, line)
                 # print(f"[{self.target_hostname}] {( + ' ').ljust(20, '-')}> {line}")
 
     def _log_status(self, lkey: str, lval: Any):
         # TODO with colors based on type of message
-        with ScanManager._LOGGER_MUTEX:
-            self._output_manager.update_status(self._scanner_name, lkey, lval)
+        # TODO mutex into op manager
+        self._output_manager.update_status(self._scanner_name, lkey, lval)
                 # print(f"[{self.target_hostname}] {( + ' ').ljust(20, '-')}> {line}")
 
     def _log_exception(self, exc_text, abort: bool):

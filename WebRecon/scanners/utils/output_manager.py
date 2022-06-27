@@ -20,7 +20,7 @@ class OutputManager(object):
     _OUTPUT_LEN = 0
     _LINE_WIDTH = 100
     _DELIMITER = (_LINE_WIDTH + 1) * '='
-    TESTLOCK = threading.RLock()
+    _MUTEX = threading.RLock()
 
     def __new__(cls, *args, **kwargs):  # singleton
         if not isinstance(cls._INSTANCE, cls):
@@ -33,7 +33,7 @@ class OutputManager(object):
         pass
 
     def insert_output(self, source_name: str, output_type: OutputType, status_keys: Union[Dict[str, Any], None] = None):
-        with OutputManager.TESTLOCK:
+        with OutputManager._MUTEX:
             if source_name in OutputManager._OUTPUT_CONT[output_type]:
                 return
             elif output_type == OutputType.Lines:
@@ -54,7 +54,7 @@ class OutputManager(object):
             OutputManager._OUTPUT_LEN += 2  # delimiter + source_name
 
     def remove_output(self, source_name: str, output_type: OutputType):
-        with OutputManager.TESTLOCK:
+        with OutputManager._MUTEX:
             if source_name in OutputManager._OUTPUT_CONT[output_type]:
                 output_len = len(OutputManager._OUTPUT_CONT[output_type][source_name])
                 OutputManager._OUTPUT_CONT[output_type].pop(source_name)
@@ -69,7 +69,7 @@ class OutputManager(object):
 
     def update_status(self, source_name: str, output_key: str, output_val: Any):
         # TODO add lock here (or to all methods??)
-        with OutputManager.TESTLOCK:
+        with OutputManager._MUTEX:
             if output_key not in OutputManager._OUTPUT_CONT[OutputType.Status][source_name]:
                 OutputManager._OUTPUT_LEN += 1
             OutputManager._OUTPUT_CONT[OutputType.Status][source_name][output_key] = self.construct_status_val(output_key, output_val)
@@ -78,7 +78,7 @@ class OutputManager(object):
 
     def update_lines(self, source_name: str, line: str):
         # TODO add lock here (or to all methods??)
-        with OutputManager.TESTLOCK:
+        with OutputManager._MUTEX:
             OutputManager._OUTPUT_CONT[OutputType.Lines][source_name].append(line)
             self._clear()
             self._flush()
