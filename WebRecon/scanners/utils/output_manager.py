@@ -2,7 +2,7 @@ import threading
 from collections import defaultdict, deque
 from copy import deepcopy
 from typing import Union, Dict, Any
-from .default_values import OutputType, OutputColors
+from .default_values import OutputType, OutputColors, StatusKeyColorMap
 from functools import lru_cache
 import sys
 
@@ -19,7 +19,7 @@ class OutputManager(object):
     _OUTPUT_CONT = dict()  # TODO to params
     _OUTPUT_LEN = 0
     _LINE_WIDTH = 100
-    _DELIMITER = (_LINE_WIDTH + 1) * '='
+    _DELIMITER = _LINE_WIDTH * '='
     _MUTEX = threading.RLock()
 
     def __new__(cls, *args, **kwargs):  # singleton
@@ -64,22 +64,14 @@ class OutputManager(object):
 
     @staticmethod
     def construct_status_val(output_key, output_val):
-        if output_val.startswith('\033'):
-            sys.stdout.write("Asdasd")
-            sys.stdout.write("Asdasd")
-            sys.stdout.write("Asdasd")
-            sys.stdout.write("Asdasd")
-            sys.stdout.write("Asdasd")
-            sys.stdout.write("Asdasd")
-            sys.stdout.write("Asdasd")
-            sys.stdout.write("Asdasd")
-            sys.stdout.write("Asdasd")
-            sys.stdout.write(output_val)
-            sys.stdout.write(str(len(output_val)))
-            sys.stdout.write(str(len(repr(output_val))))
-            exit(0)
-        valstr = f"{output_val}".rjust(OutputManager._LINE_WIDTH - len(output_key) + (len(repr(output_val)) - len(output_val)), " ")
-        return f"{output_key} {valstr}"
+        if isinstance(output_val, tuple):
+            status_text, status_color = output_val
+        else:
+            status_text = output_val
+            status_color = StatusKeyColorMap.get(output_key, OutputColors.White)  # TODO cache or smth
+
+        valstr = f"{status_text}".rjust(OutputManager._LINE_WIDTH - len(output_key), " ")
+        return f"{output_key}{status_color}{valstr}{OutputColors.White}"
 
     def update_status(self, source_name: str, output_key: str, output_val: Any):
         # TODO add lock here (or to all methods??)
@@ -98,7 +90,7 @@ class OutputManager(object):
             self._flush()
 
     def _flush(self):
-        for source, status_dict in OutputManager._OUTPUT_CONT[OutputType.Status].items(): # TODO if initial dont remove
+        for source, status_dict in OutputManager._OUTPUT_CONT[OutputType.Status].items():  # TODO if initial dont remove
             sys.stdout.write(self._construct_line(self._DELIMITER))
             sys.stdout.write(self._construct_line(source)) # TODO sys write with construct to another method
             for skey, sval in status_dict.items():

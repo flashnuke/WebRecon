@@ -1,4 +1,5 @@
 from enum import Enum
+from collections import defaultdict
 
 
 class _ExtendedEnum(Enum):
@@ -72,11 +73,19 @@ class OutputStatusKeys(_ExtendedEnum):
 
 
 class OutputValues(_ExtendedEnum):
-    StateSetup = f"setting up"
-    StateRunning = f"running"
-    StateComplete = f"{OutputColors.Red}finished"
-    StateFail = f"{OutputColors.Red}failed{OutputColors.White}"  # TODO reason?
+    StateSetup = ("setting up", OutputColors.White)
+    StateRunning = ("running", OutputColors.Green)
+    StateComplete = ("finished", OutputColors.Green)
+    StateFail = ("failed", OutputColors.Red)  # TODO reason?
 
     EmptyStatusVal = "---"
-    ZeroStatusVal = 0
+    ZeroStatusVal = "0"
     EmptyLine = ""
+
+
+StatusKeyColorMap = {
+    "Progress": OutputColors.Cyan,
+    "Found": OutputColors.Blue
+}
+
+

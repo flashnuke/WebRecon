@@ -14,6 +14,7 @@ from tld import get_tld, get_tld_names
 
 # TODO lru imports maybe once using package?
 # todo continue scan using cache?
+# TODO replace tld with your own list?
 
 #   --------------------------------------------------------------------------------------------------------------------
 #
