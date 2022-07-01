@@ -48,6 +48,20 @@ class OutputType(_ExtendedEnum):
     Status = "status"
 
 
+class OutputColors(_ExtendedEnum):
+    White = '\033[0m'
+    Red = '\033[31m'
+    Green = '\033[32m'
+    Orange = '\033[33m'
+    Blue = '\033[34m'
+    Purple = '\033[35m'
+    Cyan = '\033[36m'
+    Gray = '\033[37m'
+    Dim = '\033[2m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
 class OutputStatusKeys(_ExtendedEnum):
     State = "State"
     Progress = "Progress"  # todo method and print the iterated / amount numbers... maybe not every time to avoid overload
@@ -58,12 +72,11 @@ class OutputStatusKeys(_ExtendedEnum):
 
 
 class OutputValues(_ExtendedEnum):
-    StateSetup = "setting up"
-    StateRunning = "running"
-    StateComplete = "finished"
-    StateFail = "failed"  # TODO reason?
+    StateSetup = f"setting up"
+    StateRunning = f"running"
+    StateComplete = f"{OutputColors.Red}finished"
+    StateFail = f"{OutputColors.Red}failed{OutputColors.White}"  # TODO reason?
 
     EmptyStatusVal = "---"
     ZeroStatusVal = 0
     EmptyLine = ""
-

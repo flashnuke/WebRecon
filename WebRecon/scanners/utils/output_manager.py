@@ -2,7 +2,7 @@ import threading
 from collections import defaultdict, deque
 from copy import deepcopy
 from typing import Union, Dict, Any
-from .default_values import OutputType
+from .default_values import OutputType, OutputColors
 from functools import lru_cache
 import sys
 
@@ -64,7 +64,21 @@ class OutputManager(object):
 
     @staticmethod
     def construct_status_val(output_key, output_val):
-        valstr = f"{output_val}".rjust(OutputManager._LINE_WIDTH - len(output_key), " ")
+        if output_val.startswith('\033'):
+            sys.stdout.write("Asdasd")
+            sys.stdout.write("Asdasd")
+            sys.stdout.write("Asdasd")
+            sys.stdout.write("Asdasd")
+            sys.stdout.write("Asdasd")
+            sys.stdout.write("Asdasd")
+            sys.stdout.write("Asdasd")
+            sys.stdout.write("Asdasd")
+            sys.stdout.write("Asdasd")
+            sys.stdout.write(output_val)
+            sys.stdout.write(str(len(output_val)))
+            sys.stdout.write(str(len(repr(output_val))))
+            exit(0)
+        valstr = f"{output_val}".rjust(OutputManager._LINE_WIDTH - len(output_key) + (len(repr(output_val)) - len(output_val)), " ")
         return f"{output_key} {valstr}"
 
     def update_status(self, source_name: str, output_key: str, output_val: Any):
