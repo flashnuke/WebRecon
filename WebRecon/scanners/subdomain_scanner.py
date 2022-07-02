@@ -22,6 +22,8 @@ from typing import Dict, Any
 
 
 class DNSScanner(Scanner):
+    _SCAN_COLOR = OutputColors.Blue
+
     def __init__(self, domains_queue=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.domains_queue = domains_queue if domains_queue else queue.Queue()
@@ -54,7 +56,6 @@ class DNSScanner(Scanner):
                 continue
             finally:
                 finished_count += 1
-                self._log_status(OutputStatusKeys.Left, total_count - finished_count)
                 self._update_progress_status(finished_count, total_count)
                 time.sleep(self.request_cooldown)
 

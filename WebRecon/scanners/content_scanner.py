@@ -28,6 +28,8 @@ from .bypass_403 import Bypass403
 
 
 class ContentScanner(Scanner):
+    _SCAN_COLOR = OutputColors.Blue
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -48,7 +50,6 @@ class ContentScanner(Scanner):
         with self._finished_counter_lock:
             self._finished_counter += 1
             self._update_progress_status(self._finished_counter, self._total_wordcount)
-            self._log_status(OutputStatusKeys.Left, self._total_wordcount - self._finished_counter)
 
     def _increment_success_count(self):
         with self._success_counter_lock:

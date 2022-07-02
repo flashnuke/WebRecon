@@ -14,12 +14,13 @@ class OutputManager(object):
     # TODO suppress all other output from other libraries to avoid messing up
     # TODO make singleton
     _INSTANCE = None
-    _DEF_MAXLEN = 3  # TODO make sure to initialize with this size
+    _DEF_MAXLEN = 5  # TODO make sure to initialize with this size
     _LINE_REMOVE = "\x1b[1A\x1b[2K" # TODO rename
     _OUTPUT_CONT = dict()  # TODO to params
     _OUTPUT_LEN = 0
     _LINE_WIDTH = 100
-    _DELIMITER = _LINE_WIDTH * '='
+    _DELIMITER = f"{OutputColors.Purple}{_LINE_WIDTH * '='}{OutputColors.White}\n"
+    _LINE_PREF = f"{OutputColors.Gray}>{OutputColors.White}"
     _MUTEX = threading.RLock()
 
     def __new__(cls, *args, **kwargs):  # singleton
@@ -39,7 +40,7 @@ class OutputManager(object):
             elif output_type == OutputType.Lines:
                 OutputManager._OUTPUT_CONT[OutputType.Lines][source_name] = deque(maxlen=OutputManager._DEF_MAXLEN)
                 for _ in range(OutputManager._DEF_MAXLEN):
-                    OutputManager._OUTPUT_CONT[OutputType.Lines][source_name].append('')
+                    OutputManager._OUTPUT_CONT[OutputType.Lines][source_name].append(OutputManager._LINE_PREF)
                 OutputManager._OUTPUT_LEN += OutputManager._DEF_MAXLEN
             elif output_type == OutputType.Status:
                 if not status_keys:
@@ -51,7 +52,7 @@ class OutputManager(object):
                 OutputManager._OUTPUT_LEN += len(status_keys)
             else:
                 raise Exception(f"wrong output_type set: {output_type}")  # TODO exceptions
-            OutputManager._OUTPUT_LEN += 2  # delimiter + source_name
+            OutputManager._OUTPUT_LEN += 4  # delimiter + source_name
 
     def remove_output(self, source_name: str, output_type: OutputType):
         with OutputManager._MUTEX:
@@ -85,28 +86,28 @@ class OutputManager(object):
     def update_lines(self, source_name: str, line: str):
         # TODO add lock here (or to all methods??)
         with OutputManager._MUTEX:
-            OutputManager._OUTPUT_CONT[OutputType.Lines][source_name].append(line)
+            OutputManager._OUTPUT_CONT[OutputType.Lines][source_name].appendleft(f"{OutputManager._LINE_PREF} {line}")
             self._clear()
             self._flush()
 
     def _flush(self):
         for source, status_dict in OutputManager._OUTPUT_CONT[OutputType.Status].items():  # TODO if initial dont remove
-            sys.stdout.write(self._construct_line(self._DELIMITER))
-            sys.stdout.write(self._construct_line(source)) # TODO sys write with construct to another method
+            sys.stdout.write(self._construct_output(self._DELIMITER))
+            sys.stdout.write(f"{OutputColors.BOLD}{self._construct_output(source)}{OutputColors.White}\n")  # TODO sys write with construct to another method
             for skey, sval in status_dict.items():
-                sys.stdout.write(self._construct_line(f"{sval}"))
+                sys.stdout.write(self._construct_output(f"{sval}"))
         for source, line_deq in OutputManager._OUTPUT_CONT[OutputType.Lines].items():  # TODO if initial dont remove
-            sys.stdout.write(self._construct_line(self._DELIMITER))
-            sys.stdout.write(self._construct_line(source))
+            sys.stdout.write(self._construct_output(self._DELIMITER))
+            sys.stdout.write(f"{OutputColors.BOLD}{self._construct_output(source)}{OutputColors.White}\n")
             for line in line_deq:
-                sys.stdout.write(self._construct_line(line))
+                sys.stdout.write(self._construct_output(line))
         sys.stdout.flush()
 
     def _clear(self):
-        sys.stdout.write(self._construct_line((OutputManager._OUTPUT_LEN + 1) * OutputManager._LINE_REMOVE))
+        sys.stdout.write(self._construct_output((OutputManager._OUTPUT_LEN + 1) * OutputManager._LINE_REMOVE))
 
     @lru_cache(maxsize=50)
-    def _construct_line(self, output: Any) -> str:
+    def _construct_output(self, output: Any) -> str:
         return f"{output}\n"
 
 # WebRecon

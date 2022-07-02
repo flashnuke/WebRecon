@@ -51,6 +51,8 @@ from tld import get_tld, get_tld_names
 
 
 class WebRecon(ScanManager):
+    _SCAN_COLOR = OutputColors.Orange
+
     _SCANNAME_TO_METHOD_MAP = {
         "nmap_scan": NmapScanner,
         "content_brute": ContentScanner
@@ -112,9 +114,9 @@ class WebRecon(ScanManager):
             domains = self._setup_targets()
             domains_count = domains.qsize()
             self._log_status(OutputStatusKeys.State, OutputValues.StateRunning)
-            self._log_status(OutputStatusKeys.Left, domains_count)
 
             success_count, total_count = 0, 0
+            self._update_progress_status(total_count, domains_count)
             while not domains.empty():
                 target = domains.get()
                 if total_count and target == self.target_url:
@@ -133,7 +135,6 @@ class WebRecon(ScanManager):
                     self._log_exception(f"target {target} exception {exc}", False)
                 finally:
                     total_count += 1
-                    self._log_status(OutputStatusKeys.Left, domains_count - total_count)
                     self._update_progress_status(total_count, domains_count)
 
             results_str = pprint.pformat(self.recon_results,
