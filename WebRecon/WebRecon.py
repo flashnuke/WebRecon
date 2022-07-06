@@ -1,20 +1,14 @@
-import os
-import queue
 import urllib.parse
 import argparse
 import threading
 import pprint
 
-
-from typing import Tuple, List, Callable, Type
-from scanners.utils import PPrintDefaultParams, ScannerDefaultParams
-from functools import lru_cache
+from typing import Tuple, List, Type
 from scanners import *
 from tld import get_tld, get_tld_names
 
 # TODO lru imports maybe once using package?
 # todo continue scan using cache?
-# TODO replace tld with your own list?
 
 #   --------------------------------------------------------------------------------------------------------------------
 #
@@ -115,7 +109,7 @@ class WebRecon(ScanManager):
             domains_count = domains.qsize()
             self._log_status(OutputStatusKeys.State, OutputValues.StateRunning)
 
-            success_count, total_count = 0, 0
+            total_count = 0, 0
             self._update_progress_status(total_count, domains_count)
             while not domains.empty():
                 target = domains.get()
@@ -130,7 +124,6 @@ class WebRecon(ScanManager):
                     for t in scanner_threads:
                         t.join()
                     # self._log(f"finished, saving results... target {target}")
-                    success_count += 1  # TODO not needed?
                 except Exception as exc:
                     self._log_exception(f"target {target} exception {exc}", False)
                 finally:
@@ -139,10 +132,7 @@ class WebRecon(ScanManager):
 
             results_str = pprint.pformat(self.recon_results,
                                          compact=PPrintDefaultParams.Compact, width=PPrintDefaultParams.Width)
-            # self._log(f"results: {results_str}")
-            # self._log("saving results...")
             self._save_results(results_str)
-            # self._log(f"finished successfully {success_count} out of {total_count} targets, shutting down...")
         except Exception as exc:
             self._log_status(OutputStatusKeys.State, OutputValues.StateFail)
             self._log_exception(exc, True)
@@ -199,8 +189,3 @@ if __name__ == "__main__":
              dns_recursion=True,
              scan_names=["content_brute", "nmap_scan"]).start_recon()
     # TODO only dns / only brute / etc...
-    # TODO argparse help -> must be without "www" (also add "raise exc" if something) you can also wait for input and check it
-
-    # TODO check COLOR:
-    # TODO "Color.clear_entire_line()
-    # TODO        Color.p(status)"

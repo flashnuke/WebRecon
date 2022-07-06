@@ -2,13 +2,14 @@ import threading
 from collections import defaultdict, deque
 from copy import deepcopy
 from typing import Union, Dict, Any
-from .default_values import OutputType, OutputColors, StatusKeyColorMap
+from .default_values import OutputType, OutputColors, StatusKeyColorMap, Banner
 from functools import lru_cache
 import sys
 
 print = lambda *args, **kwargs: None  # to disable prints
 
 # TODO x is lines limit... print x empty ones first to avoid deleting old user output
+
 
 class OutputManager(object):
     # TODO suppress all other output from other libraries to avoid messing up
@@ -109,6 +110,11 @@ class OutputManager(object):
     @lru_cache(maxsize=50)
     def _construct_output(self, output: Any) -> str:
         return f"{output}\n"
+
+    @staticmethod
+    def print_banner():
+        sys.stdout.write(Banner)
+
 
 # WebRecon
 # Host:

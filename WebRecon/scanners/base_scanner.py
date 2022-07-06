@@ -46,6 +46,7 @@ class ScanManager:
 
     def _output_manager_setup(self):
         self._output_manager = OutputManager()
+        self._output_manager.print_banner()
         self._output_manager.insert_output(self._ERROR_LOG_NAME, OutputType.Lines)
         keys = self._define_status_output()
         if keys:
