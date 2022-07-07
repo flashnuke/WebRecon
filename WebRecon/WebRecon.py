@@ -3,6 +3,7 @@ import argparse
 import threading
 import pprint
 
+from scanners.utils import Banner
 from typing import Tuple, List, Type
 from scanners import *
 from tld import get_tld, get_tld_names
@@ -173,6 +174,10 @@ class WebRecon(ScanManager):
         status[OutputStatusKeys.Left] = OutputValues.EmptyStatusVal
 
         return status
+
+    @lru_cache()
+    def _get_scanner_name(self) -> str:
+        return f"{self.__class__._SCAN_COLOR}{Banner}{OutputColors.White}"
 
 
 if __name__ == "__main__":

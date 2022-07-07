@@ -35,7 +35,6 @@ class OutputManager(object):
         pass
 
     def insert_output(self, source_name: str, output_type: OutputType, status_keys: Union[Dict[str, Any], None] = None):
-        appended_newlines = 0
         with OutputManager._MUTEX:
             if source_name in OutputManager._OUTPUT_CONT[output_type]:
                 return
@@ -43,7 +42,7 @@ class OutputManager(object):
                 OutputManager._OUTPUT_CONT[OutputType.Lines][source_name] = deque(maxlen=OutputManager._DEF_MAXLEN)
                 for _ in range(OutputManager._DEF_MAXLEN):
                     OutputManager._OUTPUT_CONT[OutputType.Lines][source_name].append(OutputManager._LINE_PREF)
-                appended_newlines += OutputManager._DEF_MAXLEN
+                OutputManager._OUTPUT_LEN += OutputManager._DEF_MAXLEN
             elif output_type == OutputType.Status:
                 if not status_keys:
                     raise Exception("missing keys for output dict")  # TODO exceptions
@@ -51,13 +50,10 @@ class OutputManager(object):
                 for okey, oval in status_keys.items():
                     self.update_status(source_name, okey, oval)
                     OutputManager._OUTPUT_CONT[output_type][source_name][okey] = self.construct_status_val(okey, oval)
-                appended_newlines -= len(status_keys)
+                OutputManager._OUTPUT_LEN += len(status_keys)
             else:
                 raise Exception(f"wrong output_type set: {output_type}")  # TODO exceptions
-            appended_newlines += 4  # delimiter + source_name
-            OutputManager._OUTPUT_LEN += appended_newlines
-            for _ in range(appended_newlines + 1):
-                sys.stdout.write(self._construct_output("\t"))
+            OutputManager._OUTPUT_LEN += 4  # delimiter + source_name
 
     def remove_output(self, source_name: str, output_type: OutputType):
         with OutputManager._MUTEX:
@@ -114,11 +110,6 @@ class OutputManager(object):
     @lru_cache(maxsize=50)
     def _construct_output(self, output: Any) -> str:
         return f"{output}\n"
-
-    @staticmethod
-    def print_banner():
-        sys.stdout.write(Banner)
-
 
 # WebRecon
 # Host:
