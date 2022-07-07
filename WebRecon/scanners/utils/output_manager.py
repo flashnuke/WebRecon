@@ -51,12 +51,12 @@ class OutputManager(object):
                 for okey, oval in status_keys.items():
                     self.update_status(source_name, okey, oval)
                     OutputManager._OUTPUT_CONT[output_type][source_name][okey] = self.construct_status_val(okey, oval)
-                appended_newlines += len(status_keys)
+                appended_newlines -= len(status_keys)
             else:
                 raise Exception(f"wrong output_type set: {output_type}")  # TODO exceptions
             appended_newlines += 4  # delimiter + source_name
             OutputManager._OUTPUT_LEN += appended_newlines
-            for _ in range(appended_newlines):
+            for _ in range(appended_newlines + 1):
                 sys.stdout.write(self._construct_output("\t"))
 
     def remove_output(self, source_name: str, output_type: OutputType):
@@ -96,7 +96,6 @@ class OutputManager(object):
             self._flush()
 
     def _flush(self):
-        # self.print_banner()  # TODO dont print every time
         for source, status_dict in OutputManager._OUTPUT_CONT[OutputType.Status].items():  # TODO if initial dont remove
             sys.stdout.write(self._construct_output(self._DELIMITER))
             sys.stdout.write(f"{OutputColors.BOLD}{self._construct_output(source)}{OutputColors.White}\n")  # TODO sys write with construct to another method
