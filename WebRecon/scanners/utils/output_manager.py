@@ -20,7 +20,7 @@ class OutputManager(object):
     _OUTPUT_CONT = dict()  # TODO to params
     _OUTPUT_LEN = 0
     _LINE_WIDTH = 100
-    _DELIMITER = f"{OutputColors.Purple}{_LINE_WIDTH * '='}{OutputColors.White}\n"
+    _DELIMITER = f"{OutputColors.Purple}{_LINE_WIDTH * '='}{OutputColors.White}"
     _LINE_PREF = f"{OutputColors.Gray}>{OutputColors.White}"
     _MUTEX = threading.RLock()
 
@@ -29,31 +29,34 @@ class OutputManager(object):
             cls._INSTANCE = object.__new__(cls)
             for output_type in OutputType:
                 cls._OUTPUT_CONT[output_type.value] = dict()
+            cls.print_banner()
         return cls._INSTANCE
 
     def __init__(self):
         pass
 
     def insert_output(self, source_name: str, output_type: OutputType, status_keys: Union[Dict[str, Any], None] = None):
+        if source_name in OutputManager._OUTPUT_CONT[output_type]:
+            return
         with OutputManager._MUTEX:
-            if source_name in OutputManager._OUTPUT_CONT[output_type]:
-                return
-            elif output_type == OutputType.Lines:
-                OutputManager._OUTPUT_CONT[OutputType.Lines][source_name] = deque(maxlen=OutputManager._DEF_MAXLEN)
-                for _ in range(OutputManager._DEF_MAXLEN):
-                    OutputManager._OUTPUT_CONT[OutputType.Lines][source_name].append(OutputManager._LINE_PREF)
-                OutputManager._OUTPUT_LEN += OutputManager._DEF_MAXLEN
-            elif output_type == OutputType.Status:
+            self._clear()
+            if output_type == OutputType.Status:
                 if not status_keys:
                     raise Exception("missing keys for output dict")  # TODO exceptions
                 OutputManager._OUTPUT_CONT[output_type][source_name] = dict()
                 for okey, oval in status_keys.items():
-                    self.update_status(source_name, okey, oval)
+                    self.update_status(source_name, okey, oval, refresh_output=False)
                     OutputManager._OUTPUT_CONT[output_type][source_name][okey] = self.construct_status_val(okey, oval)
-                OutputManager._OUTPUT_LEN += len(status_keys)
+            elif output_type == OutputType.Lines:
+                OutputManager._OUTPUT_CONT[OutputType.Lines][source_name] = deque(maxlen=OutputManager._DEF_MAXLEN)
+                for _ in range(OutputManager._DEF_MAXLEN):
+                    OutputManager._OUTPUT_CONT[OutputType.Lines][source_name].append(OutputManager._LINE_PREF)
+                # appended_output_lines += OutputManager._DEF_MAXLEN
+                OutputManager._OUTPUT_LEN += OutputManager._DEF_MAXLEN + 1
             else:
                 raise Exception(f"wrong output_type set: {output_type}")  # TODO exceptions
-            OutputManager._OUTPUT_LEN += 4  # delimiter + source_name
+            OutputManager._OUTPUT_LEN += 3 if source_name else 2  # delimiter + source_name (if exists)
+            self._flush()
 
     def remove_output(self, source_name: str, output_type: OutputType):
         with OutputManager._MUTEX:
@@ -75,14 +78,15 @@ class OutputManager(object):
         valstr = f"{status_text}".rjust(OutputManager._LINE_WIDTH - len(output_key), " ")
         return f"{output_key}{status_color}{valstr}{OutputColors.White}"
 
-    def update_status(self, source_name: str, output_key: str, output_val: Any):
+    def update_status(self, source_name: str, output_key: str, output_val: Any, refresh_output=True):
         # TODO add lock here (or to all methods??)
         with OutputManager._MUTEX:
             if output_key not in OutputManager._OUTPUT_CONT[OutputType.Status][source_name]:
                 OutputManager._OUTPUT_LEN += 1
             OutputManager._OUTPUT_CONT[OutputType.Status][source_name][output_key] = self.construct_status_val(output_key, output_val)
-            self._clear()
-            self._flush()
+            if refresh_output:
+                self._clear()
+                self._flush()
 
     def update_lines(self, source_name: str, line: str):
         # TODO add lock here (or to all methods??)
@@ -93,7 +97,8 @@ class OutputManager(object):
 
     def _flush(self):
         for source, status_dict in OutputManager._OUTPUT_CONT[OutputType.Status].items():  # TODO if initial dont remove
-            sys.stdout.write(self._construct_output(self._DELIMITER))
+            if source:
+                sys.stdout.write(self._construct_output(self._DELIMITER))
             sys.stdout.write(f"{OutputColors.BOLD}{self._construct_output(source)}{OutputColors.White}\n")  # TODO sys write with construct to another method
             for skey, sval in status_dict.items():
                 sys.stdout.write(self._construct_output(f"{sval}"))
@@ -105,11 +110,15 @@ class OutputManager(object):
         sys.stdout.flush()
 
     def _clear(self):
-        sys.stdout.write(self._construct_output((OutputManager._OUTPUT_LEN + 1) * OutputManager._LINE_REMOVE))
+        sys.stdout.write(self._construct_output(OutputManager._OUTPUT_LEN * OutputManager._LINE_REMOVE))
 
     @lru_cache(maxsize=50)
     def _construct_output(self, output: Any) -> str:
         return f"{output}\n"
+
+    @staticmethod
+    def print_banner():
+        sys.stdout.write(Banner)
 
 # WebRecon
 # Host:

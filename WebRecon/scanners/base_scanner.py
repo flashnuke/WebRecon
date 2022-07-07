@@ -46,14 +46,14 @@ class ScanManager:
 
     def _output_manager_setup(self):
         self._output_manager = OutputManager()
-        self._output_manager.insert_output(self._ERROR_LOG_NAME, OutputType.Lines)
         keys = self._define_status_output()
         if keys:
             self._output_manager.insert_output(self._get_scanner_name(), OutputType.Status, keys)
+        self._output_manager.insert_output(self._ERROR_LOG_NAME, OutputType.Lines)
 
     @lru_cache()
     def _get_scanner_name(self) -> str:
-        return f"{self.__class__._SCAN_COLOR}{self.__class__.__name__}{OutputColors.White}"
+        return f"{self.__class__._SCAN_COLOR}{self.__class__.__name__}"
 
     def _setup_results_path(self) -> str:
         Path(self._get_results_directory()).mkdir(parents=True, exist_ok=True)  # recursively make directories

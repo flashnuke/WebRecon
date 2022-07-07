@@ -134,6 +134,8 @@ class WebRecon(ScanManager):
             results_str = pprint.pformat(self.recon_results,
                                          compact=PPrintDefaultParams.Compact, width=PPrintDefaultParams.Width)
             self._save_results(results_str)
+            self._log_status(OutputStatusKeys.State, OutputValues.StateComplete)
+
         except Exception as exc:
             self._log_status(OutputStatusKeys.State, OutputValues.StateFail)
             self._log_exception(exc, True)
@@ -177,7 +179,7 @@ class WebRecon(ScanManager):
 
     @lru_cache()
     def _get_scanner_name(self) -> str:
-        return f"{self.__class__._SCAN_COLOR}{Banner}{OutputColors.White}"
+        return str()
 
 
 if __name__ == "__main__":

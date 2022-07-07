@@ -35,7 +35,6 @@ class NmapScanner(Scanner):
             self.ret_results[host] = nm[host]
         results_str = pprint.pformat(self.ret_results,
                                      compact=PPrintDefaultParams.Compact, width=PPrintDefaultParams.Width)
-        # self._log(f"\n{results_str}") TODO
         self._save_results(results_str)
 
         return self.ret_results

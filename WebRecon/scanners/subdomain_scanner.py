@@ -3,6 +3,8 @@ import os
 import threading
 import queue
 import time
+
+from urllib3.exceptions import HTTPError
 from .utils import *
 from .base_scanner import Scanner
 from functools import lru_cache
@@ -51,7 +53,7 @@ class DNSScanner(Scanner):
                     self._save_results(f"{url_path}\n")
                     self.domains_queue.put(url_path)
             except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout,
-                    requests.exceptions.ReadTimeout):
+                    requests.exceptions.ReadTimeout, HTTPError):
                 # other exceptions should not occur
                 continue
             finally:

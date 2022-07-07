@@ -114,11 +114,9 @@ StatusKeyColorMap = {
 
 # TODO move elsewhere?
 
-Banner = """
-                          __        __   _     ____                      
-                          \ \      / /__| |__ |  _ \ ___  ___ ___  _ __                            
-                           \ \ /\ / / _ \ '_ \| |_) / _ \/ __/ _ \| '_ \                           
-                            \ V  V /  __/ |_) |  _ <  __/ (_| (_) | | | |                          
-                             \_/\_/ \___|_.__/|_| \_\___|\___\___/|_| |_|                          
-                                                                                                   
-"""
+Banner = f"""
+                         {OutputColors.Orange}{OutputColors.BOLD} {OutputColors.Orange}__        __{OutputColors.White}   _    {OutputColors.Orange}{OutputColors.BOLD} ____ {OutputColors.White}                     
+                          {OutputColors.Orange}{OutputColors.BOLD}\ \      / /{OutputColors.White}__| |__ {OutputColors.Orange}{OutputColors.BOLD}|  _ \{OutputColors.White} ___  ___ ___  _ __                            
+                           {OutputColors.Orange}{OutputColors.BOLD}\ \ /\ / /{OutputColors.White} _ \\ '_ \{OutputColors.Orange}{OutputColors.BOLD}| |_){OutputColors.White} / _ \/ __/ _ \| '_ \                           
+                            {OutputColors.Orange}{OutputColors.BOLD}\ V  V /{OutputColors.White}  __/ |_) {OutputColors.Orange}{OutputColors.BOLD}|  _ <{OutputColors.White}  __/ (_| (_) | | | |                          
+                             {OutputColors.Orange}{OutputColors.BOLD}\_/\_/{OutputColors.White} \___|_.__/{OutputColors.Orange}{OutputColors.BOLD}|_| \_\{OutputColors.White}___|\___\___/|_| |_|                          """

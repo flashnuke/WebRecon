@@ -2,6 +2,7 @@ import collections
 import urllib.parse
 import threading
 import time
+import requests
 from typing import Any, Dict, List, Union
 
 from urllib3.exceptions import HTTPError
@@ -94,10 +95,12 @@ class ContentScanner(Scanner):
                                                    scheme=self.scheme).start_scanner()
                         for bypass_scode, bypass_url in bypass_results.items():
                             self.ret_results["bypass"][bypass_scode].append(bypass_url)
-                except HTTPError:
-                    pass
+                except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout,
+                        requests.exceptions.ReadTimeout, HTTPError):
+                    continue
                 except Exception as exc:
-                    self._log_exception(f"{exc} - target {url}", False)
+                    self._log_exception(f"target {url}, exception - {exc}", True)
+                    raise exc
                 finally:
                     self._increment_finished_count()
                     attempt_list.clear()
