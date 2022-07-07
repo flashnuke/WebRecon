@@ -109,7 +109,7 @@ class WebRecon(ScanManager):
             domains_count = domains.qsize()
             self._log_status(OutputStatusKeys.State, OutputValues.StateRunning)
 
-            total_count = 0, 0
+            total_count = 0
             self._update_progress_status(total_count, domains_count)
             while not domains.empty():
                 target = domains.get()

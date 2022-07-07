@@ -92,6 +92,7 @@ class OutputManager(object):
             self._flush()
 
     def _flush(self):
+        self.print_banner()  # TODO dont print every time
         for source, status_dict in OutputManager._OUTPUT_CONT[OutputType.Status].items():  # TODO if initial dont remove
             sys.stdout.write(self._construct_output(self._DELIMITER))
             sys.stdout.write(f"{OutputColors.BOLD}{self._construct_output(source)}{OutputColors.White}\n")  # TODO sys write with construct to another method
