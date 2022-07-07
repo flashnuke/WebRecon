@@ -35,6 +35,7 @@ class OutputManager(object):
         pass
 
     def insert_output(self, source_name: str, output_type: OutputType, status_keys: Union[Dict[str, Any], None] = None):
+        appended_newlines = 0
         with OutputManager._MUTEX:
             if source_name in OutputManager._OUTPUT_CONT[output_type]:
                 return
@@ -42,7 +43,7 @@ class OutputManager(object):
                 OutputManager._OUTPUT_CONT[OutputType.Lines][source_name] = deque(maxlen=OutputManager._DEF_MAXLEN)
                 for _ in range(OutputManager._DEF_MAXLEN):
                     OutputManager._OUTPUT_CONT[OutputType.Lines][source_name].append(OutputManager._LINE_PREF)
-                OutputManager._OUTPUT_LEN += OutputManager._DEF_MAXLEN
+                appended_newlines += OutputManager._DEF_MAXLEN
             elif output_type == OutputType.Status:
                 if not status_keys:
                     raise Exception("missing keys for output dict")  # TODO exceptions
@@ -50,10 +51,13 @@ class OutputManager(object):
                 for okey, oval in status_keys.items():
                     self.update_status(source_name, okey, oval)
                     OutputManager._OUTPUT_CONT[output_type][source_name][okey] = self.construct_status_val(okey, oval)
-                OutputManager._OUTPUT_LEN += len(status_keys)
+                appended_newlines += len(status_keys)
             else:
                 raise Exception(f"wrong output_type set: {output_type}")  # TODO exceptions
-            OutputManager._OUTPUT_LEN += 4  # delimiter + source_name
+            appended_newlines += 4  # delimiter + source_name
+            OutputManager._OUTPUT_LEN += appended_newlines
+            for _ in range(appended_newlines):
+                sys.stdout.write(self._construct_output("\t"))
 
     def remove_output(self, source_name: str, output_type: OutputType):
         with OutputManager._MUTEX:
@@ -92,7 +96,7 @@ class OutputManager(object):
             self._flush()
 
     def _flush(self):
-        self.print_banner()  # TODO dont print every time
+        # self.print_banner()  # TODO dont print every time
         for source, status_dict in OutputManager._OUTPUT_CONT[OutputType.Status].items():  # TODO if initial dont remove
             sys.stdout.write(self._construct_output(self._DELIMITER))
             sys.stdout.write(f"{OutputColors.BOLD}{self._construct_output(source)}{OutputColors.White}\n")  # TODO sys write with construct to another method
