@@ -35,30 +35,11 @@ class ContentScanner(Scanner):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        self._finished_counter = int()
-        self._finished_counter_lock = threading.RLock()
-
-        self._success_counter = int()
-        self._success_counter_lock = threading.RLock()
-
-        self._total_wordcount = self.words_queue.qsize()
         self.ret_results: Dict[str, Union[Dict, List]] = collections.defaultdict(list)
 
         self.try_bypass = kwargs.get("try_bypass", False)
         if self.try_bypass:
             self.ret_results['bypass'] = {scode: list() for scode in ScannerDefaultParams.SuccessStatusCodes}
-
-    def _increment_finished_count(self, current):
-        with self._finished_counter_lock:
-            self._finished_counter += 1
-            self._update_progress_status(self._finished_counter, self._total_wordcount, current)
-
-    def _increment_success_count(self):
-        with self._success_counter_lock:
-            self._success_counter += 1
-            self._log_status(OutputStatusKeys.Found, self._success_counter, refresh_output=False)
-            self._save_results()
 
     def _save_results(self, *args, **kwargs):
         results_str = str()
@@ -74,6 +55,8 @@ class ContentScanner(Scanner):
 
         while not self.words_queue.empty():
             attempt = self.words_queue.get()
+            found_any = False
+
             # check if there is a file extension, if not then it's a directory we're bruting
             if "." not in attempt:
                 attempt_list.append(f"/{attempt}/")
@@ -101,10 +84,13 @@ class ContentScanner(Scanner):
                                                    scheme=self.scheme).start_scanner()
                         for bypass_scode, bypass_url in bypass_results.items():
                             self.ret_results["bypass"][bypass_scode].append(bypass_url)
+                            found_any = True
+                            self._save_results()
 
                     if scode in ScannerDefaultParams.SuccessStatusCodes:  # after bypass to make sure we save all results
                         self.ret_results[scode].append(url)
-                        self._increment_success_count()
+                        found_any = True
+                        self._save_results()
 
                 except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout,
                         requests.exceptions.ReadTimeout, HTTPError):
@@ -113,9 +99,9 @@ class ContentScanner(Scanner):
                     self._log_exception(f"target {url}, exception - {exc}", True)
                     raise exc
                 finally:
-                    self._increment_finished_count(attempt)
                     attempt_list.clear()
                     time.sleep(self.request_cooldown)
+            self._update_count(attempt, found_any)
 
     def _start_scanner(self):
         threads = list()
@@ -128,7 +114,6 @@ class ContentScanner(Scanner):
         for t in threads:
             t.join()
 
-        self._update_progress_status(self._finished_counter, self._total_wordcount, OutputValues.EmptyStatusVal)
         self._save_results()
         return self.ret_results
 

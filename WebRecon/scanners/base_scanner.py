@@ -211,6 +211,11 @@ class Scanner(ScanManager):
         if self.wordlist_path:
             self.words_queue: queue.Queue = self.load_words()
 
+        self._total_count = self.words_queue.qsize() if self.wordlist_path else 0
+        self._finished_count = 0
+        self._success_count = 0
+        self._count_mutex = threading.RLock()
+
         self.request_cooldown = kwargs.get("request_cooldown", NetworkDefaultParams.RequestCooldown)
         self.thread_count = kwargs.get("thread_count", ScannerDefaultParams.ThreadCount)
         self.request_timeout = kwargs.get("request_timeout", NetworkDefaultParams.RequestTimeout)
@@ -231,6 +236,14 @@ class Scanner(ScanManager):
                 words.put(word.rstrip("\n"))
         return words
 
+    def _update_count(self, current, success=False):
+        with self._count_mutex:
+            self._finished_count += 1
+            self._update_progress_status(self._finished_count, self._total_count, current)
+            if success:
+                self._success_count += 1
+                self._log_status(OutputStatusKeys.Found, self._success_count)
+
     def start_scanner(self) -> Any:
         try:
             self._log_status(OutputStatusKeys.State, OutputValues.StateSetup)
@@ -238,6 +251,7 @@ class Scanner(ScanManager):
             self._log_status(OutputStatusKeys.State, OutputValues.StateComplete)
             return scan_results
         except Exception as exc:
+            self._log_status(OutputStatusKeys.State, OutputValues.StateFail, refresh_output=False)
             self._log_exception(exc, True)  # TODO try to have our own exceptions
 
     @abstractmethod
