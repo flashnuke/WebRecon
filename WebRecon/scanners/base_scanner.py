@@ -50,7 +50,10 @@ class ScanManager:
         self.results_path = kwargs.get("results_path", f'{self._DEF_OUTPUT_DIRECTORY}')
         self.results_path_full = self._setup_results_path()
 
-        self._cache_dict: dict = self._load_cache_if_exists()
+        self._use_prev_cache = False
+        self._cache_dict: dict = self._load_cache_if_exists()  # TODO if finished - remove cache
+        if not self._use_prev_cache:
+            self._remove_old_results()
 
         self._current_progress_perc = int()
         self._output_manager = None
@@ -69,9 +72,7 @@ class ScanManager:
 
     def _setup_results_path(self) -> str:
         Path(self._get_results_directory()).mkdir(parents=True, exist_ok=True)  # recursively make directories
-        full_path = os.path.join(self._get_results_directory(), self._get_results_filename())
-        if os.path.isfile(full_path):
-            os.remove(full_path)  # remove old files
+        full_path = self._get_results_fullpath()
         return full_path
 
     def _log_line(self, log_name, line: str):
@@ -117,11 +118,16 @@ class ScanManager:
                             if results_filehash == get_filehash(self._get_results_fullpath()) and \
                                     wordlist_filehash == get_filehash(os.path.join(self.wordlist_path)) and \
                                     time.time() - scan_cache.get("timestamp", 0) < 22222:  # todo proper time limit
+                                self._use_prev_cache = True
                                 return scan_cache
                 else:  # create file
                     with open(cache_path, mode='w') as cf:
                         json.dump(self._init_cache_file_dict(self.target_url), cf)
         return self._init_cache_scanner_dict()
+
+    def _remove_old_results(self):
+        if os.path.isfile(self.results_path_full):
+            os.remove(self.results_path_full)
 
     def _supports_cache(self) -> bool:
         return self.__class__._SUPPORTS_CACHE
