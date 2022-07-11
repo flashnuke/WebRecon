@@ -1,14 +1,19 @@
+import copy
+import threading
+
 import requests
 import os
 import queue
 import time
+import json
+import urllib3
 
 from typing import Any, Dict, Union
 from pathlib import Path
 from functools import lru_cache
 from abc import abstractmethod
 from .utils import *
-import urllib3
+from utils.util_methods import *
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -27,15 +32,21 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class ScanManager:
+    _DEF_CACHE_DIRECTORY = ".cache_scan"  # TODO all this to another file
     _DEF_OUTPUT_DIRECTORY = "results"
     _ACCEPTED_SCHEMES = ["http", "https"]
     _ERROR_LOG_NAME = f"{OutputColors.Red}error_log{OutputColors.White}"  # TODO to default values?
     _SCAN_COLOR = OutputColors.White
+    _CACHE_MUTEX = threading.RLock()
 
     def __init__(self, scheme, target_hostname, target_url, *args, **kwargs):
+        self._supports_cache = False  # overwrite for each scanner
+
         self.target_hostname = target_hostname
         self.target_url = target_url
         self.scheme = scheme
+
+        self.wordlist_path = kwargs.get("wordlist_path", getattr(WordlistDefaultPath, self.__class__.__name__, None))  # TODO argparse
 
         self.results_path = kwargs.get("results_path", f'{self._DEF_OUTPUT_DIRECTORY}')
         self.results_path_full = self._setup_results_path()
@@ -63,32 +74,51 @@ class ScanManager:
         return full_path
 
     def _log_line(self, log_name, line: str):
-        # TODO with colors based on type of message
-        # TODO not each line individually
-        # TODO mutex into op manager
         self._output_manager.update_lines(log_name, line)
-                # print(f"[{self.target_hostname}] {( + ' ').ljust(20, '-')}> {line}")
 
     def _log_status(self, lkey: str, lval: Any):
-        # TODO with colors based on type of message
-        # TODO mutex into op manager
         self._output_manager.update_status(self._get_scanner_name(), lkey, lval)
-                # print(f"[{self.target_hostname}] {( + ' ').ljust(20, '-')}> {line}")
 
     def _log_exception(self, exc_text, abort: bool):
         self._log_line(self._ERROR_LOG_NAME, f" {self.__class__.__name__} exception - {exc_text}, aborting - {abort}")
 
-    def _save_results(self, results: str):
-        path = os.path.join(self._get_results_directory(), self._get_results_filename())
-        with open(path, "a") as res_file:
-            res_file.write(f"{results}")
+    def _save_results(self, results: str, mode="a"):
+        with ScanManager._CACHE_MUTEX:
+            path = self._get_results_fullpath()
+            with open(path, mode) as res_file:
+                res_file.write(f"{results}")
+            self._update_cache_results()
 
-    def _get_results_filename(self, *args, **kwargs) -> str:
+    def _update_cache_results(self):
+        with open(self._get_cache_fullpath(), "w") as cf:
+            cache_json = json.load(cf)
+            cache_json["scanners"][self._get_scanner_name()]["status_dict"] = self._get_current_status_dict()
+            cache_json["scanners"][self._get_scanner_name()]["results_filehash"] = get_filehash(self._get_results_fullpath())
+            json.dump(cache_json, cf)  # todo json in req.txt needed?
+
+    def _load_cache_if_exists(self) -> dict:
+        if self._supports_cache:
+            with ScanManager._CACHE_MUTEX:
+                cache_path = Path(self._get_cache_fullpath())
+                if cache_path.exists():
+                    with cache_path.open("r") as cf:
+                        cache_json = json.load(cf)
+                        scan_cache = cache_json["scanners"][self._get_scanner_name()]
+                        results_filehash = scan_cache["results_filehash"]
+                        wordlist_filehash = scan_cache["wordlist_filehash"]
+                        if results_filehash == get_filehash(self._get_results_fullpath()) and \
+                                wordlist_filehash == get_filehash(os.path.join(self.wordlist_path)):
+                            return scan_cache["status_dict"]
+                return dict()
+
+    def _get_current_status_dict(self):
+        return self._output_manager.get_status_dict(self._get_scanner_name(), OutputType.Status)
+
+    def _get_results_filename(self) -> str:
         return f"{self.__class__.__name__}.txt"
 
-    @abstractmethod
-    def _define_status_output(self) -> Dict[str, Any]:
-        ...
+    def _get_cache_filename(self) -> str:
+        return self._get_results_filename()
 
     @lru_cache
     def _get_results_directory(self, *args, **kwargs) -> str:
@@ -98,6 +128,20 @@ class ScanManager:
 
         return path
 
+    @lru_cache
+    def _get_cache_directory(self) -> str:
+        return self._DEF_CACHE_DIRECTORY
+
+    def _get_results_fullpath(self) -> str:
+        return os.path.join(self._get_results_directory(), self._get_results_filename())
+
+    def _get_cache_fullpath(self) -> str:
+        return os.path.join(self._get_cache_directory(), self._get_cache_filename())
+
+    @abstractmethod
+    def _define_status_output(self) -> Dict[str, Any]:
+        ...
+
     @lru_cache(maxsize=5)
     def generate_url_base_path(self, dnsname: str) -> str:
         return f"{self.scheme}://{dnsname}.{self.target_hostname}"
@@ -106,7 +150,7 @@ class ScanManager:
     def _format_name_for_path(self, name: str) -> str:
         return name.replace(f'{self.scheme}://', '').replace('.', '_')
 
-    def _update_progress_status(self, finished_c, total_c):
+    def _update_progress_status(self, finished_c, total_c, results_str=None):
         progress = (100 * finished_c) // total_c
         self._log_status(OutputStatusKeys.Left, f"{total_c - finished_c} out of {total_c}")
 
@@ -123,7 +167,6 @@ class Scanner(ScanManager):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.wordlist_path = kwargs.get("wordlist_path", getattr(WordlistDefaultPath, self.__class__.__name__, None))  # TODO argparse
         if self.wordlist_path:
             self.words_queue: queue.Queue = self.load_words()
 

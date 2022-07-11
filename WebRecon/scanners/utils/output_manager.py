@@ -1,3 +1,4 @@
+import copy
 import threading
 from collections import defaultdict, deque
 from copy import deepcopy
@@ -22,7 +23,7 @@ class OutputManager(object):
     _LINE_WIDTH = 100
     _DELIMITER = f"{OutputColors.Purple}{_LINE_WIDTH * '='}{OutputColors.White}"
     _LINE_PREF = f"{OutputColors.Gray}>{OutputColors.White}"
-    _MUTEX = threading.RLock()
+    _OUTPUT_MUTEX = threading.RLock()
 
     def __new__(cls, *args, **kwargs):  # singleton
         if not isinstance(cls._INSTANCE, cls):
@@ -38,7 +39,7 @@ class OutputManager(object):
     def insert_output(self, source_name: str, output_type: OutputType, status_keys: Union[Dict[str, Any], None] = None):
         if source_name in OutputManager._OUTPUT_CONT[output_type]:
             return
-        with OutputManager._MUTEX:
+        with OutputManager._OUTPUT_MUTEX:
             self._clear()
             if output_type == OutputType.Status:
                 if not status_keys:
@@ -59,7 +60,7 @@ class OutputManager(object):
             self._flush()
 
     def remove_output(self, source_name: str, output_type: OutputType):
-        with OutputManager._MUTEX:
+        with OutputManager._OUTPUT_MUTEX:
             if source_name in OutputManager._OUTPUT_CONT[output_type]:
                 output_len = len(OutputManager._OUTPUT_CONT[output_type][source_name])
                 OutputManager._OUTPUT_CONT[output_type].pop(source_name)
@@ -80,7 +81,7 @@ class OutputManager(object):
 
     def update_status(self, source_name: str, output_key: str, output_val: Any, refresh_output=True):
         # TODO add lock here (or to all methods??)
-        with OutputManager._MUTEX:
+        with OutputManager._OUTPUT_MUTEX:
             if output_key not in OutputManager._OUTPUT_CONT[OutputType.Status][source_name]:
                 OutputManager._OUTPUT_LEN += 1
             OutputManager._OUTPUT_CONT[OutputType.Status][source_name][output_key] = self.construct_status_val(output_key, output_val)
@@ -90,7 +91,7 @@ class OutputManager(object):
 
     def update_lines(self, source_name: str, line: str):
         # TODO add lock here (or to all methods??)
-        with OutputManager._MUTEX:
+        with OutputManager._OUTPUT_MUTEX:
             OutputManager._OUTPUT_CONT[OutputType.Lines][source_name].appendleft(f"{OutputManager._LINE_PREF} {line}")
             self._clear()
             self._flush()
@@ -119,6 +120,17 @@ class OutputManager(object):
     @staticmethod
     def print_banner():
         sys.stdout.write(Banner)
+
+    @staticmethod
+    def get_status_dict(source_name: str, output_type: OutputType):
+        """
+        a getter to be used from OUTSIDE the class ONLY (to avoid deadlocks)
+        """
+        with OutputManager._OUTPUT_MUTEX:
+            return copy.deepcopy(OutputManager._OUTPUT_CONT[output_type][source_name])
+
+# TODO compatible with linux only OR ELSE bail out
+# TODO no exception is ok... unless handled (due to output limitations)
 
 # WebRecon
 # Host:

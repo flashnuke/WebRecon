@@ -10,6 +10,8 @@ from tld import get_tld, get_tld_names
 
 # TODO lru imports maybe once using package?
 # todo continue scan using cache?
+# every scan, when saving results, save cache... iterate over queue and save num of how manny were iterated upon
+# make sure you verify the path of WL and the num of total WL beforehand
 
 #   --------------------------------------------------------------------------------------------------------------------
 #
@@ -130,10 +132,10 @@ class WebRecon(ScanManager):
                 finally:
                     total_count += 1
                     self._update_progress_status(total_count, domains_count)
+                    results_str = pprint.pformat(self.recon_results,
+                                                 compact=PPrintDefaultParams.Compact, width=PPrintDefaultParams.Width)
+                    self._save_results(results_str, mode="w")
 
-            results_str = pprint.pformat(self.recon_results,
-                                         compact=PPrintDefaultParams.Compact, width=PPrintDefaultParams.Width)
-            self._save_results(results_str)
             self._log_status(OutputStatusKeys.State, OutputValues.StateComplete)
 
         except Exception as exc:
