@@ -27,6 +27,11 @@ class NetworkDefaultParams(_ExtendedEnum):
     TooManyReqSleep = 10
 
 
+class CacheDefaultParams(_ExtendedEnum):
+    CacheMaxAge = 30 * 60
+    ClearWhenFinished = True
+
+
 # ========= Default Wordlist Paths
 
 

@@ -134,11 +134,12 @@ class WebRecon(ScanManager):
             self._update_progress_status(total_count, domains_count, OutputValues.EmptyStatusVal)
             self._log_status(OutputStatusKeys.State, OutputValues.StateComplete)
 
+            if CacheDefaultParams.ClearWhenFinished:
+                self._clear_cache_file()
+
         except Exception as exc:
             self._log_status(OutputStatusKeys.State, OutputValues.StateFail)
             self._log_exception(exc, True)
-        finally:
-            self._clear_cache_file()
 
     def _setup_targets(self) -> queue.Queue:
         domains = queue.Queue()

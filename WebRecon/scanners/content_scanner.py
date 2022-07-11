@@ -57,7 +57,7 @@ class ContentScanner(Scanner):
     def _increment_success_count(self):
         with self._success_counter_lock:
             self._success_counter += 1
-            self._log_status(OutputStatusKeys.Found, self._success_counter)
+            self._log_status(OutputStatusKeys.Found, self._success_counter, refresh_output=False)
             self._save_results()
 
     def _save_results(self, *args, **kwargs):
@@ -74,8 +74,6 @@ class ContentScanner(Scanner):
 
         while not self.words_queue.empty():
             attempt = self.words_queue.get()
-            self._log_status(OutputStatusKeys.Current, attempt)
-
             # check if there is a file extension, if not then it's a directory we're bruting
             if "." not in attempt:
                 attempt_list.append(f"/{attempt}/")

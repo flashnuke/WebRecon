@@ -142,7 +142,7 @@ class Bypass403(Scanner):
             if scode in ScannerDefaultParams.SuccessStatusCodes:
                 success_results[scode] = req
                 Bypass403._FOUND += 1
-                self._log_status(OutputStatusKeys.Found, Bypass403._FOUND)
+        self._log_status(OutputStatusKeys.Found, Bypass403._FOUND)
 
         return success_results
 

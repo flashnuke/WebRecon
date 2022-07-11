@@ -53,6 +53,7 @@ class ScanManager:
         if not self._use_prev_cache:
             self._remove_old_results()
 
+        self._current_progress_mutex = threading.RLock()
         self._current_progress_perc = int()
         self._output_manager = None
         self._output_manager_setup()
@@ -76,8 +77,8 @@ class ScanManager:
     def _log_line(self, log_name, line: str):
         self._output_manager.update_lines(log_name, line)
 
-    def _log_status(self, lkey: str, lval: Any):
-        self._output_manager.update_status(self._get_scanner_name(), lkey, lval)
+    def _log_status(self, lkey: str, lval: Any, refresh_output=True):
+        self._output_manager.update_status(self._get_scanner_name(), lkey, lval, refresh_output)
 
     def _log_exception(self, exc_text, abort: bool):
         self._log_line(self._ERROR_LOG_NAME, f" {self.__class__.__name__} exception - {exc_text}, aborting - {abort}")
@@ -113,7 +114,7 @@ class ScanManager:
                                 wordlist_filehash = scan_cache.get("wordlist_filehash", "")
                                 if results_filehash == get_filehash(self._get_results_fullpath()) and \
                                         wordlist_filehash == get_filehash(os.path.join(self.wordlist_path)) and \
-                                        time.time() - scan_cache.get("timestamp", 0) < 22222:  # todo proper time limit
+                                        time.time() - scan_cache.get("timestamp", 0) < CacheDefaultParams.CacheMaxAge:
                                     self._use_prev_cache = True
                                     return scan_cache
                     else:  # create file
@@ -188,20 +189,19 @@ class ScanManager:
         return name.replace(f'{self.scheme}://', '').replace('.', '_')
 
     def _update_progress_status(self, finished_c, total_c, current: str):
-        progress = (100 * finished_c) // total_c
-        with ScanManager._CACHE_MUTEX:
-            self._cache_dict["finished"] = finished_c
-        self._log_status(OutputStatusKeys.Current, current)  # TODO not needed to flush twice?
-        self._log_status(OutputStatusKeys.Left, f"{total_c - finished_c} out of {total_c}")
-        # also todo mutex for this as well otherwise prints are not sorted
-
-        if progress % ScannerDefaultParams.ProgBarIntvl == 0 and progress > self._current_progress_perc:
-            print_prog_mod = 5  # TODO params
-            print_prog_count = progress // print_prog_mod  # TODO params
-            print_prog_max = (100 // print_prog_mod)  # TODO params
-            prog_str = f"[{('#' * print_prog_count).ljust(print_prog_max - print_prog_count, '-')}]"
-            self._log_status(OutputStatusKeys.Progress, prog_str)
-            self._current_progress_perc = progress
+        with self._current_progress_mutex:
+            progress = (100 * finished_c) // total_c
+            with ScanManager._CACHE_MUTEX:
+                self._cache_dict["finished"] = finished_c
+            if progress % ScannerDefaultParams.ProgBarIntvl == 0 and progress > self._current_progress_perc:
+                print_prog_mod = 5  # TODO params
+                print_prog_count = progress // print_prog_mod  # TODO params
+                print_prog_max = (100 // print_prog_mod)  # TODO params
+                prog_str = f"[{('#' * print_prog_count).ljust(print_prog_max - print_prog_count, '-')}]"
+                self._log_status(OutputStatusKeys.Progress, prog_str, refresh_output=False)
+                self._current_progress_perc = progress
+            self._log_status(OutputStatusKeys.Current, current, refresh_output=False)
+            self._log_status(OutputStatusKeys.Left, f"{total_c - finished_c} out of {total_c}")
 
 
 class Scanner(ScanManager):

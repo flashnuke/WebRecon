@@ -59,6 +59,7 @@ class DNSScanner(Scanner):
             finally:
                 finished_count += 1
                 time.sleep(self.request_cooldown)
+            self._update_progress_status(finished_count, total_count, url_path)
 
 # TODO why banner prints twice
     def _start_scanner(self) -> queue.Queue:
