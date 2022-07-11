@@ -1,3 +1,4 @@
+import sys
 import threading
 
 import requests
@@ -29,7 +30,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 #   --------------------------------------------------------------------------------------------------------------------
 
 
-class ScanManager:
+class ScanManager(object):
     _DEF_CACHE_DIRECTORY = os.path.join("scanners/utils/.cache_scan")  # TODO all this to another file
     _DEF_OUTPUT_DIRECTORY = "results"
     _ACCEPTED_SCHEMES = ["http", "https"]
@@ -37,6 +38,12 @@ class ScanManager:
     _SCAN_COLOR = OutputColors.White
     _SUPPORTS_CACHE = False  # overwrite for each scanner
     _CACHE_MUTEX = threading.RLock()
+    _RUN_ID = str()
+
+    def __new__(cls, *args, **kwargs):
+        if not ScanManager._RUN_ID:
+            ScanManager._RUN_ID = generate_runid()
+        return object.__new__(cls)
 
     def __init__(self, scheme, target_hostname, target_url, *args, **kwargs):
         self.target_hostname = target_hostname
@@ -112,10 +119,13 @@ class ScanManager:
                             if scan_cache:
                                 results_filehash = scan_cache.get("results_filehash", "")
                                 wordlist_filehash = scan_cache.get("wordlist_filehash", "")
+                                run_id = scan_cache.get("run_id", "")
                                 if results_filehash == get_filehash(self._get_results_fullpath()) and \
                                         wordlist_filehash == get_filehash(os.path.join(self.wordlist_path)) and \
-                                        time.time() - scan_cache.get("timestamp", 0) < CacheDefaultParams.CacheMaxAge:
+                                        time.time() - scan_cache.get("timestamp", 0) < CacheDefaultParams.CacheMaxAge and \
+                                        run_id != ScanManager._RUN_ID:
                                     self._use_prev_cache = True
+                                    scan_cache["run_id"] = ScanManager._RUN_ID
                                     return scan_cache
                     else:  # create file
                         with open(cache_path, mode='w') as cf:
@@ -149,6 +159,7 @@ class ScanManager:
             "wordlist_filehash": get_filehash(self.wordlist_path),
             "results_filehash": "",
             "finished": 0,
+            "run_id": ScanManager._RUN_ID,
             "timestamp": time.time()
         }
 
@@ -229,10 +240,9 @@ class Scanner(ScanManager):
         self._session_refresh_count = 0
 
     def load_words(self) -> queue.Queue:
-        start_idx = self._cache_dict.get("finished", 0)
         with open(self.wordlist_path, 'r') as wl:
             words = queue.Queue()
-            for word in wl.readlines()[start_idx:]:
+            for word in wl.readlines()[self._cache_dict.get("finished", 0) - 1:]:
                 words.put(word.rstrip("\n"))
         return words
 
