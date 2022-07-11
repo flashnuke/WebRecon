@@ -30,6 +30,10 @@ class DNSScanner(Scanner):
     def __init__(self, domains_queue=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.domains_queue = domains_queue if domains_queue else queue.Queue()
+        self._total_count = self.words_queue.qsize()
+        self._finished_count = 0
+        self._success_count = 0
+        self._count_mutex = threading.RLock()
 
     def load_words(self) -> queue.Queue:
         with open(self.wordlist_path, 'r') as wl:
@@ -39,17 +43,14 @@ class DNSScanner(Scanner):
         return words
 
     def single_bruter(self):
-        success_count, finished_count = int(), int()
-        total_count = self.words_queue.qsize()
 
         while not self.words_queue.empty():
             url_path = self.generate_url_base_path(self.words_queue.get())
-            self._update_progress_status(finished_count, total_count, url_path)
+            found = False
             try:
                 res = self._make_request(method="GET", url=url_path)
-                if res.status_code:
-                    success_count += 1
-                    self._log_status(OutputStatusKeys.Found, success_count)
+                found = res.status_code
+                if found:
                     self._save_results(f"{url_path}\n")
                     self.domains_queue.put(url_path)
             except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout,
@@ -57,11 +58,18 @@ class DNSScanner(Scanner):
                 # other exceptions should not occur
                 continue
             finally:
-                finished_count += 1
+                self._update_count(url_path, found)
                 time.sleep(self.request_cooldown)
-            self._update_progress_status(finished_count, total_count, url_path)
 
-# TODO why banner prints twice
+    def _update_count(self, url_path, success=False):
+        with self._count_mutex:
+            self._finished_count += 1
+            self._update_progress_status(self._finished_count, self._total_count, url_path)
+            if success:
+                self._success_count += 1
+                self._log_status(OutputStatusKeys.Found, self._success_count)
+
+    # TODO why banner prints twice
     def _start_scanner(self) -> queue.Queue:
         threads = list()
         self._log_status(OutputStatusKeys.State, OutputValues.StateRunning)
