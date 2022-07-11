@@ -9,14 +9,10 @@ import sys
 
 print = lambda *args, **kwargs: None  # to disable prints
 
-# TODO x is lines limit... print x empty ones first to avoid deleting old user output
-
 
 class OutputManager(object):
-    # TODO suppress all other output from other libraries to avoid messing up
-    # TODO make singleton
     _INSTANCE = None
-    _DEF_MAXLEN = 5  # TODO make sure to initialize with this size
+    _DEF_MAXLEN = 5
     _LINE_REMOVE = "\x1b[1A\x1b[2K" # TODO rename
     _OUTPUT_CONT = dict()  # TODO to params
     _OUTPUT_LEN = 0
@@ -80,7 +76,6 @@ class OutputManager(object):
         return f"{output_key}{status_color}{valstr}{OutputColors.White}"
 
     def update_status(self, source_name: str, output_key: str, output_val: Any, refresh_output=True):
-        # TODO add lock here (or to all methods??)
         with OutputManager._OUTPUT_MUTEX:
             if output_key not in OutputManager._OUTPUT_CONT[OutputType.Status][source_name]:
                 OutputManager._OUTPUT_LEN += 1
@@ -90,7 +85,6 @@ class OutputManager(object):
                 self._flush()
 
     def update_lines(self, source_name: str, line: str):
-        # TODO add lock here (or to all methods??)
         with OutputManager._OUTPUT_MUTEX:
             OutputManager._OUTPUT_CONT[OutputType.Lines][source_name].appendleft(f"{OutputManager._LINE_PREF} {line}")
             self._clear()
