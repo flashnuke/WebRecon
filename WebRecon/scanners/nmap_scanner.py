@@ -17,6 +17,7 @@ from .base_scanner import Scanner
 
 class NmapScanner(Scanner):
     _SCAN_COLOR = OutputColors.Blue
+    _SUPPORTS_CACHE = False
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

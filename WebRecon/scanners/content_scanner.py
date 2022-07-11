@@ -30,6 +30,7 @@ from .bypass_403 import Bypass403
 
 class ContentScanner(Scanner):
     _SCAN_COLOR = OutputColors.Blue
+    _SUPPORTS_CACHE = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -56,6 +57,16 @@ class ContentScanner(Scanner):
         with self._success_counter_lock:
             self._success_counter += 1
             self._log_status(OutputStatusKeys.Found, self._success_counter)
+            self._save_results()
+
+    def _save_results(self, *args, **kwargs):
+        results_str = str()
+        for code, urls in self.ret_results.items():
+            results_str += f"{code} status code\n\n"
+            for url in urls:
+                results_str += f"{url}\n"
+            results_str += "\n\n================================\n\n"
+        super().__init__(results_str, mode="w")
 
     def single_bruter(self):
         attempt_list = list()
@@ -84,9 +95,6 @@ class ContentScanner(Scanner):
                 try:
                     response = self._make_request(method="GET", url=url)
                     scode = response.status_code
-                    if scode in ScannerDefaultParams.SuccessStatusCodes:
-                        self.ret_results[scode].append(url)
-                        self._increment_success_count()
 
                     if scode == 403 and self.try_bypass:  # TODO param 403
                         bypass_results = Bypass403(target_url=self.target_url,
@@ -95,6 +103,11 @@ class ContentScanner(Scanner):
                                                    scheme=self.scheme).start_scanner()
                         for bypass_scode, bypass_url in bypass_results.items():
                             self.ret_results["bypass"][bypass_scode].append(bypass_url)
+
+                    if scode in ScannerDefaultParams.SuccessStatusCodes:  # after bypass to make sure we save all results
+                        self.ret_results[scode].append(url)
+                        self._increment_success_count()
+
                 except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout,
                         requests.exceptions.ReadTimeout, HTTPError):
                     continue
@@ -116,14 +129,6 @@ class ContentScanner(Scanner):
             threads.append(t)
         for t in threads:
             t.join()
-
-        results_str = str()
-        for code, urls in self.ret_results.items():
-            results_str += f"{code} status code\n\n"
-            for url in urls:
-                results_str += f"{url}\n"
-            results_str += "\n\n================================\n\n"
-        self._save_results(results_str)
 
         return self.ret_results
 

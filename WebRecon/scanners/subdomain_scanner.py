@@ -25,6 +25,7 @@ from typing import Dict, Any
 
 class DNSScanner(Scanner):
     _SCAN_COLOR = OutputColors.Blue
+    _SUPPORTS_CACHE = True
 
     def __init__(self, domains_queue=None, *args, **kwargs):
         super().__init__(*args, **kwargs)

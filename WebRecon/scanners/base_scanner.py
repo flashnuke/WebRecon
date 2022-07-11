@@ -13,7 +13,6 @@ from pathlib import Path
 from functools import lru_cache
 from abc import abstractmethod
 from .utils import *
-from utils.util_methods import *
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -32,16 +31,15 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class ScanManager:
-    _DEF_CACHE_DIRECTORY = ".cache_scan"  # TODO all this to another file
+    _DEF_CACHE_DIRECTORY = os.path.join("scanners/utils/.cache_scan")  # TODO all this to another file
     _DEF_OUTPUT_DIRECTORY = "results"
     _ACCEPTED_SCHEMES = ["http", "https"]
     _ERROR_LOG_NAME = f"{OutputColors.Red}error_log{OutputColors.White}"  # TODO to default values?
     _SCAN_COLOR = OutputColors.White
+    _SUPPORTS_CACHE = False  # overwrite for each scanner
     _CACHE_MUTEX = threading.RLock()
 
     def __init__(self, scheme, target_hostname, target_url, *args, **kwargs):
-        self._supports_cache = False  # overwrite for each scanner
-
         self.target_hostname = target_hostname
         self.target_url = target_url
         self.scheme = scheme
@@ -51,13 +49,15 @@ class ScanManager:
         self.results_path = kwargs.get("results_path", f'{self._DEF_OUTPUT_DIRECTORY}')
         self.results_path_full = self._setup_results_path()
 
+        self._cache_dict = self._load_cache_if_exists()
+
         self._current_progress_perc = int()
         self._output_manager = None
         self._output_manager_setup()
 
     def _output_manager_setup(self):
         self._output_manager = OutputManager()
-        keys = self._define_status_output()
+        keys = self._cache_dict.get("status_dict", self._define_status_output())
         if keys:
             self._output_manager.insert_output(self._get_scanner_name(), OutputType.Status, keys)
         self._output_manager.insert_output(self._ERROR_LOG_NAME, OutputType.Lines)
@@ -90,11 +90,10 @@ class ScanManager:
             self._update_cache_results()
 
     def _update_cache_results(self):
+        self._cache_dict["status_dict"] = self._get_current_status_dict()
+        self._cache_dict["results_filehash"] = get_filehash(self._get_results_fullpath())
         with open(self._get_cache_fullpath(), "w") as cf:
-            cache_json = json.load(cf)
-            cache_json["scanners"][self._get_scanner_name()]["status_dict"] = self._get_current_status_dict()
-            cache_json["scanners"][self._get_scanner_name()]["results_filehash"] = get_filehash(self._get_results_fullpath())
-            json.dump(cache_json, cf)  # todo json in req.txt needed?
+            json.dump(self._cache_dict, cf)  # todo json in req.txt needed?
 
     def _load_cache_if_exists(self) -> dict:
         if self._supports_cache:
@@ -103,13 +102,20 @@ class ScanManager:
                 if cache_path.exists():
                     with cache_path.open("r") as cf:
                         cache_json = json.load(cf)
-                        scan_cache = cache_json["scanners"][self._get_scanner_name()]
-                        results_filehash = scan_cache["results_filehash"]
-                        wordlist_filehash = scan_cache["wordlist_filehash"]
-                        if results_filehash == get_filehash(self._get_results_fullpath()) and \
-                                wordlist_filehash == get_filehash(os.path.join(self.wordlist_path)):
-                            return scan_cache["status_dict"]
-                return dict()
+                        scan_cache = cache_json["scanners"].get(self._get_scanner_name())
+                        if scan_cache:
+                            results_filehash = scan_cache.get("results_filehash", "null")
+                            wordlist_filehash = scan_cache.get("wordlist_filehash", "null")
+                            if results_filehash == get_filehash(self._get_results_fullpath()) and \
+                                    wordlist_filehash == get_filehash(os.path.join(self.wordlist_path)) and \
+                                    time.time() - scan_cache.get("timestamp", 0) < 22222:  # todo proper time limit
+                                return scan_cache
+                else:  # create file
+                    open(cache_path, mode='a').close()
+        return dict()
+
+    def _supports_cache(self):
+        return self.__class__._SUPPORTS_CACHE
 
     def _get_current_status_dict(self):
         return self._output_manager.get_status_dict(self._get_scanner_name(), OutputType.Status)
@@ -118,7 +124,7 @@ class ScanManager:
         return f"{self.__class__.__name__}.txt"
 
     def _get_cache_filename(self) -> str:
-        return self._get_results_filename()
+        return f"cache_{self._format_name_for_path(self.target_hostname)}.json"
 
     @lru_cache
     def _get_results_directory(self, *args, **kwargs) -> str:
@@ -150,7 +156,7 @@ class ScanManager:
     def _format_name_for_path(self, name: str) -> str:
         return name.replace(f'{self.scheme}://', '').replace('.', '_')
 
-    def _update_progress_status(self, finished_c, total_c, results_str=None):
+    def _update_progress_status(self, finished_c, total_c):
         progress = (100 * finished_c) // total_c
         self._log_status(OutputStatusKeys.Left, f"{total_c - finished_c} out of {total_c}")
 
@@ -161,6 +167,8 @@ class ScanManager:
             prog_str = f"[{('#' * print_prog_count).ljust(print_prog_max - print_prog_count, '-')}]"
             self._log_status(OutputStatusKeys.Progress, prog_str)
             self._current_progress_perc = progress
+            with ScanManager._CACHE_MUTEX:
+                self._cache_dict["finished"] = finished_c
 
 
 class Scanner(ScanManager):
@@ -183,9 +191,10 @@ class Scanner(ScanManager):
         self._session_refresh_count = 0
 
     def load_words(self) -> queue.Queue:
+        start_idx = self._cache_dict.get("finished", 0)
         with open(self.wordlist_path, "r") as wl:
             words = queue.Queue()
-            for word in wl.readlines():
+            for word in wl.readlines()[start_idx:]:
                 words.put(word.rstrip("\n"))
         return words
 
