@@ -44,8 +44,7 @@ class DNSScanner(Scanner):
 
         while not self.words_queue.empty():
             url_path = self.generate_url_base_path(self.words_queue.get())
-            self._log_status(OutputStatusKeys.Current, url_path)
-
+            self._update_progress_status(finished_count, total_count, url_path)
             try:
                 res = self._make_request(method="GET", url=url_path)
                 if res.status_code:
@@ -59,8 +58,8 @@ class DNSScanner(Scanner):
                 continue
             finally:
                 finished_count += 1
-                self._update_progress_status(finished_count, total_count)
                 time.sleep(self.request_cooldown)
+
 # TODO why banner prints twice
     def _start_scanner(self) -> queue.Queue:
         threads = list()
@@ -85,6 +84,7 @@ class DNSScanner(Scanner):
     def _define_status_output(self) -> Dict[str, Any]:
         status = dict()
         status[OutputStatusKeys.State] = OutputValues.StateSetup
+        status[OutputStatusKeys.UsingCached] = OutputValues.BoolTrue if self._use_prev_cache else OutputValues.BoolFalse  # TODO method for general bool
         status[OutputStatusKeys.Current] = OutputValues.EmptyStatusVal
         status[OutputStatusKeys.Progress] = OutputValues.EmptyStatusVal
         status[OutputStatusKeys.ResultsPath] = self.results_path_full

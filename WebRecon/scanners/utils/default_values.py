@@ -94,6 +94,7 @@ class OutputStatusKeys(_ExtendedEnum):
     ResultsPath = "ResultsPath"
     Found = "Found"  # TODO rename
     Left = "Left"
+    UsingCached = "UsingCached"
 
 
 class OutputValues(_ExtendedEnum):
@@ -101,6 +102,9 @@ class OutputValues(_ExtendedEnum):
     StateRunning = ("running", OutputColors.Green)
     StateComplete = ("finished", OutputColors.Green)
     StateFail = ("failed", OutputColors.Red)  # TODO reason?
+
+    BoolTrue = ("true", OutputColors.YELLOW)
+    BoolFalse = "false"
 
     EmptyStatusVal = "---"
     ZeroStatusVal = "0"

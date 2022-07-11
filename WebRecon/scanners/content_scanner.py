@@ -49,10 +49,10 @@ class ContentScanner(Scanner):
         if self.try_bypass:
             self.ret_results['bypass'] = {scode: list() for scode in ScannerDefaultParams.SuccessStatusCodes}
 
-    def _increment_finished_count(self):
+    def _increment_finished_count(self, current):
         with self._finished_counter_lock:
             self._finished_counter += 1
-            self._update_progress_status(self._finished_counter, self._total_wordcount)
+            self._update_progress_status(self._finished_counter, self._total_wordcount, current)
 
     def _increment_success_count(self):
         with self._success_counter_lock:
@@ -67,12 +67,11 @@ class ContentScanner(Scanner):
             for url in urls:
                 results_str += f"{url}\n"
             results_str += "\n\n================================\n\n"
-        super().__init__(results_str, mode='w')
+        super()._save_results(results_str, mode='w')
 
     def single_bruter(self):
         attempt_list = list()
 
-        self._log_status(OutputStatusKeys.Left, self._total_wordcount - self._finished_counter)
         while not self.words_queue.empty():
             attempt = self.words_queue.get()
             self._log_status(OutputStatusKeys.Current, attempt)
@@ -116,7 +115,7 @@ class ContentScanner(Scanner):
                     self._log_exception(f"target {url}, exception - {exc}", True)
                     raise exc
                 finally:
-                    self._increment_finished_count()
+                    self._increment_finished_count(attempt)
                     attempt_list.clear()
                     time.sleep(self.request_cooldown)
 
@@ -131,11 +130,14 @@ class ContentScanner(Scanner):
         for t in threads:
             t.join()
 
+        self._update_progress_status(self._finished_counter, self._total_wordcount, OutputValues.EmptyStatusVal)
+        self._save_results()
         return self.ret_results
 
     def _define_status_output(self) -> Dict[str, Any]:
         status = dict()
         status[OutputStatusKeys.State] = OutputValues.StateSetup
+        status[OutputStatusKeys.UsingCached] = OutputValues.BoolTrue if self._use_prev_cache else OutputValues.BoolFalse  # TODO method for general bool
         status[OutputStatusKeys.Current] = OutputValues.EmptyStatusVal
         status[OutputStatusKeys.Progress] = OutputValues.EmptyStatusVal
         status[OutputStatusKeys.ResultsPath] = self.results_path_full

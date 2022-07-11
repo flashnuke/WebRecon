@@ -1,5 +1,3 @@
-import copy
-import sys
 import threading
 
 import requests
@@ -99,30 +97,30 @@ class ScanManager:
                     cache_json = json.load(cf)
                 cache_json["scanners"][self._get_scanner_name(include_ansi=False)] = self._cache_dict
                 with open(self._get_cache_fullpath(), "w") as cf:
-                    json.dump(cache_json, cf)  # todo json in req.txt needed?
-
-
-                    # TODO if bad cache then ignore cache
+                    json.dump(cache_json, cf)
 
     def _load_cache_if_exists(self) -> dict:
-        if self._supports_cache:
-            with ScanManager._CACHE_MUTEX:
-                cache_path = Path(self._get_cache_fullpath())
-                if cache_path.exists():
-                    with cache_path.open('r') as cf:
-                        cache_json = json.load(cf)
-                        scan_cache = cache_json["scanners"].get(self._get_scanner_name(include_ansi=False))
-                        if scan_cache:
-                            results_filehash = scan_cache.get("results_filehash", "")
-                            wordlist_filehash = scan_cache.get("wordlist_filehash", "")
-                            if results_filehash == get_filehash(self._get_results_fullpath()) and \
-                                    wordlist_filehash == get_filehash(os.path.join(self.wordlist_path)) and \
-                                    time.time() - scan_cache.get("timestamp", 0) < 22222:  # todo proper time limit
-                                self._use_prev_cache = True
-                                return scan_cache
-                else:  # create file
-                    with open(cache_path, mode='w') as cf:
-                        json.dump(self._init_cache_file_dict(self.target_url), cf)
+        try:
+            if self._supports_cache:
+                with ScanManager._CACHE_MUTEX:
+                    cache_path = Path(self._get_cache_fullpath())
+                    if cache_path.exists():
+                        with cache_path.open('r') as cf:
+                            cache_json = json.load(cf)
+                            scan_cache = cache_json["scanners"].get(self._get_scanner_name(include_ansi=False))
+                            if scan_cache:
+                                results_filehash = scan_cache.get("results_filehash", "")
+                                wordlist_filehash = scan_cache.get("wordlist_filehash", "")
+                                if results_filehash == get_filehash(self._get_results_fullpath()) and \
+                                        wordlist_filehash == get_filehash(os.path.join(self.wordlist_path)) and \
+                                        time.time() - scan_cache.get("timestamp", 0) < 22222:  # todo proper time limit
+                                    self._use_prev_cache = True
+                                    return scan_cache
+                    else:  # create file
+                        with open(cache_path, mode='w') as cf:
+                            json.dump(self._init_cache_file_dict(self.target_url), cf)
+        except Exception as exc:
+            pass  # failed to load cache
         return self._init_cache_scanner_dict()
 
     def _remove_old_results(self):
@@ -171,6 +169,12 @@ class ScanManager:
     def _get_cache_fullpath(self) -> str:
         return os.path.join(self._get_cache_directory(), self._get_cache_filename())
 
+    def _clear_cache_file(self):
+        with ScanManager._CACHE_MUTEX:
+            cache_path = self._get_cache_fullpath()
+            if os.path.exists(cache_path):
+                os.remove(cache_path)
+
     @abstractmethod
     def _define_status_output(self) -> Dict[str, Any]:
         ...
@@ -183,9 +187,13 @@ class ScanManager:
     def _format_name_for_path(self, name: str) -> str:
         return name.replace(f'{self.scheme}://', '').replace('.', '_')
 
-    def _update_progress_status(self, finished_c, total_c):
+    def _update_progress_status(self, finished_c, total_c, current: str):
         progress = (100 * finished_c) // total_c
+        with ScanManager._CACHE_MUTEX:
+            self._cache_dict["finished"] = finished_c
+        self._log_status(OutputStatusKeys.Current, current)  # TODO not needed to flush twice?
         self._log_status(OutputStatusKeys.Left, f"{total_c - finished_c} out of {total_c}")
+        # also todo mutex for this as well otherwise prints are not sorted
 
         if progress % ScannerDefaultParams.ProgBarIntvl == 0 and progress > self._current_progress_perc:
             print_prog_mod = 5  # TODO params
@@ -194,8 +202,6 @@ class ScanManager:
             prog_str = f"[{('#' * print_prog_count).ljust(print_prog_max - print_prog_count, '-')}]"
             self._log_status(OutputStatusKeys.Progress, prog_str)
             self._current_progress_perc = progress
-            with ScanManager._CACHE_MUTEX:
-                self._cache_dict["finished"] = finished_c
 
 
 class Scanner(ScanManager):

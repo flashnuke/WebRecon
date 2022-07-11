@@ -113,34 +113,32 @@ class WebRecon(ScanManager):
             self._log_status(OutputStatusKeys.State, OutputValues.StateRunning)
 
             total_count = 0
-            self._update_progress_status(total_count, domains_count)
             while not domains.empty():
                 target = domains.get()
                 if total_count and target == self.target_url:
                     continue
-                self._log_status(OutputStatusKeys.Current, target)
-                # self._log(f"setting up for target {target}")
-
+                self._update_progress_status(total_count, domains_count, target)
                 self.recon_results[target] = dict()
                 try:
                     scanner_threads = self._start_scans_for_target(target)
                     for t in scanner_threads:
                         t.join()
-                    # self._log(f"finished, saving results... target {target}")
                 except Exception as exc:
                     self._log_exception(f"target {target} exception {exc}", False)
                 finally:
                     total_count += 1
-                    self._update_progress_status(total_count, domains_count)
                     results_str = pprint.pformat(self.recon_results,
                                                  compact=PPrintDefaultParams.Compact, width=PPrintDefaultParams.Width)
                     self._save_results(results_str, mode='w')
 
+            self._update_progress_status(total_count, domains_count, OutputValues.EmptyStatusVal)
             self._log_status(OutputStatusKeys.State, OutputValues.StateComplete)
 
         except Exception as exc:
             self._log_status(OutputStatusKeys.State, OutputValues.StateFail)
             self._log_exception(exc, True)
+        finally:
+            self._clear_cache_file()
 
     def _setup_targets(self) -> queue.Queue:
         domains = queue.Queue()
