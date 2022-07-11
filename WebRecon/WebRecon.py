@@ -134,7 +134,7 @@ class WebRecon(ScanManager):
                     self._update_progress_status(total_count, domains_count)
                     results_str = pprint.pformat(self.recon_results,
                                                  compact=PPrintDefaultParams.Compact, width=PPrintDefaultParams.Width)
-                    self._save_results(results_str, mode="w")
+                    self._save_results(results_str, mode='w')
 
             self._log_status(OutputStatusKeys.State, OutputValues.StateComplete)
 
@@ -154,9 +154,10 @@ class WebRecon(ScanManager):
         self.recon_results[target][scanner_name] = dict()
         scanner = scanner_cls(target_url=target, **self._default_scanner_args)
         results = scanner.start_scanner()
-        self.recon_results[target][scanner_name].update(results)
+        if results:
+            self.recon_results[target][scanner_name].update(results)
 
-    def _get_results_filename(self, *args, **kwargs) -> str:
+    def _get_results_filename(self, *args, **kwargs) -> str:  # TODO for cache - if cant load results...
         return "results_summary.txt"
 
     @lru_cache
@@ -180,7 +181,7 @@ class WebRecon(ScanManager):
         return status
 
     @lru_cache()
-    def _get_scanner_name(self) -> str:
+    def _get_scanner_name(self, *args, **kwargs) -> str:
         return str()
 
 

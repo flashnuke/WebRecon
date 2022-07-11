@@ -32,7 +32,7 @@ class DNSScanner(Scanner):
         self.domains_queue = domains_queue if domains_queue else queue.Queue()
 
     def load_words(self) -> queue.Queue:
-        with open(self.wordlist_path, "r") as wl:
+        with open(self.wordlist_path, 'r') as wl:
             words = queue.Queue()
             for word in wl.readlines():
                 words.put(word.rstrip("\n"))
@@ -61,7 +61,7 @@ class DNSScanner(Scanner):
                 finished_count += 1
                 self._update_progress_status(finished_count, total_count)
                 time.sleep(self.request_cooldown)
-
+# TODO why banner prints twice
     def _start_scanner(self) -> queue.Queue:
         threads = list()
         self._log_status(OutputStatusKeys.State, OutputValues.StateRunning)

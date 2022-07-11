@@ -1,4 +1,5 @@
 import collections
+import traceback
 import urllib.parse
 import threading
 import time
@@ -66,7 +67,7 @@ class ContentScanner(Scanner):
             for url in urls:
                 results_str += f"{url}\n"
             results_str += "\n\n================================\n\n"
-        super().__init__(results_str, mode="w")
+        super().__init__(results_str, mode='w')
 
     def single_bruter(self):
         attempt_list = list()

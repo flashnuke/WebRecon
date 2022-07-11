@@ -1,4 +1,5 @@
 import copy
+import sys
 import threading
 
 import requests
@@ -49,7 +50,7 @@ class ScanManager:
         self.results_path = kwargs.get("results_path", f'{self._DEF_OUTPUT_DIRECTORY}')
         self.results_path_full = self._setup_results_path()
 
-        self._cache_dict = self._load_cache_if_exists()
+        self._cache_dict: dict = self._load_cache_if_exists()
 
         self._current_progress_perc = int()
         self._output_manager = None
@@ -57,14 +58,14 @@ class ScanManager:
 
     def _output_manager_setup(self):
         self._output_manager = OutputManager()
-        keys = self._cache_dict.get("status_dict", self._define_status_output())
+        keys = self._define_status_output()
         if keys:
             self._output_manager.insert_output(self._get_scanner_name(), OutputType.Status, keys)
         self._output_manager.insert_output(self._ERROR_LOG_NAME, OutputType.Lines)
 
     @lru_cache()
-    def _get_scanner_name(self) -> str:
-        return f"{self.__class__._SCAN_COLOR}{self.__class__.__name__}"
+    def _get_scanner_name(self, include_ansi=True) -> str:
+        return f"{self.__class__._SCAN_COLOR if include_ansi else ''}{self.__class__.__name__}"
 
     def _setup_results_path(self) -> str:
         Path(self._get_results_directory()).mkdir(parents=True, exist_ok=True)  # recursively make directories
@@ -90,41 +91,61 @@ class ScanManager:
             self._update_cache_results()
 
     def _update_cache_results(self):
-        self._cache_dict["status_dict"] = self._get_current_status_dict()
-        self._cache_dict["results_filehash"] = get_filehash(self._get_results_fullpath())
-        with open(self._get_cache_fullpath(), "w") as cf:
-            json.dump(self._cache_dict, cf)  # todo json in req.txt needed?
+        if self._supports_cache:
+            with ScanManager._CACHE_MUTEX:
+                self._cache_dict["results_filehash"] = get_filehash(self._get_results_fullpath())
+                with open(self._get_cache_fullpath(), "r") as cf:
+                    cache_json = json.load(cf)
+                cache_json["scanners"][self._get_scanner_name(include_ansi=False)] = self._cache_dict
+                with open(self._get_cache_fullpath(), "w") as cf:
+                    json.dump(cache_json, cf)  # todo json in req.txt needed?
+
+
+                    # TODO if bad cache then ignore cache
 
     def _load_cache_if_exists(self) -> dict:
         if self._supports_cache:
             with ScanManager._CACHE_MUTEX:
                 cache_path = Path(self._get_cache_fullpath())
                 if cache_path.exists():
-                    with cache_path.open("r") as cf:
+                    with cache_path.open('r') as cf:
                         cache_json = json.load(cf)
-                        scan_cache = cache_json["scanners"].get(self._get_scanner_name())
+                        scan_cache = cache_json["scanners"].get(self._get_scanner_name(include_ansi=False))
                         if scan_cache:
-                            results_filehash = scan_cache.get("results_filehash", "null")
-                            wordlist_filehash = scan_cache.get("wordlist_filehash", "null")
+                            results_filehash = scan_cache.get("results_filehash", "")
+                            wordlist_filehash = scan_cache.get("wordlist_filehash", "")
                             if results_filehash == get_filehash(self._get_results_fullpath()) and \
                                     wordlist_filehash == get_filehash(os.path.join(self.wordlist_path)) and \
                                     time.time() - scan_cache.get("timestamp", 0) < 22222:  # todo proper time limit
                                 return scan_cache
                 else:  # create file
-                    open(cache_path, mode='a').close()
-        return dict()
+                    with open(cache_path, mode='w') as cf:
+                        json.dump(self._init_cache_file_dict(self.target_url), cf)
+        return self._init_cache_scanner_dict()
 
-    def _supports_cache(self):
+    def _supports_cache(self) -> bool:
         return self.__class__._SUPPORTS_CACHE
-
-    def _get_current_status_dict(self):
-        return self._output_manager.get_status_dict(self._get_scanner_name(), OutputType.Status)
 
     def _get_results_filename(self) -> str:
         return f"{self.__class__.__name__}.txt"
 
     def _get_cache_filename(self) -> str:
         return f"cache_{self._format_name_for_path(self.target_hostname)}.json"
+
+    @staticmethod
+    def _init_cache_file_dict(target_url: str) -> dict:
+        return {
+            "target_url": target_url,
+            "scanners": dict()
+        }
+
+    def _init_cache_scanner_dict(self) -> dict:
+        return {
+            "wordlist_filehash": get_filehash(self.wordlist_path),
+            "results_filehash": "",
+            "finished": 0,
+            "timestamp": time.time()
+        }
 
     @lru_cache
     def _get_results_directory(self, *args, **kwargs) -> str:
@@ -192,7 +213,7 @@ class Scanner(ScanManager):
 
     def load_words(self) -> queue.Queue:
         start_idx = self._cache_dict.get("finished", 0)
-        with open(self.wordlist_path, "r") as wl:
+        with open(self.wordlist_path, 'r') as wl:
             words = queue.Queue()
             for word in wl.readlines()[start_idx:]:
                 words.put(word.rstrip("\n"))
