@@ -31,7 +31,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class ScanManager(object):
-    _DEF_CACHE_DIRECTORY = os.path.join("scanners/utils/.cache_scan")  # TODO all this to another file
+    _DEF_CACHE_DIRECTORY = os.path.join("scanners/.cache_scan")  # TODO all this to another file
     _DEF_OUTPUT_DIRECTORY = "results"
     _ACCEPTED_SCHEMES = ["http", "https"]
     _ERROR_LOG_NAME = f"{OutputColors.Red}error_log{OutputColors.White}"  # TODO to default values?

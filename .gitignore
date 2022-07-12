@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Lib related
+
+/scanners/.cache_scan/*
