@@ -251,7 +251,7 @@ class Scanner(ScanManager):
             return words
         except Exception as exc:
             self._log_exception(exc, True)
-            raise Exception("Failed to load cache")
+            raise Exception("Failed to load wordlist")  # TODO exceptions
 
     def _update_count(self, current, success=False):
         with self._count_mutex:

@@ -14,6 +14,8 @@ class _ExtendedEnum(Enum):
 # ========= OutputManager Settings
 
 
+
+
 class OutputType(_ExtendedEnum):
     Lines = "lines"
     Status = "status"
@@ -35,6 +37,14 @@ class OutputColors(_ExtendedEnum):
     BLUE = "\033[0;34m"
     FAINT = "\033[2m"
     BLINK = "\033[5m"
+
+
+class OutputDefaultParams(_ExtendedEnum):
+    LineRemove = "\x1b[1A\x1b[2K"
+    LineWidth = 100
+    MaxLen = 5
+    Delimiter = f"{OutputColors.Purple}{LineWidth.value * '='}{OutputColors.White}"
+    LinePrefix = f"{OutputColors.Gray}>{OutputColors.White}"
 
 
 class OutputStatusKeys(_ExtendedEnum):
@@ -61,10 +71,9 @@ class OutputValues(_ExtendedEnum):
     EmptyLine = ""
 
 
-StatusKeyColorMap = {
-    "Progress": OutputColors.Cyan,
-    "Found": OutputColors.Blue
-}
+class OutputStatuskeyColor(_ExtendedEnum):
+    Progress = OutputColors.Cyan
+    Found = OutputColors.Blue
 
 
 # ========= Default Scanner Params
