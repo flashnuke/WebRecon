@@ -1,11 +1,13 @@
+import sys
 import copy
 import threading
+
+from functools import lru_cache
 from collections import deque
 from typing import Union, Dict, Any
 from .default_values import *
 from .repo_banner import get_banner
-from functools import lru_cache
-import sys
+from .exceptions.scanner_exceptions import MissingOutputDictKeys, InvalidOutputType
 
 print = lambda *args, **kwargs: None  # to disable prints
 
@@ -34,7 +36,7 @@ class OutputManager(object):
             self._clear()
             if output_type == OutputType.Status:
                 if not status_keys:
-                    raise Exception("missing keys for output dict")  # TODO exceptions
+                    raise MissingOutputDictKeys
                 OutputManager._OUTPUT_CONT[output_type][source_name] = dict()
                 for okey, oval in status_keys.items():
                     self.update_status(source_name, okey, oval, refresh_output=False)
@@ -46,7 +48,7 @@ class OutputManager(object):
                 # appended_output_lines += OutputManager.OutputDefaultParams.MaxLen
                 OutputManager._OUTPUT_LEN += OutputDefaultParams.MaxLen + 1
             else:
-                raise Exception(f"wrong output_type set: {output_type}")  # TODO exceptions
+                raise InvalidOutputType(output_type)
             OutputManager._OUTPUT_LEN += 3 if source_name else 2  # delimiter + source_name (if exists)
             self._flush()
 

@@ -251,7 +251,7 @@ class Scanner(ScanManager):
             return words
         except Exception as exc:
             self._log_exception(exc, True)
-            raise Exception("Failed to load wordlist")  # TODO exceptions
+            raise InvalidPathLoad("wordlist", self.wordlist_path)
 
     def _update_count(self, current, success=False):
         with self._count_mutex:
@@ -281,11 +281,10 @@ class Scanner(ScanManager):
 
     def _setup_session(self):
         if self.scheme not in ScannerDefaultParams.AcceptedSchemes:
-            raise Exception(f"Missing / unsupported url scheme, should be one of: {', '.join(ScannerDefaultParams.AcceptedSchemes)}")
-            # TODO exceptions class?
+            raise UnsupportedScheme(self.scheme)
 
         if not self.target_url:
-            raise Exception("Missing target url")  # TODO exceptions class?
+            raise MissingTargetURL
 
         self._default_headers.clear()
         self._default_headers['User-Agent'] = get_random_useragent()

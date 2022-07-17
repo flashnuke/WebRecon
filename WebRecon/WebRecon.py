@@ -2,10 +2,10 @@ import copy
 import urllib.parse
 import pprint
 
-from scanners.utils import arg_parser
 from typing import Tuple, List, Type
 from scanners import *
 from tld import get_tld, get_tld_names
+
 
 #   --------------------------------------------------------------------------------------------------------------------
 #
@@ -102,7 +102,7 @@ class WebRecon(ScanManager):
         scans = list()
         for scan_name in scan_list:
             if scan_name not in self._SCANNAME_TO_METHOD_MAP:
-                raise Exception("Bad scanner name")  # TODO exceptions
+                raise InvalidScannerName(scan_name)
             scanner = self._SCANNAME_TO_METHOD_MAP.get(scan_name)
             if scanner:
                 scans.append(scanner)

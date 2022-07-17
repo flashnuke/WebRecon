@@ -1,7 +1,7 @@
-import os
 import argparse
 
 from .default_values import *
+from .exceptions.scanner_exceptions import ContradictingArguments, MissingArguments
 
 
 def get_argument_parser() -> argparse.ArgumentParser:
@@ -68,11 +68,11 @@ def get_argument_parser() -> argparse.ArgumentParser:
 def parse_scan_list(arguments: argparse.Namespace):
     if arguments.scan_all:
         if arguments.scan_custom:
-            raise Exception("Custom scan list cannot be set with -sA")
+            raise ContradictingArguments(["-sA", "-sC"])
         return [s_name.value for s_name in ScannerNames]
     elif arguments.scan_custom:
         return arguments.scan_custom
-    raise Exception("Please choose scans to run (-sA to perform all scans)")
+    raise MissingArguments(["-sA", "-sC"])
 
 
 def parse_wordlist_list(arguments: argparse.Namespace):
