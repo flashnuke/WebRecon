@@ -1,16 +1,11 @@
+import copy
 import urllib.parse
-import argparse
 import pprint
 
 from scanners.utils import arg_parser
 from typing import Tuple, List, Type
 from scanners import *
 from tld import get_tld, get_tld_names
-
-# TODO lru imports maybe once using package?
-# todo continue scan using cache?
-# every scan, when saving results, save cache... iterate over queue and save num of how manny were iterated upon
-# make sure you verify the path of WL and the num of total WL beforehand
 
 #   --------------------------------------------------------------------------------------------------------------------
 #
@@ -59,7 +54,6 @@ class WebRecon(ScanManager):
     def __init__(self,
                  target_url: str,
                  scans: List[str],
-                 wordlist_paths: Dict[str, str],
                  results_path: str,
                  *args, **kwargs):
         get_tld_names()
@@ -67,16 +61,15 @@ class WebRecon(ScanManager):
         self._all_scans = scans
         self._scans = self._parse_scan_list(scans)  # only the ones we call using `_do_scan()`
 
-        self._wl_paths = wordlist_paths
 
-        self.do_bypass = ScannerNames.BypassScan in self._all_scans
         self.scheme, self.subdomain, self.target_hostname = self._parse_target_url(target_url)
-        self._default_scanner_args = {
+        self._default_general_scanner_args = {
             "scheme": self.scheme,
             "target_hostname": self.target_hostname,
             "results_path": results_path,
-            "do_bypass": self.do_bypass
         }
+
+        self._default_custom_scanner_args = self._setup_custom_scanner_args(**kwargs)
 
         self.domains = queue.Queue()
         self.dns_recursion = ScannerNames.DnsScan in self._all_scans
@@ -84,7 +77,26 @@ class WebRecon(ScanManager):
         self.recon_results = dict()
 
         super().__init__(target_url=self.generate_url_base_path(self.subdomain),
-                         *args, **kwargs, **self._default_scanner_args)
+                         *args, **kwargs, **self._default_general_scanner_args)
+
+    def _setup_custom_scanner_args(self, **kwargs) -> Dict[str, dict]:
+        default_custom_scanner_args = dict()
+        default_custom_scanner_args = {s_name.value:
+                                           {"wordlist_path": kwargs.get("wordlist_paths", dict()).get(s_name.value, None)}
+                                       for s_name in ScannerNames}
+        print(default_custom_scanner_args)
+
+        default_custom_scanner_args[ScannerNames.ContentScan]["do_bypass"] = ScannerNames.BypassScan in self._all_scans
+
+        default_custom_scanner_args[ScannerNames.NmapScan]["cmdline_args"] = kwargs.get("nmap_cmdline")
+        default_custom_scanner_args[ScannerNames.NmapScan]["ports"] = kwargs.get("nmap_ports")
+
+        return default_custom_scanner_args
+
+    def _generate_scanner_args(self, scan_name: str) -> dict:
+        args = copy.deepcopy(self._default_general_scanner_args)
+        args.update(self._default_custom_scanner_args.get(scan_name, dict()))
+        return args
 
     def _parse_scan_list(self, scan_list: List[str]) -> List[Type[Scanner]]:
         scans = list()
@@ -154,14 +166,13 @@ class WebRecon(ScanManager):
         domains.put(self.target_url)
         if self.dns_recursion:
             subdomain_scanner.DNSScanner(target_url=self.target_hostname, domains_queue=self.domains,
-                                         wordlist_path=self._wl_paths.get(DNSScanner.SCAN_NICKNAME),
-                                         **self._default_scanner_args).start_scanner()
+                                         **self._generate_scanner_args(DNSScanner.SCAN_NICKNAME)).start_scanner()
         return domains
 
     def _do_scan(self, scanner_cls: Type[Scanner], scanner_name: str, target: str):
         self.recon_results[target][scanner_name] = dict()
-        scanner = scanner_cls(target_url=target, wordlist_path=self._wl_paths.get(scanner_cls.SCAN_NICKNAME, None),
-                              **self._default_scanner_args)
+        scanner = scanner_cls(target_url=target,
+                              **self._generate_scanner_args(scanner_cls.SCAN_NICKNAME))
         results = scanner.start_scanner()
         if results:
             self.recon_results[target][scanner_name].update(results)
@@ -197,14 +208,10 @@ class WebRecon(ScanManager):
 if __name__ == "__main__":
     parser = arg_parser.get_argument_parser()
     arguments = parser.parse_args()
-    print(arguments.target_url)
-    print(arguments.wl_content)
-
-    wl_paths = arg_parser.parse_wordlist_list(arguments)
-    scan_list = arg_parser.parse_scan_list(arguments)
-    print(scan_list)
 
     WebRecon(target_url=arguments.target_url,
-             scans=scan_list,
-             wordlist_paths=wl_paths,
-             results_path=arguments.results_path).start_recon()
+             scans=arg_parser.parse_scan_list(arguments),
+             wordlist_paths=arg_parser.parse_wordlist_list(arguments),
+             results_path=arguments.results_path,
+             nmap_cmdline=ArgParserArgName.NmapCmdlineargs,
+             nmap_ports=ArgParserArgName.NmapPorts).start_recon()

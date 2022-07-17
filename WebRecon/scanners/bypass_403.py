@@ -148,11 +148,8 @@ class Bypass403(Scanner):
         return success_results
 
     def _define_status_output(self) -> Dict[str, Any]:
-        status = dict()
-        status[OutputStatusKeys.State] = OutputValues.StateSetup
-        status[OutputStatusKeys.UsingCached] = OutputValues.BoolTrue if self._use_prev_cache else OutputValues.BoolFalse  # TODO method for general bool
+        status = super()._define_status_output()
         status[OutputStatusKeys.Current] = f"{self.target_url}/{self.target_keyword}"
-        status[OutputStatusKeys.ResultsPath] = self.results_path_full
         status[OutputStatusKeys.Found] = Bypass403._FOUND
 
         return status

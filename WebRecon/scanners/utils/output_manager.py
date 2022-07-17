@@ -3,7 +3,8 @@ import threading
 from collections import defaultdict, deque
 from copy import deepcopy
 from typing import Union, Dict, Any
-from .default_values import OutputType, OutputColors, StatusKeyColorMap, Banner
+from .default_values import OutputType, OutputColors, StatusKeyColorMap
+from .repo_banner import get_banner
 from functools import lru_cache
 import sys
 
@@ -113,7 +114,7 @@ class OutputManager(object):
 
     @staticmethod
     def print_banner():
-        sys.stdout.write(Banner)
+        sys.stdout.write(get_banner())
 
     @staticmethod
     def get_status_dict(source_name: str, output_type: OutputType):

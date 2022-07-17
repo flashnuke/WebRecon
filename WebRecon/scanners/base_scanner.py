@@ -1,14 +1,12 @@
-import sys
 import threading
 
 import requests
-import os
 import queue
 import time
 import json
 import urllib3
 
-from typing import Any, Dict, Union
+from typing import Any, Dict
 from pathlib import Path
 from functools import lru_cache
 from abc import abstractmethod
@@ -31,9 +29,6 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class ScanManager(object):
-    _DEF_CACHE_DIRECTORY = os.path.join("scanners/.cache_scan")  # TODO all this to another file
-    _ACCEPTED_SCHEMES = ["http", "https"]
-    _ERROR_LOG_NAME = f"{OutputColors.Red}error_log{OutputColors.White}"  # TODO to default values?
     _SCAN_COLOR = OutputColors.White
     _SUPPORTS_CACHE = False  # overwrite for each scanner
     _CACHE_MUTEX = threading.RLock()
@@ -69,7 +64,7 @@ class ScanManager(object):
         keys = self._define_status_output()
         if keys:
             self._output_manager.insert_output(self._get_scanner_name(), OutputType.Status, keys)
-        self._output_manager.insert_output(self._ERROR_LOG_NAME, OutputType.Lines)
+        self._output_manager.insert_output(ScannerDefaultParams.ErrorLogName, OutputType.Lines)
 
     @lru_cache()
     def _get_scanner_name(self, include_ansi=True) -> str:
@@ -87,7 +82,7 @@ class ScanManager(object):
         self._output_manager.update_status(self._get_scanner_name(), lkey, lval, refresh_output)
 
     def _log_exception(self, exc_text, abort: bool):
-        self._log_line(self._ERROR_LOG_NAME, f" {self.__class__.__name__} exception - {exc_text}, aborting - {abort}")
+        self._log_line(ScannerDefaultParams.ErrorLogName, f" {self.__class__.__name__} exception - {exc_text}, aborting - {abort}")
 
     def _save_results(self, results: str, mode="a"):
         with ScanManager._CACHE_MUTEX:
@@ -105,6 +100,14 @@ class ScanManager(object):
                 cache_json["scanners"][self._get_scanner_name(include_ansi=False)] = self._cache_dict
                 with open(self._get_cache_fullpath(), "w") as cf:
                     json.dump(cache_json, cf)
+
+    def _define_status_output(self):
+        status = dict()
+        status[OutputStatusKeys.State] = OutputValues.StateSetup
+        status[OutputStatusKeys.ResultsPath] = self.results_path_full
+        status[OutputStatusKeys.UsingCached] = OutputValues.BoolTrue if self._use_prev_cache else OutputValues.BoolFalse
+
+        return status
 
     def _load_cache_if_exists(self) -> dict:
         try:
@@ -172,7 +175,7 @@ class ScanManager(object):
 
     @lru_cache
     def _get_cache_directory(self) -> str:
-        return self._DEF_CACHE_DIRECTORY
+        return ScannerDefaultParams.DefaultCacheDirectory
 
     def _get_results_fullpath(self) -> str:
         return os.path.join(self._get_results_directory(), self._get_results_filename())
@@ -203,11 +206,10 @@ class ScanManager(object):
             progress = (100 * finished_c) // total_c
             with ScanManager._CACHE_MUTEX:
                 self._cache_dict["finished"] = finished_c
-            if progress % ScannerDefaultParams.ProgBarIntvl == 0 and progress > self._current_progress_perc:
-                print_prog_mod = 5  # TODO params
-                print_prog_count = progress // print_prog_mod  # TODO params
-                print_prog_max = (100 // print_prog_mod)  # TODO params
-                prog_str = f"[{('#' * print_prog_count).ljust(print_prog_max - print_prog_count, '-')}]"
+            if progress % ScannerProgBarParams.ProgBarIntvl == 0 and progress > self._current_progress_perc:
+                print_prog_mod = ScannerProgBarParams.ProgressMod
+                prog_count = progress // print_prog_mod
+                prog_str = f"[{('#' * prog_count).ljust(ScannerProgBarParams.ProgressMax - prog_count, '-')}]"
                 self._log_status(OutputStatusKeys.Progress, prog_str, refresh_output=False)
                 self._current_progress_perc = progress
             self._log_status(OutputStatusKeys.Current, current, refresh_output=False)
@@ -278,8 +280,8 @@ class Scanner(ScanManager):
         ...
 
     def _setup_session(self):
-        if self.scheme not in self._ACCEPTED_SCHEMES:
-            raise Exception(f"Missing / unsupported url scheme, should be one of: {', '.join(self._ACCEPTED_SCHEMES)}")
+        if self.scheme not in ScannerDefaultParams.AcceptedSchemes:
+            raise Exception(f"Missing / unsupported url scheme, should be one of: {', '.join(ScannerDefaultParams.AcceptedSchemes)}")
             # TODO exceptions class?
 
         if not self.target_url:

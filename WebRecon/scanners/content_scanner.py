@@ -1,10 +1,9 @@
 import collections
-import traceback
 import urllib.parse
 import threading
 import time
 import requests
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 from urllib3.exceptions import HTTPError
 
@@ -16,9 +15,6 @@ from .bypass_403 import Bypass403
 #
 #   Scan websites for vulnerable directories or files by bruteforce
 #
-#   TODO (scan web for websites with filters) -> (perform nmap) -> (perform content bruter) ->
-#   TODO (bypass 403) -> (brute ftp / ssh) -> (brute admin pages)
-#   TODO start with saving profile for each website: (subdomains), (ports), (vul pages + code)
 #   TODO add .js ext? only if file ending? or not needed... (if ends with .js then do smth)
 #   Notes
 #       * Use a Queue in order to allow for multi-threading
@@ -78,7 +74,7 @@ class ContentScanner(Scanner):
                     response = self._make_request(method="GET", url=url)
                     scode = response.status_code
 
-                    if scode == 403 and self.do_bypass:  # TODO param 403
+                    if scode == ScannerDefaultParams.ForbiddenSCode and self.do_bypass:
                         bypass_results = Bypass403(target_url=self.target_url,
                                                    target_keyword=path,
                                                    target_hostname=self.target_hostname,
@@ -119,12 +115,9 @@ class ContentScanner(Scanner):
         return self.ret_results
 
     def _define_status_output(self) -> Dict[str, Any]:
-        status = dict()
-        status[OutputStatusKeys.State] = OutputValues.StateSetup
-        status[OutputStatusKeys.UsingCached] = OutputValues.BoolTrue if self._use_prev_cache else OutputValues.BoolFalse  # TODO method for general bool
+        status = super()._define_status_output()
         status[OutputStatusKeys.Current] = OutputValues.EmptyStatusVal
         status[OutputStatusKeys.Progress] = OutputValues.EmptyStatusVal
-        status[OutputStatusKeys.ResultsPath] = self.results_path_full
         status[OutputStatusKeys.Left] = OutputValues.EmptyStatusVal
         status[OutputStatusKeys.Found] = OutputValues.ZeroStatusVal
 

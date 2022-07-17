@@ -23,10 +23,10 @@ class NmapScanner(Scanner):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.cmdline_args = kwargs.get("cmdline_args", "-sV")  # TODO ARGS and revert to flags "-sV -sU -sS"
+        self.cmdline_args = kwargs.get("cmdline_args")
         self._log_status("CmdlineArgs", self.cmdline_args)
         self.cmdline_args += " &>/dev/null"
-        self.ports = kwargs.get("ports", "22-443")  # TODO ARGS
+        self.ports = kwargs.get("ports")
 
         self.ret_results = dict()
 
@@ -44,11 +44,7 @@ class NmapScanner(Scanner):
         return self.ret_results
 
     def _define_status_output(self) -> Dict[str, Any]:
-        status = dict()
-        status[OutputStatusKeys.State] = OutputValues.StateSetup  # TODO to super method state, path, cached
-        status[OutputStatusKeys.ResultsPath] = self.results_path_full
-        status[OutputStatusKeys.UsingCached] = OutputValues.BoolTrue if self._use_prev_cache else OutputValues.BoolFalse  # TODO method for general bool
-
+        status = super()._define_status_output()
         return status
 
 

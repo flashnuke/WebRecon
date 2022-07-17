@@ -1,35 +1,30 @@
 import os
 import argparse
 
-from .default_values import WordlistDefaultPath, ScannerNames
+from .default_values import *
 
 
 def get_argument_parser() -> argparse.ArgumentParser:
     # Create the parser and add arguments
-    left_pad = 2 * " "
-    ljust_width = 22
-    default_results_path = os.path.join(os.getcwd(), "results")
-    default_contentscan_wlpath = os.path.join(os.getcwd(), WordlistDefaultPath.ContentScanner)
-    default_dnsscan_wlpath = os.path.join(os.getcwd(), WordlistDefaultPath.DNSScanner)
-    parser = argparse.ArgumentParser(description=f'description:\n{left_pad}'
+    parser = argparse.ArgumentParser(description=f'description:\n{ArgParserDefaultParams.LeftPad}'
                                                  f'a variety of pentest tools for scanning vulnerabilities'
                                                  f' on a given host',
                                      formatter_class=argparse.RawTextHelpFormatter,
                                      usage=f""
-                                           f"\n{left_pad}"
-                                           f"{'WebRecon -sA'.ljust(ljust_width)}run all scans (default)"
-                                           f"\n{left_pad}"
-                                           f"{'WebRecon -sC *scans'.ljust(ljust_width)}"
+                                           f"\n{ArgParserDefaultParams.LeftPad}"
+                                           f"{'WebRecon -sA'.ljust(ArgParserDefaultParams.LJustWidth)}run all scans (default)"
+                                           f"\n{ArgParserDefaultParams.LeftPad}"
+                                           f"{'WebRecon -sC *scans'.ljust(ArgParserDefaultParams.LJustWidth)}"
                                            f"run custom scans (i.e: `WebRecon -sC dns content`)",
                                      epilog="Types of scans:\n"
-                                            f"{left_pad}"
+                                            f"{ArgParserDefaultParams.LeftPad}"
                                             f"* {ScannerNames.DnsScan} -> a recursive multi-threaded scan for subdomains\n"
-                                            f"{left_pad}"
+                                            f"{ArgParserDefaultParams.LeftPad}"
                                             f"* {ScannerNames.ContentScan} -> a multi-threaded content scan for vulnerable pages\n"
-                                            f"{left_pad}"
+                                            f"{ArgParserDefaultParams.LeftPad}"
                                             f"* {ScannerNames.BypassScan} -> perform attempts to bypass a 403 page "
                                             f"(requires scan: {ScannerNames.ContentScan})\n"
-                                            f"{left_pad}"
+                                            f"{ArgParserDefaultParams.LeftPad}"
                                             f"* {ScannerNames.NmapScan} -> an nmap port scan")
     parser.add_argument(dest='target_url', type=str, help="The target host url")
 
@@ -37,25 +32,35 @@ def get_argument_parser() -> argparse.ArgumentParser:
                         help="perform all scans")
     parser.add_argument("-sC", "--scan-custom", dest='scan_custom', action="store", nargs="+", metavar=("", "s1, s2"),
                         type=str, help="custom scans (case-sensitive)")
-    # TODO if -A, ignore the rest above
-    # TODO colors
 
-    parser.add_argument(f"--set-{ScannerNames.DnsScan}scan-wl", action='store', dest=f'wl_{ScannerNames.DnsScan}',
+    parser.add_argument(f"--set-{ScannerNames.DnsScan}scan-wl", dest=f'wl_{ScannerNames.DnsScan}', action='store',
                         metavar="PATH_TO_WORDLIST",
-                        type=str, default=default_dnsscan_wlpath,
+                        type=str, default=ArgParserDefaultParams.DNSDefaultWL,
                         help=f"path to the dns scan wordlist"
-                             f" (default: {default_dnsscan_wlpath})")
+                             f" (default: {ArgParserDefaultParams.DNSDefaultWL})")
 
     parser.add_argument(f"--set-{ScannerNames.ContentScan}scan-wl", action='store',
                         dest=f'wl_{ScannerNames.ContentScan}', metavar="PATH_TO_WORDLIST",
-                        type=str, default=default_contentscan_wlpath,
+                        type=str, default=ArgParserDefaultParams.ContentDefaultWL,
                         help=f"path to the content scan wordlist"
-                             f" (default: {default_contentscan_wlpath})")
+                             f" (default: {ArgParserDefaultParams.ContentDefaultWL})")
 
     parser.add_argument("--set-results-directory", dest='results_path', metavar="PATH_TO_DIRECTORY",
-                        type=str, default=default_results_path,
+                        type=str, default=ArgParserDefaultParams.ResultsDefaultPath,
                         help=f"path to the main results directory"
-                             f" (default: {default_results_path})")  # TODO make sure default is PWD
+                             f" (default: {ArgParserDefaultParams.ResultsDefaultPath})")
+
+    parser.add_argument(f"--set-{ScannerNames.NmapScan}scan-cmdline_args", action='store',
+                        dest=ArgParserArgName.NmapCmdlineargs, metavar="CMDLINE_ARGS",
+                        type=str, default=ArgParserDefaultParams.NmapCmdlineargs,
+                        help=f"cmdline arguments to be passed into the nmap scan"
+                             f" (default: {ArgParserDefaultParams.NmapCmdlineargs})")
+
+    parser.add_argument(f"--set-{ScannerNames.NmapScan}scan-ports", action='store',
+                        dest=ArgParserArgName.NmapPorts, metavar="PORTS",
+                        type=str, default=ArgParserDefaultParams.NmapPorts,
+                        help=f"ports to be scanned by the nmap scanner"
+                             f" (default: {len(ArgParserDefaultParams.NmapPorts)} common ports)")
 
     return parser
 
