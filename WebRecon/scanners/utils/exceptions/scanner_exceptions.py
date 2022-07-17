@@ -59,13 +59,6 @@ class MissingOutputDictKeys(WebscannerException):
 # ====== Parser Exceptions
 
 
-class ParserException:
-    _MESSAGE = "Missing output dict keys"
-
-    def __init__(self):
-        super().__init__()
-
-
 class ContradictingArguments(WebscannerException):
     _MESSAGE = "The chosen arguments cannot be set simultaneously"
 
