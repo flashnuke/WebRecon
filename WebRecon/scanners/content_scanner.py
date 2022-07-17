@@ -30,6 +30,7 @@ from .bypass_403 import Bypass403
 
 
 class ContentScanner(Scanner):
+    SCAN_NICKNAME = ScannerNames.ContentScan
     _SCAN_COLOR = OutputColors.Blue
     _SUPPORTS_CACHE = True
 
@@ -37,8 +38,8 @@ class ContentScanner(Scanner):
         super().__init__(*args, **kwargs)
         self.ret_results: Dict[str, Union[Dict, List]] = collections.defaultdict(list)
 
-        self.try_bypass = kwargs.get("try_bypass", False)
-        if self.try_bypass:
+        self.do_bypass = kwargs.get("do_bypass", False)
+        if self.do_bypass:
             self.ret_results['bypass'] = {scode: list() for scode in ScannerDefaultParams.SuccessStatusCodes}
 
     def _save_results(self, *args, **kwargs):
@@ -77,7 +78,7 @@ class ContentScanner(Scanner):
                     response = self._make_request(method="GET", url=url)
                     scode = response.status_code
 
-                    if scode == 403 and self.try_bypass:  # TODO param 403
+                    if scode == 403 and self.do_bypass:  # TODO param 403
                         bypass_results = Bypass403(target_url=self.target_url,
                                                    target_keyword=path,
                                                    target_hostname=self.target_hostname,

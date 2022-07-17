@@ -17,9 +17,10 @@ from typing import Any, Dict, List
 
 
 class Bypass403(Scanner):
+    SCAN_NICKNAME = ScannerNames.BypassScan
     _SCAN_COLOR = OutputColors.Blue
-    _FOUND = 0
     _SUPPORTS_CACHE = False
+    _FOUND = 0
 
     def __init__(self, target_keyword, *args, **kwargs):
         super().__init__(*args, **kwargs)

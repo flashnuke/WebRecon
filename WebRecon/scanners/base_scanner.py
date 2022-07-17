@@ -32,7 +32,6 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class ScanManager(object):
     _DEF_CACHE_DIRECTORY = os.path.join("scanners/.cache_scan")  # TODO all this to another file
-    _DEF_OUTPUT_DIRECTORY = "results"
     _ACCEPTED_SCHEMES = ["http", "https"]
     _ERROR_LOG_NAME = f"{OutputColors.Red}error_log{OutputColors.White}"  # TODO to default values?
     _SCAN_COLOR = OutputColors.White
@@ -50,13 +49,13 @@ class ScanManager(object):
         self.target_url = target_url
         self.scheme = scheme
 
-        self.wordlist_path = kwargs.get("wordlist_path", getattr(WordlistDefaultPath, self.__class__.__name__, None))  # TODO argparse
+        self.wordlist_path = kwargs.get("wordlist_path", None)  # if None... scanner does not use a wordlist
 
-        self.results_path = kwargs.get("results_path", f'{self._DEF_OUTPUT_DIRECTORY}')
+        self.results_path = kwargs.get("results_path")
         self.results_path_full = self._setup_results_path()
 
         self._use_prev_cache = False
-        self._cache_dict: dict = self._load_cache_if_exists()  # TODO if finished - remove cache
+        self._cache_dict: dict = self._load_cache_if_exists()
         if not self._use_prev_cache:
             self._remove_old_results()
 
@@ -216,6 +215,8 @@ class ScanManager(object):
 
 
 class Scanner(ScanManager):
+    SCAN_NICKNAME = None  # overwrite for each scan individually
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -240,11 +241,15 @@ class Scanner(ScanManager):
         self._session_refresh_count = 0
 
     def load_words(self) -> queue.Queue:
-        with open(self.wordlist_path, 'r') as wl:
-            words = queue.Queue()
-            for word in wl.readlines()[self._cache_dict.get("finished", 0) - 1:]:
-                words.put(word.rstrip("\n"))
-        return words
+        try:
+            with open(self.wordlist_path, 'r') as wl:
+                words = queue.Queue()
+                for word in wl.readlines()[self._cache_dict.get("finished", 0) - 1:]:
+                    words.put(word.rstrip("\n"))
+            return words
+        except Exception as exc:
+            self._log_exception(exc, True)
+            raise Exception("Failed to load cache")
 
     def _update_count(self, current, success=False):
         with self._count_mutex:

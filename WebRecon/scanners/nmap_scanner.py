@@ -16,6 +16,7 @@ from .base_scanner import Scanner
 
 
 class NmapScanner(Scanner):
+    SCAN_NICKNAME = ScannerNames.NmapScan
     _SCAN_COLOR = OutputColors.Blue
     _SUPPORTS_CACHE = False
 

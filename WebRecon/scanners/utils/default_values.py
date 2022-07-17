@@ -20,6 +20,13 @@ class ScannerDefaultParams(_ExtendedEnum):
     ProgBarIntvl = 1
 
 
+class ScannerNames(_ExtendedEnum):
+    DnsScan = "dns"
+    ContentScan = "content"
+    BypassScan = "403bypass"
+    NmapScan = "nmap"
+
+
 class NetworkDefaultParams(_ExtendedEnum):
     RequestCooldown = 0.1
     RequestTimeout = 1
@@ -129,5 +136,3 @@ Banner = f"""
                            {OutputColors.Green}{OutputColors.BOLD}\ \ /\ / /{OutputColors.White}{OutputColors.YELLOW} _ \\ '_ \{OutputColors.White}{OutputColors.Green}{OutputColors.BOLD}| |_){OutputColors.White}{OutputColors.YELLOW} / _ \/ __/ _ \| '_ \{OutputColors.White}                           
                             {OutputColors.Green}{OutputColors.BOLD}\ V  V /{OutputColors.White}{OutputColors.YELLOW}  __/ |_) {OutputColors.White}{OutputColors.Green}{OutputColors.BOLD}|  _ <{OutputColors.White}{OutputColors.YELLOW}  __/ (_| (_) | | | |{OutputColors.White}                          
                              {OutputColors.Green}{OutputColors.BOLD}\_/\_/{OutputColors.White}{OutputColors.YELLOW} \___|_.__/{OutputColors.White}{OutputColors.Green}{OutputColors.BOLD}|_| \_\{OutputColors.White}{OutputColors.YELLOW}___|\___\___/|_| |_|{OutputColors.White}                          """
-
-print(Banner)
