@@ -80,11 +80,9 @@ class WebRecon(ScanManager):
                          *args, **kwargs, **self._default_general_scanner_args)
 
     def _setup_custom_scanner_args(self, **kwargs) -> Dict[str, dict]:
-        default_custom_scanner_args = dict()
         default_custom_scanner_args = {s_name.value:
-                                           {"wordlist_path": kwargs.get("wordlist_paths", dict()).get(s_name.value, None)}
+                                       {"wordlist_path": kwargs.get("wordlist_paths", dict()).get(s_name.value, None)}
                                        for s_name in ScannerNames}
-        print(default_custom_scanner_args)
 
         default_custom_scanner_args[ScannerNames.ContentScan]["do_bypass"] = ScannerNames.BypassScan in self._all_scans
 

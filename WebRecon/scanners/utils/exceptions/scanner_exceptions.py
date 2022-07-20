@@ -1,3 +1,6 @@
+from typing import List
+
+
 class WebscannerException(Exception):
     _MESSAGE = ""
 
@@ -61,13 +64,13 @@ class MissingOutputDictKeys(WebscannerException):
 class ContradictingArguments(WebscannerException):
     _MESSAGE = "The chosen arguments cannot be set simultaneously"
 
-    def __init__(self, args: list[str]):
+    def __init__(self, args: List[str]):
         super().__init__(','.join(args))
 
 
 class MissingArguments(WebscannerException):
     _MESSAGE = "Missing arguments"
 
-    def __init__(self, args: list[str]):
+    def __init__(self, args: List[str]):
         super().__init__(','.join(args))
 
