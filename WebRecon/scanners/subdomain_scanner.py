@@ -53,6 +53,10 @@ class DNSScanner(Scanner):
                     requests.exceptions.ReadTimeout, HTTPError):
                 # other exceptions should not occur
                 continue
+            except Exception as exc:
+                self._log_status(OutputStatusKeys.State, OutputValues.StateFail)
+                self._log_exception(f"target {url_path}, exception - {exc}", True)
+                exit(-1)
             finally:
                 self._update_count(url_path, found)
                 time.sleep(self.request_cooldown)

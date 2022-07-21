@@ -93,6 +93,7 @@ class ContentScanner(Scanner):
                         requests.exceptions.ReadTimeout, HTTPError):
                     continue
                 except Exception as exc:
+                    self._log_status(OutputStatusKeys.State, OutputValues.StateFail)
                     self._log_exception(f"target {url}, exception - {exc}", True)
                     exit(-1)
                 finally:
