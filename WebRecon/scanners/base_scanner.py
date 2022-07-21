@@ -101,7 +101,7 @@ class ScanManager(object):
                 with open(self._get_cache_fullpath(), "w") as cf:
                     json.dump(cache_json, cf)
 
-    def _define_status_output(self):
+    def _define_status_output(self) -> Dict[str, Any]:
         status = dict()
         status[OutputStatusKeys.State] = OutputValues.StateSetup
         status[OutputStatusKeys.ResultsPath] = self.results_path_full
@@ -189,10 +189,6 @@ class ScanManager(object):
             if os.path.exists(cache_path):
                 os.remove(cache_path)
 
-    @abstractmethod
-    def _define_status_output(self) -> Dict[str, Any]:
-        ...
-
     @lru_cache(maxsize=5)
     def generate_url_base_path(self, dnsname: str) -> str:
         return f"{self.scheme}://{dnsname}.{self.target_hostname}"
@@ -273,10 +269,6 @@ class Scanner(ScanManager):
 
     @abstractmethod
     def _start_scanner(self) -> Any:
-        ...
-
-    @abstractmethod
-    def _define_status_output(self) -> Dict[str, Any]:
         ...
 
     def _setup_session(self):

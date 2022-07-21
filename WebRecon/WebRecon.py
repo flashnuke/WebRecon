@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import copy
+import traceback
 import urllib.parse
 import pprint
 import pkg_resources
@@ -161,6 +162,7 @@ class WebRecon(ScanManager):
         except Exception as exc:
             self._log_status(OutputStatusKeys.State, OutputValues.StateFail)
             self._log_exception(exc, True)
+            print(traceback.format_exc())
             exit(-1)
 
     def _setup_targets(self) -> queue.Queue:
@@ -194,10 +196,8 @@ class WebRecon(ScanManager):
 
     def _define_status_output(self) -> Dict[str, Any]:
         status = dict()
-        status[OutputStatusKeys.State] = OutputValues.StateSetup
         status[OutputStatusKeys.Current] = OutputValues.EmptyStatusVal
         status[OutputStatusKeys.Progress] = OutputValues.EmptyStatusVal
-        status[OutputStatusKeys.ResultsPath] = self.results_path_full
         status[OutputStatusKeys.Left] = OutputValues.EmptyStatusVal
 
         return status
