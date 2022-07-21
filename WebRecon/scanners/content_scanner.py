@@ -3,7 +3,7 @@ import urllib.parse
 import threading
 import time
 import requests
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from urllib3.exceptions import HTTPError
 
@@ -94,7 +94,7 @@ class ContentScanner(Scanner):
                     continue
                 except Exception as exc:
                     self._log_exception(f"target {url}, exception - {exc}", True)
-                    raise exc
+                    exit(-1)
                 finally:
                     attempt_list.clear()
                     time.sleep(self.request_cooldown)
