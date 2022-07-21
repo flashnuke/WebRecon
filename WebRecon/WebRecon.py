@@ -158,6 +158,7 @@ class WebRecon(ScanManager):
         except Exception as exc:
             self._log_status(OutputStatusKeys.State, OutputValues.StateFail)
             self._log_exception(exc, True)
+            exit(-1)
 
     def _setup_targets(self) -> queue.Queue:
         domains = queue.Queue()
