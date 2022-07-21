@@ -43,7 +43,7 @@ class OutputDefaultParams(_ExtendedEnum):
     LineRemove = "\x1b[1A\x1b[2K"
     LineWidth = 100
     MaxLen = 5
-    Delimiter = f"{OutputColors.Purple}{LineWidth.value * '='}{OutputColors.White}"
+    Delimiter = f"{OutputColors.Purple}{LineWidth * '='}{OutputColors.White}"
     LinePrefix = f"{OutputColors.Gray}>{OutputColors.White}"
 
 
@@ -52,7 +52,7 @@ class OutputStatusKeys(_ExtendedEnum):
     Progress = "Progress"
     Current = "Current"
     ResultsPath = "ResultsPath"
-    Found = "Found"  # TODO rename
+    Found = "Found"
     Left = "Left"
     UsingCached = "UsingCached"
 
@@ -100,7 +100,7 @@ class ScannerDefaultParams(_ExtendedEnum):
 class ScannerProgBarParams(_ExtendedEnum):
     ProgBarIntvl = 1
     ProgressMod = 5
-    ProgressMax = (100 // ProgressMod.value)
+    ProgressMax = (100 // ProgressMod)
 
 
 class WordlistDefaultPath(_ExtendedEnum):

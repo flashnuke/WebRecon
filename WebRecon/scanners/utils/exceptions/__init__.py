@@ -1,1 +1,1 @@
-from scanner_exceptions import *
+from .scanner_exceptions import *

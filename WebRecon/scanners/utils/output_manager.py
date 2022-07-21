@@ -119,6 +119,3 @@ class OutputManager(object):
         """
         with OutputManager._OUTPUT_MUTEX:
             return copy.deepcopy(OutputManager._OUTPUT_CONT[output_type][source_name])
-
-# TODO compatible with linux only OR ELSE bail out
-# TODO no exception is ok... unless handled (due to output limitations)

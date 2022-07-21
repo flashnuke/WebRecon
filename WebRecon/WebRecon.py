@@ -1,8 +1,12 @@
+#!/usr/bin/env python3
+
 import copy
 import urllib.parse
 import pprint
+import pkg_resources
 
-from typing import Tuple, List, Type
+from sys import platform
+from typing import Tuple, Type
 from scanners import *
 from tld import get_tld, get_tld_names
 
@@ -60,7 +64,6 @@ class WebRecon(ScanManager):
 
         self._all_scans = scans
         self._scans = self._parse_scan_list(scans)  # only the ones we call using `_do_scan()`
-
 
         self.scheme, self.subdomain, self.target_hostname = self._parse_target_url(target_url)
         self._default_general_scanner_args = {
@@ -205,6 +208,11 @@ class WebRecon(ScanManager):
 
 
 if __name__ == "__main__":
+    if "linux" not in platform:
+        raise UnsupportedOS(platform)
+    with open("requirements.txt", "r") as reqs:
+        pkg_resources.require(reqs.readlines())
+
     parser = arg_parser.get_argument_parser()
     arguments = parser.parse_args()
 

@@ -9,7 +9,7 @@ class WebscannerException(Exception):
         super().__init__(message)
 
     def _generate_message(self, invalid_input) -> str:
-        return f"{self._MESSAGE}: {invalid_input}" if invalid_input else self._MESSAGE
+        return f"{self._MESSAGE} - {invalid_input}" if invalid_input else self._MESSAGE
 
 # ====== Scanner Exceptions
 
@@ -74,3 +74,11 @@ class MissingArguments(WebscannerException):
     def __init__(self, args: List[str]):
         super().__init__(','.join(args))
 
+# ====== Requirements Exceptions
+
+
+class UnsupportedOS(WebscannerException):
+    _MESSAGE = "Unsupported operating system"
+
+    def __init__(self, os_platform):
+        super().__init__(os_platform)
