@@ -5,7 +5,7 @@ import time
 
 from urllib3.exceptions import HTTPError
 from .utils import *
-from .base_scanner import Scanner
+from .base_scanner import Scanner, ScanManager
 from functools import lru_cache
 from typing import Dict, Any
 
@@ -40,7 +40,7 @@ class DNSScanner(Scanner):
 
     def single_bruter(self):
 
-        while not self.words_queue.empty():
+        while not self.words_queue.empty() and not ScanManager._SHOULD_ABORT:
             url_path = self.generate_url_base_path(self.words_queue.get())
             found = False
             try:
@@ -54,8 +54,9 @@ class DNSScanner(Scanner):
                 # other exceptions should not occur
                 continue
             except Exception as exc:
+                ScanManager._SHOULD_ABORT = True
                 self._log_status(OutputStatusKeys.State, OutputValues.StateFail)
-                self._log_exception(f"target {url_path}, exception - {exc}", True)
+                self._log_exception(f"target {url_path}, exception - {exc}", ScanManager._SHOULD_ABORT)
                 exit(-1)
             finally:
                 self._update_count(url_path, found)

@@ -32,6 +32,7 @@ class ScanManager(object):
     _SCAN_COLOR = OutputColors.White
     _SUPPORTS_CACHE = False  # overwrite for each scanner
     _CACHE_MUTEX = threading.RLock()
+    _SHOULD_ABORT = False
     _RUN_ID = str()
 
     def __new__(cls, *args, **kwargs):

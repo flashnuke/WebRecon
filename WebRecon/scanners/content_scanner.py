@@ -7,7 +7,7 @@ from typing import Any, Dict
 
 from urllib3.exceptions import HTTPError
 
-from .base_scanner import Scanner
+from .base_scanner import Scanner, ScanManager
 from .utils import *
 from .bypass_403 import Bypass403
 
@@ -50,7 +50,7 @@ class ContentScanner(Scanner):
     def single_bruter(self):
         attempt_list = list()
 
-        while not self.words_queue.empty():
+        while not self.words_queue.empty() and ScanManager._RUNNING:
             attempt = self.words_queue.get()
             found_any = False
 
@@ -93,8 +93,9 @@ class ContentScanner(Scanner):
                         requests.exceptions.ReadTimeout, HTTPError):
                     continue
                 except Exception as exc:
+                    ScanManager._SHOULD_ABORT = True
                     self._log_status(OutputStatusKeys.State, OutputValues.StateFail)
-                    self._log_exception(f"target {url}, exception - {exc}", True)
+                    self._log_exception(f"target {url}, exception - {exc}", ScanManager._SHOULD_ABORT)
                     exit(-1)
                 finally:
                     attempt_list.clear()
