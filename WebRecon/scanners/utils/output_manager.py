@@ -31,8 +31,6 @@ class OutputManager(object):
 
     def insert_output(self, source_name: str, output_type: OutputType, status_keys: Union[Dict[str, Any], None] = None):
         if source_name in OutputManager._OUTPUT_CONT[output_type]:
-            sys.stdout.write("already in " + source_name)
-            sys.stdout.flush()
             return
         with OutputManager._OUTPUT_MUTEX:
             self._clear()
@@ -43,12 +41,12 @@ class OutputManager(object):
                 for okey, oval in status_keys.items():
                     self.update_status(source_name, okey, oval, refresh_output=False)
                     OutputManager._OUTPUT_CONT[output_type][source_name][okey] = self.construct_status_val(okey, oval)
+                OutputManager._OUTPUT_LEN += OutputDefaultParams.MaxLen + 1
             elif output_type == OutputType.Lines:
                 OutputManager._OUTPUT_CONT[OutputType.Lines][source_name] = deque(maxlen=OutputDefaultParams.MaxLen)
                 for _ in range(OutputDefaultParams.MaxLen):
                     OutputManager._OUTPUT_CONT[OutputType.Lines][source_name].append(OutputDefaultParams.LinePrefix)
                 # appended_output_lines += OutputManager.OutputDefaultParams.MaxLen
-                OutputManager._OUTPUT_LEN += OutputDefaultParams.MaxLen + 1
             else:
                 raise InvalidOutputType(output_type)
             OutputManager._OUTPUT_LEN += 3 if source_name else 2  # delimiter + source_name (if exists)
