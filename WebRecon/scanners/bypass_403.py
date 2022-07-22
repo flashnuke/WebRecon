@@ -31,6 +31,7 @@ class Bypass403(Scanner):
 
     def try_bypass(self) -> dict:
         results = {scode: list() for scode in ScannerDefaultParams.SuccessStatusCodes}
+        results[ScannerDefaultParams.ForbiddenSCode] = list()
 
         # methods
 
