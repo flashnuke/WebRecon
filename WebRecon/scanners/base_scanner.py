@@ -274,8 +274,10 @@ class Scanner(ScanManager):
             self._log_status(OutputStatusKeys.State, OutputValues.StateComplete)
             return scan_results
         except Exception as exc:
-            self._log_status(OutputStatusKeys.State, OutputValues.StateFail, refresh_output=False)
-            self._log_exception(exc, True)
+            ScanManager._SHOULD_ABORT = True
+            self._log_status(OutputStatusKeys.State, OutputValues.StateFail)
+            self._log_exception(exc, ScanManager._SHOULD_ABORT)
+            os.kill(os.getpid(), 9)
 
     @abstractmethod
     def _start_scanner(self) -> Any:
