@@ -111,11 +111,3 @@ class OutputManager(object):
     @staticmethod
     def print_banner():
         sys.stdout.write(get_banner())
-
-    @staticmethod
-    def get_status_dict(source_name: str, output_type: OutputType):
-        """
-        a getter to be used from OUTSIDE the class ONLY (to avoid deadlocks)
-        """
-        with OutputManager._OUTPUT_MUTEX:
-            return copy.deepcopy(OutputManager._OUTPUT_CONT[output_type][source_name])
