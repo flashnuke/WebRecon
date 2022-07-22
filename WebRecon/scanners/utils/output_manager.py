@@ -31,6 +31,8 @@ class OutputManager(object):
 
     def insert_output(self, source_name: str, output_type: OutputType, status_keys: Union[Dict[str, Any], None] = None):
         if source_name in OutputManager._OUTPUT_CONT[output_type]:
+            sys.stdout.write("already in " + source_name)
+            sys.stdout.flush()
             return
         with OutputManager._OUTPUT_MUTEX:
             self._clear()
