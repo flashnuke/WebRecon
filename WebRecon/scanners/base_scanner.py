@@ -113,6 +113,7 @@ class ScanManager(object):
 
     def _load_cache_if_exists(self) -> dict:
         try:
+            Path(self._get_cache_directory()).mkdir(parents=True, exist_ok=True)
             if self._supports_cache:
                 with ScanManager._CACHE_MUTEX:
                     cache_path = Path(self._get_cache_fullpath())
