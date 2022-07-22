@@ -99,7 +99,7 @@ class ScannerDefaultParams(_ExtendedEnum):
 
 class ScannerProgBarParams(_ExtendedEnum):
     ProgBarIntvl = 1
-    ProgressMod = 2
+    ProgressMod = 3
     ProgressMax = (100 // ProgressMod)
 
 

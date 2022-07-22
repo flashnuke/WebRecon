@@ -209,7 +209,7 @@ class ScanManager(object):
             if progress % ScannerProgBarParams.ProgBarIntvl == 0 and progress > self._current_progress_perc:
                 print_prog_mod = ScannerProgBarParams.ProgressMod
                 prog_count = progress // print_prog_mod
-                prog_str = f"[{('#' * prog_count).ljust(ScannerProgBarParams.ProgressMax - prog_count, '-')}]"
+                prog_str = f"[{('#' * prog_count).ljust(ScannerProgBarParams.ProgressMax, '-')}]"
                 self._log_status(OutputStatusKeys.Progress, prog_str, refresh_output=False)
                 self._current_progress_perc = progress
             self._log_status(OutputStatusKeys.Current, current, refresh_output=False)
