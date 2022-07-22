@@ -130,4 +130,4 @@ dmypy.json
 
 # Lib related
 
-/scanners/.cache_scan/*
+/scanners/cache_scan/*
