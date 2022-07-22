@@ -82,12 +82,10 @@ class ContentScanner(Scanner):
                         for bypass_scode, bypass_url in bypass_results.items():
                             self.ret_results["bypass"][bypass_scode].append(bypass_url)
                             found_any = True
-                            self._save_results()
 
                     if scode in ScannerDefaultParams.SuccessStatusCodes:  # after bypass to make sure we save all results
                         self.ret_results[scode].append(url)
                         found_any = True
-                        self._save_results()
 
                 except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout,
                         requests.exceptions.ReadTimeout, HTTPError):
@@ -96,6 +94,8 @@ class ContentScanner(Scanner):
                     self.abort_scan(reason=f"target {url}, exception - {exc}")
                 finally:
                     attempt_list.clear()
+                    if found_any:
+                        self._save_results()
                     time.sleep(self.request_cooldown)
 
             self._update_count(attempt, found_any)
