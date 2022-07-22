@@ -1,3 +1,4 @@
+import collections
 import copy
 import time
 from .base_scanner import Scanner
@@ -31,8 +32,7 @@ class Bypass403(Scanner):
         self.target_url = self.target_url.strip("/")
 
     def try_bypass(self) -> dict:
-        results = {scode: list() for scode in ScannerDefaultParams.SuccessStatusCodes}
-        results[ScannerDefaultParams.ForbiddenSCode] = list()
+        results = collections.defaultdict(list)
 
         # methods
 
