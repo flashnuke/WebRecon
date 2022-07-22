@@ -123,7 +123,7 @@ class WebRecon(ScanManager):
         scanner_threads = list()
         for scanner in self._scans:
             scanner_name = scanner.__name__
-            t = threading.Thread(target=self._do_scan(scanner, scanner_name, target))
+            t = threading.Thread(target=self._do_scan(scanner, scanner_name, target), daemon=True)
             t.start()
             scanner_threads.append(t)
         return scanner_threads
