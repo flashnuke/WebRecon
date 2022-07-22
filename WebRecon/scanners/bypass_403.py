@@ -1,3 +1,4 @@
+import copy
 import time
 from .base_scanner import Scanner
 from .utils import *
@@ -141,10 +142,9 @@ class Bypass403(Scanner):
         self._log_status(OutputStatusKeys.State, OutputValues.StateRunning)
         all_results = self.try_bypass()
 
-        for scode, req in all_results.items():
-            if scode in ScannerDefaultParams.SuccessStatusCodes:
-                success_results[scode] = req
-                Bypass403._FOUND += 1
+        for scode in ScannerDefaultParams.SuccessStatusCodes:
+            success_results[scode] = copy.deepcopy(all_results[scode])
+            Bypass403._FOUND += len(all_results[scode])
         self._log_status(OutputStatusKeys.Found, Bypass403._FOUND)
 
         return success_results
