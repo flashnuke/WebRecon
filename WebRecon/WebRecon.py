@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import copy
-import traceback
 import urllib.parse
 import pprint
 import pkg_resources
