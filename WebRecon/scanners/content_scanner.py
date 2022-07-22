@@ -76,8 +76,7 @@ class ContentScanner(Scanner):
                     scode = response.status_code
 
                     if scode == ScannerDefaultParams.ForbiddenSCode and self.do_bypass:
-                        bypass_results = Bypass403(target_url=self.target_url,
-                                                   target_keyword=path,
+                        bypass_results = Bypass403(target_keyword=path,
                                                    target_hostname=self.target_hostname,
                                                    scheme=self.scheme).start_scanner()
                         for bypass_scode, bypass_url in bypass_results.items():
