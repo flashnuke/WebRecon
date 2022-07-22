@@ -58,15 +58,15 @@ class ScanManager(object):
 
         self._current_progress_mutex = threading.RLock()
         self._current_progress_perc = int()
-        self._output_manager = None
-        self._output_manager_setup()
+        self._output_manager = self._output_manager_setup()
 
-    def _output_manager_setup(self):
-        self._output_manager = OutputManager()
+    def _output_manager_setup(self) -> OutputManager:
+        om = OutputManager()
         keys = self._define_status_output()
         if keys:
-            self._output_manager.insert_output(self._get_scanner_name(), OutputType.Status, keys)
-        self._output_manager.insert_output(ScannerDefaultParams.ErrorLogName, OutputType.Lines)
+            om.insert_output(self._get_scanner_name(), OutputType.Status, keys)
+        om.insert_output(ScannerDefaultParams.ErrorLogName, OutputType.Lines)
+        return om
 
     @lru_cache()
     def _get_scanner_name(self, include_ansi=True) -> str:
