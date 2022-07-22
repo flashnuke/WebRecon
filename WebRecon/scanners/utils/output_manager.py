@@ -91,12 +91,12 @@ class OutputManager(object):
         for source, status_dict in OutputManager._OUTPUT_CONT[OutputType.Status].items():
             if source:
                 sys.stdout.write(self._construct_output(OutputDefaultParams.Delimiter))
-            sys.stdout.write(f"{OutputColors.BOLD}{self._construct_output(source)}{OutputColors.White}\n")
+            sys.stdout.write(f"{OutputColors.BOLD}{self._construct_output(source)}{OutputColors.White}")
             for skey, sval in status_dict.items():
                 sys.stdout.write(self._construct_output(f"{sval}"))
         for source, line_deq in OutputManager._OUTPUT_CONT[OutputType.Lines].items():
             sys.stdout.write(self._construct_output(OutputDefaultParams.Delimiter))
-            sys.stdout.write(f"{OutputColors.BOLD}{self._construct_output(source)}{OutputColors.White}\n")
+            sys.stdout.write(f"{OutputColors.BOLD}{self._construct_output(source)}{OutputColors.White}")
             for line in line_deq:
                 sys.stdout.write(self._construct_output(line))
         sys.stdout.flush()
