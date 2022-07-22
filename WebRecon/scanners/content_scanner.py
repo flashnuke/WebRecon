@@ -51,7 +51,6 @@ class ContentScanner(Scanner):
         attempt_list = list()
         while not self.words_queue.empty() and not ScanManager._SHOULD_ABORT:
             attempt = self.words_queue.get()
-            self._log_exception(attempt, ScanManager._SHOULD_ABORT)
             found_any = False
 
             # check if there is a file extension, if not then it's a directory we're bruting
