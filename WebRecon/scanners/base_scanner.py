@@ -49,8 +49,7 @@ class ScanManager(object):
         self.wordlist_path = kwargs.get("wordlist_path", None)  # if None... scanner does not use a wordlist
 
         self.results_path = kwargs.get("results_path")
-        if self.results_path:
-            self.results_path_full = self._setup_results_path()
+        self.results_path_full = self._setup_results_path() if self.results_path else None
 
         self._use_prev_cache = False
         self._cache_dict: dict = self._load_cache_if_exists()
