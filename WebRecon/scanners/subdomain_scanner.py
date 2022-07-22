@@ -31,13 +31,6 @@ class DNSScanner(Scanner):
         super().__init__(*args, **kwargs)
         self.domains_queue = domains_queue if domains_queue else queue.Queue()
 
-    def load_words(self) -> queue.Queue:
-        with open(self.wordlist_path, 'r') as wl:
-            words = queue.Queue()
-            for word in wl.readlines():
-                words.put(word.rstrip("\n"))
-        return words
-
     def single_bruter(self):
 
         while not self.words_queue.empty() and not ScanManager._SHOULD_ABORT:

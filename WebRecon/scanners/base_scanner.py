@@ -251,8 +251,9 @@ class Scanner(ScanManager):
         try:
             with open(self.wordlist_path, 'r') as wl:
                 words = queue.Queue()
-                for word in wl.readlines()[self._cache_dict.get("finished", 0) - 1:]:
-                    words.put(word.rstrip("\n"))
+                for word in wl.readlines()[max(self._cache_dict.get("finished", 0) - 1, 0):]:
+                    print(word)
+                    words.put(word.strip("\n"))
             return words
         except Exception as exc:
             self._log_exception(exc, True)
@@ -274,7 +275,7 @@ class Scanner(ScanManager):
             return scan_results
         except Exception as exc:
             self._log_status(OutputStatusKeys.State, OutputValues.StateFail, refresh_output=False)
-            self._log_exception(exc, True)  # TODO try to have our own exceptions
+            self._log_exception(exc, True)
 
     @abstractmethod
     def _start_scanner(self) -> Any:

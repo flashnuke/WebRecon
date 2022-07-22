@@ -141,17 +141,13 @@ class WebRecon(ScanManager):
                     continue
                 self._update_progress_status(total_count, domains_count, target)
                 self.recon_results[target] = dict()
-                try:
-                    scanner_threads = self._start_scans_for_target(target)
-                    for t in scanner_threads:
-                        t.join()
-                except Exception as exc:
-                    self._log_exception(f"target {target} exception {exc}", False)
-                finally:
-                    total_count += 1
-                    results_str = pprint.pformat(self.recon_results,
-                                                 compact=PPrintDefaultParams.Compact, width=PPrintDefaultParams.Width)
-                    self._save_results(results_str, mode='w')
+                scanner_threads = self._start_scans_for_target(target)
+                for t in scanner_threads:
+                    t.join()
+                total_count += 1
+                results_str = pprint.pformat(self.recon_results,
+                                             compact=PPrintDefaultParams.Compact, width=PPrintDefaultParams.Width)
+                self._save_results(results_str, mode='w')
 
             self._update_progress_status(total_count, domains_count, OutputValues.EmptyStatusVal)
             self._log_status(OutputStatusKeys.State, OutputValues.StateComplete)
