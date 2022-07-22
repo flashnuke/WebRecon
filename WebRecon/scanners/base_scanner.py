@@ -253,7 +253,6 @@ class Scanner(ScanManager):
             with open(self.wordlist_path, 'r') as wl:
                 words = queue.Queue()
                 for word in wl.readlines()[max(self._cache_dict.get("finished", 0) - 1, 0):]:
-                    print(word)
                     words.put(word.strip("\n"))
             return words
         except Exception as exc:
