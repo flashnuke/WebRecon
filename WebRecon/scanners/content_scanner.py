@@ -50,7 +50,7 @@ class ContentScanner(Scanner):
     def single_bruter(self):
         attempt_list = list()
 
-        while not self.words_queue.empty() and ScanManager._RUNNING:
+        while not self.words_queue.empty() and not ScanManager._SHOULD_ABORT:
             attempt = self.words_queue.get()
             found_any = False
 
