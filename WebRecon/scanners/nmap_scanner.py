@@ -21,10 +21,9 @@ class NmapScanner(Scanner):
     _SUPPORTS_CACHE = False
 
     def __init__(self, *args, **kwargs):
+        self.cmdline_args = kwargs.get("cmdline_args")
         super().__init__(*args, **kwargs)
 
-        self.cmdline_args = kwargs.get("cmdline_args")
-        self._log_status("CmdlineArgs", self.cmdline_args)
         self.cmdline_args += " &>/dev/null"
         self.ports = kwargs.get("ports")
 
@@ -45,6 +44,7 @@ class NmapScanner(Scanner):
 
     def _define_status_output(self) -> Dict[str, Any]:
         status = super()._define_status_output()
+        status["CmdlineArgs"] = self.cmdline_args
         return status
 
 
