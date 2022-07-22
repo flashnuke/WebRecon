@@ -64,7 +64,7 @@ class ScanManager(object):
         om = OutputManager()
         keys = self._define_status_output()
         if keys:
-            om.insert_output(self._get_scanner_name(include_ansi=False), OutputType.Status, keys)
+            om.insert_output(self._get_scanner_name(), OutputType.Status, keys)
         om.insert_output(ScannerDefaultParams.ErrorLogName, OutputType.Lines)
         return om
 
@@ -81,7 +81,7 @@ class ScanManager(object):
         self._output_manager.update_lines(log_name, line)
 
     def _log_status(self, lkey: str, lval: Any, refresh_output=True):
-        self._output_manager.update_status(self._get_scanner_name(include_ansi=False), lkey, lval, refresh_output)
+        self._output_manager.update_status(self._get_scanner_name(), lkey, lval, refresh_output)
 
     def _log_exception(self, exc_text, abort: bool):
         self._log_line(ScannerDefaultParams.ErrorLogName, f" {self.__class__.__name__} exception - {exc_text},"
