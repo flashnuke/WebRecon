@@ -84,7 +84,8 @@ class ScanManager(object):
         self._output_manager.update_status(self._get_scanner_name(), lkey, lval, refresh_output)
 
     def _log_exception(self, exc_text, abort: bool):
-        self._log_line(ScannerDefaultParams.ErrorLogName, f" {self.__class__.__name__} exception - {exc_text}, aborting - {abort}")
+        self._log_line(ScannerDefaultParams.ErrorLogName, f" {self.__class__.__name__} exception - {exc_text},"
+                                                          f" aborting - {abort}")
 
     def _save_results(self, results: str, mode="a"):
         with ScanManager._CACHE_MUTEX:
