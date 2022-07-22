@@ -19,6 +19,7 @@ class NmapScanner(Scanner):
     SCAN_NICKNAME = ScannerNames.NmapScan
     _SCAN_COLOR = OutputColors.Blue
     _SUPPORTS_CACHE = False
+    _WRITE_RESULTS = True
 
     def __init__(self, *args, **kwargs):
         self.cmdline_args = kwargs.get("cmdline_args")

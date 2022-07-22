@@ -32,6 +32,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 class ScanManager(object):
     _SCAN_COLOR = OutputColors.White
     _SUPPORTS_CACHE = False  # overwrite for each scanner
+    _WRITE_RESULTS = False  # overwrite for each scanner
     _CACHE_MUTEX = threading.RLock()
     _SHOULD_ABORT = False
     _RUN_ID = str()
@@ -53,7 +54,7 @@ class ScanManager(object):
 
         self._use_prev_cache = False
         self._cache_dict: dict = self._load_cache_if_exists()
-        if not self._use_prev_cache:
+        if not self._use_prev_cache and self._WRITE_RESULTS:
             self._remove_old_results()
 
         self._current_progress_mutex = threading.RLock()
@@ -88,14 +89,15 @@ class ScanManager(object):
                                                           f" aborting - {abort}")
 
     def _save_results(self, results: str, mode="a"):
-        with ScanManager._CACHE_MUTEX:
-            path = self._get_results_fullpath()
-            with open(path, mode) as res_file:
-                res_file.write(f"{results}")
-            self._update_cache_results()
+        if self._WRITE_RESULTS:
+            with ScanManager._CACHE_MUTEX:
+                path = self._get_results_fullpath()
+                with open(path, mode) as res_file:
+                    res_file.write(f"{results}")
+                self._update_cache_results()
 
     def _update_cache_results(self):
-        if self._supports_cache:
+        if self._supports_cache and self._WRITE_RESULTS:
             with ScanManager._CACHE_MUTEX:
                 self._cache_dict["results_filehash"] = get_filehash(self._get_results_fullpath())
                 with open(self._get_cache_fullpath(), "r") as cf:
@@ -115,7 +117,7 @@ class ScanManager(object):
     def _load_cache_if_exists(self) -> dict:
         try:
             Path(self._get_cache_directory()).mkdir(parents=True, exist_ok=True)
-            if self._supports_cache:
+            if self._supports_cache and self._WRITE_RESULTS:
                 with ScanManager._CACHE_MUTEX:
                     cache_path = Path(self._get_cache_fullpath())
                     if cache_path.exists():
@@ -141,8 +143,9 @@ class ScanManager(object):
         return self._init_cache_scanner_dict()
 
     def _remove_old_results(self):
-        if os.path.isfile(self.results_path_full):
-            os.remove(self.results_path_full)
+        if self._WRITE_RESULTS:
+            if os.path.isfile(self.results_path_full):
+                os.remove(self.results_path_full)
 
     def _supports_cache(self) -> bool:
         return self.__class__._SUPPORTS_CACHE

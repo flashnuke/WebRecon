@@ -29,6 +29,7 @@ class ContentScanner(Scanner):
     SCAN_NICKNAME = ScannerNames.ContentScan
     _SCAN_COLOR = OutputColors.Blue
     _SUPPORTS_CACHE = True
+    _WRITE_RESULTS = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

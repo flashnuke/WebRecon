@@ -47,6 +47,7 @@ from tld import get_tld, get_tld_names
 
 class WebRecon(ScanManager):
     _SCAN_COLOR = OutputColors.Orange
+    _WRITE_RESULTS = True
 
     _SCANNAME_TO_METHOD_MAP = {
         ScannerNames.DnsScan: None,
