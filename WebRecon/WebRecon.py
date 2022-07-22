@@ -188,7 +188,7 @@ class WebRecon(ScanManager):
         return len(target_url.replace(f'.{get_tld(target_url)}', '').split('.')) > 1
 
     def _define_status_output(self) -> Dict[str, Any]:
-        status = dict()
+        status = super()._define_status_output()
         status[OutputStatusKeys.Current] = OutputValues.EmptyStatusVal
         status[OutputStatusKeys.Progress] = OutputValues.EmptyStatusVal
         status[OutputStatusKeys.Left] = OutputValues.EmptyStatusVal
