@@ -24,10 +24,10 @@ class Bypass403(Scanner):
     _FOUND = 0
 
     def __init__(self, target_keyword, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.target_url = self.target_url.strip("/")
         self.target_keyword = target_keyword.strip("/")
+
+        super().__init__(*args, **kwargs)
+        self.target_url = self.target_url.strip("/")
 
     def try_bypass(self) -> dict:
         results = {scode: list() for scode in ScannerDefaultParams.SuccessStatusCodes}
