@@ -49,7 +49,7 @@ class OutputManager(object):
                 OutputManager._OUTPUT_LEN += OutputDefaultParams.MaxLen + 1
             else:
                 raise InvalidOutputType(output_type)
-            OutputManager._OUTPUT_LEN += 4 if source_name else 3  # delimiter + source_name (if exists)
+            OutputManager._OUTPUT_LEN += 3  # delimiter + source_name (if exists)
             self._flush()
 
     def remove_output(self, source_name: str, output_type: OutputType):
