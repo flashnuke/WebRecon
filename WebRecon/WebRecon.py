@@ -160,11 +160,7 @@ class WebRecon(ScanManager):
                 self._clear_cache_file()
 
         except Exception as exc:
-            ScanManager._SHOULD_ABORT = True
-            self._log_status(OutputStatusKeys.State, OutputValues.StateFail)
-            self._log_exception(exc, ScanManager._SHOULD_ABORT)
-            print(traceback.format_exc())  # todo remove
-            exit(-1)
+            self.abort_scan(reason=f"exception - {exc}")
 
     def _setup_targets(self) -> queue.Queue:
         domains = queue.Queue()

@@ -54,10 +54,7 @@ class DNSScanner(Scanner):
                 # other exceptions should not occur
                 continue
             except Exception as exc:
-                ScanManager._SHOULD_ABORT = True
-                self._log_status(OutputStatusKeys.State, OutputValues.StateFail)
-                self._log_exception(f"target {url_path}, exception - {exc}", ScanManager._SHOULD_ABORT)
-                exit(-1)
+                self.abort_scan(reason=f"target {url_path}, exception - {exc}")
             finally:
                 self._update_count(url_path, found)
                 time.sleep(self.request_cooldown)

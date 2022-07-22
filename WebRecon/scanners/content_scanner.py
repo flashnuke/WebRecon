@@ -93,13 +93,11 @@ class ContentScanner(Scanner):
                         requests.exceptions.ReadTimeout, HTTPError):
                     continue
                 except Exception as exc:
-                    ScanManager._SHOULD_ABORT = True
-                    self._log_status(OutputStatusKeys.State, OutputValues.StateFail)
-                    self._log_exception(f"target {url}, exception - {exc}", ScanManager._SHOULD_ABORT)
-                    exit(-1)
+                    self.abort_scan(reason=f"target {url}, exception - {exc}")
                 finally:
                     attempt_list.clear()
                     time.sleep(self.request_cooldown)
+
             self._update_count(attempt, found_any)
 
     def _start_scanner(self):
