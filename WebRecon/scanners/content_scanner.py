@@ -59,11 +59,12 @@ class ContentScanner(Scanner):
             else:
                 attempt_list.append(f"/{attempt}")
 
-                for extension in ScannerDefaultParams.FileExtensions:
-                    attempt_post = "." + attempt.split(".")[-1]
+                if ScannerDefaultParams.FileExtensions:
+                    for extension in ScannerDefaultParams.FileExtensions:
+                        attempt_post = "." + attempt.split(".")[-1]
 
-                    if attempt_post != extension:
-                        attempt_list.append(f"/{attempt.replace(attempt_post, extension)}")
+                        if attempt_post != extension:
+                            attempt_list.append(f"/{attempt.replace(attempt_post, extension)}")
 
             for brute in attempt_list:
                 path = urllib.parse.quote(brute)
