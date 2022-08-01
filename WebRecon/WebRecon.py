@@ -215,6 +215,6 @@ if __name__ == "__main__":
              scans=arg_parser.parse_scan_list(arguments),
              wordlist_paths=arg_parser.parse_wordlist_list(arguments),
              results_path=arguments.results_path,
-             nmap_cmdline=ArgParserArgName.NmapCmdlineargs,
-             nmap_ports=ArgParserArgName.NmapPorts,
+             nmap_cmdline=getattr(arguments, ArgParserArgName.NmapCmdlineargs),
+             nmap_ports=getattr(arguments, ArgParserArgName.NmapPorts),
              disable_cache=arguments.disable_cache).start_recon()
