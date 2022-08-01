@@ -1,5 +1,5 @@
 def get_common_ports() -> str:
-    return ','.join(_common_ports)
+    return ','.join(*_common_ports)
 
 
 _common_ports = [66,
