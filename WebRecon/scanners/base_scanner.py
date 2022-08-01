@@ -118,8 +118,8 @@ class ScanManager(object):
 
     def _load_cache_if_exists(self) -> dict:
         try:
-            Path(self._get_cache_directory()).mkdir(parents=True, exist_ok=True)
             if self._supports_cache() and self._WRITE_RESULTS:
+                Path(self._get_cache_directory()).mkdir(parents=True, exist_ok=True)
                 with ScanManager._CACHE_MUTEX:
                     cache_path = Path(self._get_cache_fullpath())
                     if cache_path.exists():
@@ -193,10 +193,11 @@ class ScanManager(object):
         return os.path.join(self._get_cache_directory(), self._get_cache_filename())
 
     def _clear_cache_file(self):
-        with ScanManager._CACHE_MUTEX:
-            cache_path = self._get_cache_fullpath()
-            if os.path.exists(cache_path):
-                os.remove(cache_path)
+        if self._supports_cache():
+            with ScanManager._CACHE_MUTEX:
+                cache_path = self._get_cache_fullpath()
+                if os.path.exists(cache_path):
+                    os.remove(cache_path)
 
     @lru_cache(maxsize=5)
     def generate_url_base_path(self, dnsname: str) -> str:
