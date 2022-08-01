@@ -45,7 +45,6 @@ class OutputManager(object):
                 OutputManager._OUTPUT_CONT[OutputType.Lines][source_name] = deque(maxlen=OutputDefaultParams.MaxLen)
                 for _ in range(OutputDefaultParams.MaxLen):
                     OutputManager._OUTPUT_CONT[OutputType.Lines][source_name].append(OutputDefaultParams.LinePrefix)
-                # appended_output_lines += OutputManager.OutputDefaultParams.MaxLen
                 OutputManager._OUTPUT_LEN += OutputDefaultParams.MaxLen + 1
             else:
                 raise InvalidOutputType(output_type)
