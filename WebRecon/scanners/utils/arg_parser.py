@@ -34,7 +34,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
                         type=str, help="custom scans (case-sensitive)")
 
     parser.add_argument("-dC", "--disable-cache", dest='disable_cache', action="store_true",
-                        type=bool, default=False, help="disable cache (enabled by default)")
+                        default=False, help="disable cache (enabled by default)")
 
     parser.add_argument(f"--set-{ScannerNames.DnsScan}scan-wl", dest=f'wl_{ScannerNames.DnsScan}', action='store',
                         metavar="PATH_TO_WORDLIST",
