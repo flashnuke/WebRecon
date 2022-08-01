@@ -99,7 +99,7 @@ class ScanManager(object):
                 self._update_cache_results()
 
     def _update_cache_results(self):
-        if self._supports_cache and self._WRITE_RESULTS:
+        if self._supports_cache() and self._WRITE_RESULTS:
             with ScanManager._CACHE_MUTEX:
                 self._cache_dict["results_filehash"] = get_filehash(self._get_results_fullpath())
                 with open(self._get_cache_fullpath(), "r") as cf:
