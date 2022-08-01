@@ -1,6 +1,9 @@
 import collections
 import copy
 import time
+import requests
+from urllib3.exceptions import HTTPError
+
 from .base_scanner import Scanner
 from .utils import *
 from typing import Any, Dict, List
@@ -133,9 +136,15 @@ class Bypass403(Scanner):
         return results
 
     def send_request(self, method, path, headers=None) -> int:
+        response = str()
         time.sleep(self.request_cooldown)
-        return self._make_request(method=method, url=path, headers=headers,
-                                  verify=False, allow_redirects=True).status_code
+        try:
+            response = self._make_request(method=method, url=path, headers=headers,
+                                          verify=False, allow_redirects=True).status_code
+        except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout,
+                requests.exceptions.ReadTimeout, HTTPError):
+            pass
+        return response
 
     def _start_scanner(self, results_filename=None) -> Dict[int, List[str]]:
         success_results = dict()
