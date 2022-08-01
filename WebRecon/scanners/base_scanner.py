@@ -43,6 +43,8 @@ class ScanManager(object):
         return object.__new__(cls)
 
     def __init__(self, scheme, target_hostname, target_url, *args, **kwargs):
+        if kwargs.get("disable_cache", False):
+            self.__class__._SUPPORTS_CACHE = False
         self.target_hostname = target_hostname
         self.target_url = target_url
         self.scheme = scheme

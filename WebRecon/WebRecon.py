@@ -60,6 +60,7 @@ class WebRecon(ScanManager):
                  target_url: str,
                  scans: List[str],
                  results_path: str,
+                 disable_cache: bool,
                  *args, **kwargs):
         get_tld_names()
 
@@ -71,6 +72,7 @@ class WebRecon(ScanManager):
             "scheme": self.scheme,
             "target_hostname": self.target_hostname,
             "results_path": results_path,
+            "disable_cache": disable_cache
         }
 
         self._default_custom_scanner_args = self._setup_custom_scanner_args(**kwargs)
@@ -214,4 +216,5 @@ if __name__ == "__main__":
              wordlist_paths=arg_parser.parse_wordlist_list(arguments),
              results_path=arguments.results_path,
              nmap_cmdline=ArgParserArgName.NmapCmdlineargs,
-             nmap_ports=ArgParserArgName.NmapPorts).start_recon()
+             nmap_ports=ArgParserArgName.NmapPorts,
+             disable_cache=arguments.disable_cache).start_recon()
