@@ -1,4 +1,6 @@
-A pentest tool for target websites, that performs several vulnerability scans.
+**READ THE DISCLAIMER** </br>
+</br> A pentest tool for target websites, that performs several vulnerability scans. 
+
 
 # Requirements
 ### Dependencies
