@@ -1,6 +1,13 @@
-A pentest tool for websites, that performs several vulnerability scans.
+A pentest tool for target websites, that performs several vulnerability scans.
 
 # Requirements
+### Dependencies
+Python library dependencies are listed inside `requirements.txt`, and should be installed using `pip3` command. </br>
+Other than that, NMAP should be installed well.
+
+### OS
+
+Currently only Kali LINUX OS is supported.
 
 # Types of Scans
 By default `-sA` (scanAll) argument is true, which means all scanners would run. </br> It is possible to pass a custom list of scans by using the argument `-sC` (scanCustom) followed by a list of scans. The nicknames of the scans are listed in the parenthesis next to each scanner header name below. </br>
