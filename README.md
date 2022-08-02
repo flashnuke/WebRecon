@@ -1,11 +1,9 @@
 A pentest tool for websites, that performs several vulnerability scans.
 
+# Requirements
+
 # Types of Scans
-in order to scan for all.. </br>
-nickname of scan in parenthesis... </br>
-results are saved... </br>
-cache... </br>
-requirements...  including OS...</br>
+By default `-sA` (scanAll) argument is true, which means all scanners would run. </br> It is possible to pass a custom list of scans by using the argument `-sC` (scanCustom) followed by a list of scans. The nicknames of the scans are listed in the parenthesis next to each scanner header name below. </br>
 
 ### Subdomain Scan (`dns`)
 
@@ -35,6 +33,24 @@ Performs a simple NMAP scan on the host target.
 
 * Custom ports should be passed using the `--set-nmapscan-ports` argument, in the same format they are passed in NMAP,</br> i.e: `"21-25,80,139"`
 * Custom commandline arguments for the scan should be passed using the `--set-nmapscan-cmdline_args` argument,</br> i.e: `"-sV -sU -sS"`
+
+# Output
+### Results
+For each hostname, a directory is created with the hostname as its name. Inside the directory, subdirectories are created with the full name of the subdomain and hostname. (each subdomain has its own subdirectory). </br>
+Total results and subdomain scan results are saved in a `.txt` file inside the main hostname directory. <br>
+Other scans save results inside the subdirectory named by the full hostname + subdomain. </br>
+Example: `results/hostname_com/www_hostname_com/results...txt`
+
+* The default path for results is the current working directory. It can be changed by passing the path following the argument: `--set-results-directory`
+
+### Cache
+By default, cache is enabled. Cache files that are older than 30 minutes would be disregarded.
+
+* It is possible to disable cache by passing the following argument: `--disable-cache`
+
+### Exceptions
+No exceptions (other than the ones handled inside the code) are allowed. Any other exception would be logged under `error log` and abort the scan. </br>
+
 
 # Disclaimer
 
