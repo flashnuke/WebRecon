@@ -15,7 +15,7 @@ from tld import get_tld, get_tld_names
 #
 #   Perform a full web reconnaissance report
 #
-#   * Scan for content brute
+#   * Scan for subdomains and content brute
 #   * Test 403 with different bypass methods
 #   * Nmap for open ports and services
 #
