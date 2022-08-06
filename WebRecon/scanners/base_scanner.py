@@ -16,19 +16,6 @@ from .utils import *
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
-#   --------------------------------------------------------------------------------------------------------------------
-#
-#   Base Scanner
-#
-#   Notes
-#       *
-#
-#   Mitigation
-#       *
-#
-#   --------------------------------------------------------------------------------------------------------------------
-
-
 class ScanManager(object):
     _SCAN_COLOR = OutputColors.White
     _SUPPORTS_CACHE = False  # overwrite for each scanner
