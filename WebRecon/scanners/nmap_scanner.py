@@ -9,9 +9,6 @@ from .base_scanner import Scanner
 #
 #   Scan ports, OS and services on a given host using NMAP
 #
-#   Notes
-#       *
-#
 #   --------------------------------------------------------------------------------------------------------------------
 
 
