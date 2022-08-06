@@ -6,6 +6,8 @@
 
 
 # Requirements
+Make sure to set the right file permissions: `chmod u+x WebRecon.py`
+
 ### Dependencies
 Python library dependencies are listed inside `requirements.txt`, and should be installed using `pip3` command. </br>
 NMAP should be installed as well.
@@ -16,6 +18,12 @@ Currently only Kali LINUX OS is supported.
 
 # Types of Scans
 By default `-sA` (scanAll) argument is true, which means all scanners would run. </br> It is possible to pass a custom list of scans by using the argument `-sC` (scanCustom) followed by a list of scans. The nicknames of the scans are listed in the parenthesis next to each scanner header name below. </br>
+
+An example of a command that would start all scans, without cache, using custom wordlists on target `www.____.com`:
+
+```
+./WebRecon.py https://www.___.com -sA --set-contentscan-wl /root/PycharmProjects/content_wl.txt2 --set-dnsscan-wl /root/PycharmProjects/dns_wl.txt2 --disable-cache
+```
 
 ### Subdomain Scan (`dns`)
 
