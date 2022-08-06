@@ -25,6 +25,9 @@ An example of a command that would start all scans, without cache, using custom 
 ./WebRecon.py https://www.___.com -sA --set-contentscan-wl /root/PycharmProjects/content_wl.txt2 --set-dnsscan-wl /root/PycharmProjects/dns_wl.txt2 --disable-cache
 ```
 
+* The default wordlists are basic. You can pass custom ones using cmdline arguments
+* A good source for wordlists: https://github.com/danielmiessler/SecLists
+
 ### Subdomain Scan (`dns`)
 
 Iterates over a wordlist and probes the target host with each word set as the subdomain.</br>
@@ -46,6 +49,7 @@ A result is considered successful if the request status code is one of the follo
 Probes a url using different methods in order to bypass a `403` forbidden status code. </br> This scan is a subscan and shoudl only be invoked by  `Content Scan`.
 
 * If listing a custom scan list rather than using the `-sA` option, this scan should be listed as well, otherwise it would be disabled
+* Most of the methods in this scanner were converted from another known GitHub repo, credit goes to https://github.com/offsecdawn/403bypass
 
 ### NMAP Scan (`nmap`)
 
