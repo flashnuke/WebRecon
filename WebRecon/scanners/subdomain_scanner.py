@@ -13,12 +13,6 @@ from typing import Dict, Any
 #
 #   Scan for subdomains
 #
-#   Notes
-#       * Use a Queue in order to allow for multi-threading
-#
-#   Mitigation
-#       *
-#
 #   --------------------------------------------------------------------------------------------------------------------
 
 
@@ -84,10 +78,4 @@ class DNSScanner(Scanner):
 
 
 if __name__ == "__main__":
-    ex_conf = {
-        "wordlist_path": "../../../wordlists/subdomain_brute.txt",
-        "request_cooldown": 0.1,
-        "thread_count": 4
-    }
-    bruter = DNSScanner(target_url="https://example.com")
-    bruter.start_scanner()
+    pass
