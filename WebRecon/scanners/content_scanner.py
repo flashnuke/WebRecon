@@ -15,13 +15,6 @@ from .bypass_403 import Bypass403
 #
 #   Scan websites for vulnerable directories or files by bruteforce
 #
-#   TODO add .js ext? only if file ending? or not needed... (if ends with .js then do smth)
-#   Notes
-#       * Use a Queue in order to allow for multi-threading
-#
-#   Mitigation
-#       *
-#
 #   --------------------------------------------------------------------------------------------------------------------
 
 
