@@ -1,11 +1,14 @@
 **READ THE DISCLAIMER** </br>
-</br> A pentest tool for target websites, that performs several vulnerability scans. 
+</br> A pentesting tool for target websites, that performs several vulnerability scans. 
+
+![image](https://user-images.githubusercontent.com/59119926/183238692-d01a8f69-20cf-4b7f-8954-b7a7c119c9bf.png)
+
 
 
 # Requirements
 ### Dependencies
 Python library dependencies are listed inside `requirements.txt`, and should be installed using `pip3` command. </br>
-Other than that, NMAP should be installed well.
+NMAP should be installed as well.
 
 ### OS
 
@@ -47,6 +50,11 @@ Performs a simple NMAP scan on the host target.
 ### Results
 For each hostname, a directory is created with the hostname as its name. Inside the directory, subdirectories are created with the full name of the subdomain and hostname. (each subdomain has its own subdirectory). </br>
 Total results and subdomain scan results are saved in a `.txt` file inside the main hostname directory. <br>
+Example of the total results output text file:
+![image](https://user-images.githubusercontent.com/59119926/183238731-79eb3f9b-0934-4b30-bf43-1446070c81a4.png)
+
+
+
 Other scans save results inside the subdirectory named by the full hostname + subdomain. </br>
 Example: `results/hostname_com/www_hostname_com/results...txt`
 
