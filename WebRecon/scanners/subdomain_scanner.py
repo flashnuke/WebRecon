@@ -41,6 +41,9 @@ class DNSScanner(Scanner):
                     requests.exceptions.ReadTimeout, HTTPError):
                 # other exceptions should not occur
                 continue
+            except requests.exceptions.TooManyRedirects:
+                self._log_exception(f"{requests.exceptions.TooManyRedirects.__name__}"
+                                    f" code {ScannerDefaultParams.TooManyRedirectsSCode}", abort=False)
             except Exception as exc:
                 self.abort_scan(reason=f"target {url_path}, exception - {exc}")
             finally:

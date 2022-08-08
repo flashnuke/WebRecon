@@ -144,6 +144,9 @@ class Bypass403(Scanner):
         except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout,
                 requests.exceptions.ReadTimeout, HTTPError):
             pass
+        except requests.exceptions.TooManyRedirects:
+            self._log_exception(requests.exceptions.TooManyRedirects.__name__, abort=False)
+            return ScannerDefaultParams.TooManyRedirectsSCode
         return response
 
     def _start_scanner(self, results_filename=None) -> Dict[int, List[str]]:

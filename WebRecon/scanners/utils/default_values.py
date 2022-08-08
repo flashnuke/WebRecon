@@ -94,6 +94,7 @@ class ScannerDefaultParams(_ExtendedEnum):
     FileExtensions = list()  # i.e: [".php", ".bak", ".orig", ".inc"]
     ForbiddenSCode = 403
     LimitRateSCode = 429
+    TooManyRedirectsSCode = 301
     SuccessStatusCodes = [200, 301, 302]
     ThreadCount = 4
 

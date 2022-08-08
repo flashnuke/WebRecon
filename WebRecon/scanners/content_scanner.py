@@ -26,7 +26,7 @@ class ContentScanner(Scanner):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.ret_results: Dict[str, Union[Dict, List]] = collections.defaultdict(list)
+        self.ret_results: Dict[Union[int, str], Union[Dict, List]] = collections.defaultdict(list)
 
         self.do_bypass = kwargs.get("do_bypass", False)
         if self.do_bypass:
@@ -84,6 +84,9 @@ class ContentScanner(Scanner):
                 except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout,
                         requests.exceptions.ReadTimeout, HTTPError):
                     continue
+                except requests.exceptions.TooManyRedirects:
+                    self.ret_results[ScannerDefaultParams.TooManyRedirectsSCode].append(url)
+                    found_any = True
                 except Exception as exc:
                     self.abort_scan(reason=f"target {url}, exception - {exc}")
                 finally:

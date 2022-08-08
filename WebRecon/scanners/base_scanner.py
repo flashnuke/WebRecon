@@ -295,8 +295,7 @@ class Scanner(ScanManager):
             headers = dict()
         headers.update(self._default_headers)
 
-        res = self._session.request(method=method, url=url, headers=headers, timeout=self.request_timeout,
-                                    allow_redirects=False, **kwargs)
+        res = self._session.request(method=method, url=url, headers=headers, timeout=self.request_timeout, **kwargs)
 
         if res.status_code == ScannerDefaultParams.LimitRateSCode:
             time.sleep(NetworkDefaultParams.TooManyReqSleep)
