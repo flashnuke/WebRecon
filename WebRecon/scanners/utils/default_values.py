@@ -93,6 +93,7 @@ class ScannerDefaultParams(_ExtendedEnum):
     ErrorLogName = f"{OutputColors.Red}error_log{OutputColors.White}"
     FileExtensions = list()  # i.e: [".php", ".bak", ".orig", ".inc"]
     ForbiddenSCode = 403
+    LimitRateSCode = 429
     SuccessStatusCodes = [200, 301, 302]
     ThreadCount = 4
 
