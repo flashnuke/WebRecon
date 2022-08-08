@@ -108,8 +108,8 @@ class ScannerDefaultParams(_ExtendedEnum):
 
 
 class WordlistDefaultPath(_ExtendedEnum):
-    ContentScanner = "wordlists/test_webcontent_brute.txt"
-    DNSScanner = "wordlists/test_subdomain_brute.txt"
+    ContentScanner = "wordlists/default_webcontent_brute.txt"
+    DNSScanner = "wordlists/default_subdomain_brute.txt"
 
 
 class NetworkDefaultParams(_ExtendedEnum):
