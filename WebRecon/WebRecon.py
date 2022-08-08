@@ -77,7 +77,6 @@ class WebRecon(ScanManager):
 
         self._default_custom_scanner_args = self._setup_custom_scanner_args(**kwargs)
 
-        self.domains = queue.Queue()
         self.dns_recursion = ScannerNames.DnsScan in self._all_scans
 
         self.recon_results = dict()
@@ -164,7 +163,7 @@ class WebRecon(ScanManager):
         domains = queue.Queue()
         domains.put(self.target_url)
         if self.dns_recursion:
-            subdomain_scanner.DNSScanner(target_url=self.target_hostname, domains_queue=self.domains,
+            subdomain_scanner.DNSScanner(target_url=self.target_hostname, domains_queue=domains,
                                          **self._generate_scanner_args(DNSScanner.SCAN_NICKNAME)).start_scanner()
         return domains
 
