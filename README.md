@@ -64,6 +64,13 @@ For each hostname, a directory is created with the hostname as its name. Inside 
 Total results and subdomain scan results are saved in a `.txt` file inside the main hostname directory. <br>
 Example of the total results output text file:
 ![image](https://user-images.githubusercontent.com/59119926/183238731-79eb3f9b-0934-4b30-bf43-1446070c81a4.png)
+</br>
+Example of the subdomain scan resuls output text file:</br>
+![image](https://user-images.githubusercontent.com/59119926/183390260-095cae93-5b9e-44cc-8ab7-e83035f38f43.png)
+</br>
+Example of the content scan results output text file:</br>
+![image](https://user-images.githubusercontent.com/59119926/183390779-8c7ff458-1b4a-4a01-9ac7-50be69ff9e23.png)
+
 
 
 
