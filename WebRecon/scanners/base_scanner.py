@@ -302,6 +302,7 @@ class Scanner(ScanManager):
         res = self._session.request(method=method, url=url, headers=headers, timeout=self.request_timeout, **kwargs)
 
         if res.status_code == ScannerDefaultParams.LimitRateSCode:
+            self._log_exception("too many requests", abort=False)
             time.sleep(NetworkDefaultParams.TooManyReqSleep)
 
         return res
