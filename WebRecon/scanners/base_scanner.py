@@ -298,7 +298,7 @@ class Scanner(ScanManager):
         res = self._session.request(method=method, url=url, headers=headers, timeout=self.request_timeout,
                                     allow_redirects=False, **kwargs)
 
-        if res.status_code == ScannerDefaultParams.LimitRateSCode:  # to default values?
+        if res.status_code == ScannerDefaultParams.LimitRateSCode:
             time.sleep(NetworkDefaultParams.TooManyReqSleep)
 
         return res
