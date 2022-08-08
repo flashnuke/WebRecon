@@ -44,7 +44,7 @@ class ContentScanner(Scanner):
     def single_bruter(self):
         attempt_list = list()
         while not self.words_queue.empty() and not ScanManager._SHOULD_ABORT:
-            attempt = self.words_queue.get()
+            attempt = self.words_queue.get().strip("/")
             found_any = False
 
             # check if there is a file extension, if not then it's a directory we're bruting
@@ -113,8 +113,9 @@ class ContentScanner(Scanner):
 
     def _define_status_output(self) -> Dict[str, Any]:
         status = super()._define_status_output()
+        status[OutputStatusKeys.ResultsPath] = self.truncate_str(self.results_path_full)
         status[OutputStatusKeys.Current] = OutputValues.EmptyStatusVal
-        status[OutputStatusKeys.Progress] = OutputValues.EmptyStatusVal
+        status[OutputStatusKeys.Progress] = OutputValues.EmptyProgressBar
         status[OutputStatusKeys.Left] = OutputValues.EmptyStatusVal
         status[OutputStatusKeys.Found] = OutputValues.ZeroStatusVal
 

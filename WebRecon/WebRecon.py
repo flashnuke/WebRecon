@@ -191,7 +191,7 @@ class WebRecon(ScanManager):
     def _define_status_output(self) -> Dict[str, Any]:
         status = dict()
         status[OutputStatusKeys.Current] = OutputValues.EmptyStatusVal
-        status[OutputStatusKeys.Progress] = OutputValues.EmptyStatusVal
+        status[OutputStatusKeys.Progress] = OutputValues.EmptyProgressBar
         status[OutputStatusKeys.Left] = OutputValues.EmptyStatusVal
 
         return status

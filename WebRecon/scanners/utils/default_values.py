@@ -43,6 +43,7 @@ class OutputDefaultParams(_ExtendedEnum):
     LineRemove = "\x1b[1A\x1b[2K"
     LineWidth = 150
     MaxLen = 5
+    StrTruncLimit = 105
     Delimiter = f"{OutputColors.Purple}{LineWidth * '='}{OutputColors.White}"
     LinePrefix = f"{OutputColors.Gray}>{OutputColors.White}"
 
@@ -57,6 +58,12 @@ class OutputStatusKeys(_ExtendedEnum):
     UsingCached = "UsingCached"
 
 
+class OutputProgBarParams(_ExtendedEnum):
+    ProgBarIntvl = 1
+    ProgressMod = 3
+    ProgressMax = (100 // ProgressMod)
+
+
 class OutputValues(_ExtendedEnum):
     StateSetup = ("setting up", OutputColors.Gray)
     StateRunning = ("running", OutputColors.Green)
@@ -67,6 +74,7 @@ class OutputValues(_ExtendedEnum):
     BoolFalse = "false"
 
     EmptyStatusVal = "---"
+    EmptyProgressBar = f"[{('#' * 0).ljust(OutputProgBarParams.ProgressMax, '-')}]"
     ZeroStatusVal = "0"
     EmptyLine = ""
 
@@ -97,12 +105,6 @@ class ScannerDefaultParams(_ExtendedEnum):
     TooManyRedirectsSCode = 301
     SuccessStatusCodes = [200, 301, 302]
     ThreadCount = 4
-
-
-class ScannerProgBarParams(_ExtendedEnum):
-    ProgBarIntvl = 1
-    ProgressMod = 3
-    ProgressMax = (100 // ProgressMod)
 
 
 class WordlistDefaultPath(_ExtendedEnum):

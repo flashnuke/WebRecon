@@ -42,16 +42,10 @@ class NmapScanner(Scanner):
 
     def _define_status_output(self) -> Dict[str, Any]:
         status = super()._define_status_output()
+        status[OutputStatusKeys.ResultsPath] = self.truncate_str(self.results_path_full)
         status["CmdlineArgs"] = self.cmdline_args
         return status
 
 
 if __name__ == "__main__":
-
-    ex_conf = {
-        "target_url": "http://scanme.nmap.org/",
-        "cmdline_args": "-sV",
-        "ports": "1-65535"
-    }
-    bruter = NmapScanner(ex_conf)
-    res = bruter.start_scanner()
+    pass

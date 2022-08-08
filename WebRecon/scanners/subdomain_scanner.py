@@ -72,8 +72,9 @@ class DNSScanner(Scanner):
 
     def _define_status_output(self) -> Dict[str, Any]:
         status = super()._define_status_output()
+        status[OutputStatusKeys.ResultsPath] = self.truncate_str(self.results_path_full)
         status[OutputStatusKeys.Current] = OutputValues.EmptyStatusVal
-        status[OutputStatusKeys.Progress] = OutputValues.EmptyStatusVal
+        status[OutputStatusKeys.Progress] = OutputValues.EmptyProgressBar
         status[OutputStatusKeys.Left] = OutputValues.EmptyStatusVal
         status[OutputStatusKeys.Found] = OutputValues.ZeroStatusVal
 

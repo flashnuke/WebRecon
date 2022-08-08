@@ -154,9 +154,13 @@ class Bypass403(Scanner):
         self._log_status(OutputStatusKeys.State, OutputValues.StateRunning)
         all_results = self.try_bypass()
 
+        success = False
         for scode in ScannerDefaultParams.SuccessStatusCodes:
             success_results[scode] = copy.deepcopy(all_results[scode])
-            Bypass403._FOUND += len(all_results[scode])
+            if len(all_results[scode]):
+                success = True
+        if success:
+            Bypass403._FOUND += 1
         self._log_status(OutputStatusKeys.Found, Bypass403._FOUND)
 
         return success_results

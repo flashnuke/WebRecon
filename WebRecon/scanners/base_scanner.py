@@ -98,7 +98,6 @@ class ScanManager(object):
     def _define_status_output(self) -> Dict[str, Any]:
         status = dict()
         status[OutputStatusKeys.State] = OutputValues.StateSetup
-        status[OutputStatusKeys.ResultsPath] = self.results_path_full
         status[OutputStatusKeys.UsingCached] = OutputValues.BoolTrue if self._use_prev_cache else OutputValues.BoolFalse
 
         return status
@@ -199,10 +198,10 @@ class ScanManager(object):
             progress = (100 * finished_c) // total_c
             with ScanManager._CACHE_MUTEX:
                 self._cache_dict["finished"] = finished_c
-            if progress % ScannerProgBarParams.ProgBarIntvl == 0 and progress > self._current_progress_perc:
-                print_prog_mod = ScannerProgBarParams.ProgressMod
+            if progress % OutputProgBarParams.ProgBarIntvl == 0 and progress > self._current_progress_perc:
+                print_prog_mod = OutputProgBarParams.ProgressMod
                 prog_count = progress // print_prog_mod
-                prog_str = f"[{('#' * prog_count).ljust(ScannerProgBarParams.ProgressMax, '-')}]"
+                prog_str = f"[{('#' * prog_count).ljust(OutputProgBarParams.ProgressMax, '-')}]"
                 self._log_status(OutputStatusKeys.Progress, prog_str, refresh_output=False)
                 self._current_progress_perc = progress
             self._log_status(OutputStatusKeys.Current, current, refresh_output=False)
@@ -213,6 +212,11 @@ class ScanManager(object):
         self._log_status(OutputStatusKeys.State, OutputValues.StateFail)
         self._log_exception(reason, ScanManager._SHOULD_ABORT)
         os.kill(os.getpid(), 9)
+
+    @staticmethod
+    def truncate_str(text: str) -> str:
+        if len(text) > OutputDefaultParams.StrTruncLimit:
+            return f"...{text[:-OutputDefaultParams.StrTruncLimit-3]}"
 
 
 class Scanner(ScanManager):
