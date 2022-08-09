@@ -149,8 +149,7 @@ class WebRecon(ScanManager):
                 results_str = pprint.pformat(self.recon_results,
                                              compact=PPrintDefaultParams.Compact, width=PPrintDefaultParams.Width)
                 self._save_results(results_str, mode='w')
-
-            self._update_progress_status(total_count, domains_count, OutputValues.EmptyStatusVal)
+                self._update_progress_status(total_count, domains_count, target)
             self._log_status(OutputStatusKeys.State, OutputValues.StateComplete)
 
             if CacheDefaultParams.ClearWhenFinished:
