@@ -1,9 +1,7 @@
 **READ THE DISCLAIMER** </br>
 </br> A pentesting tool for target websites, that performs several vulnerability scans. 
 
-![image](https://user-images.githubusercontent.com/59119926/183238692-d01a8f69-20cf-4b7f-8954-b7a7c119c9bf.png)
-
-
+![image](https://user-images.githubusercontent.com/59119926/183597854-04f267ff-7d08-46be-9aab-67a512081ed9.png)
 
 # Requirements
 Make sure to set the right file permissions: `chmod u+x WebRecon.py`
@@ -70,11 +68,12 @@ Example of the subdomain scan resuls output text file:</br>
 </br>
 Example of the content scan results output text file:</br>
 ![image](https://user-images.githubusercontent.com/59119926/183390779-8c7ff458-1b4a-4a01-9ac7-50be69ff9e23.png)
+</br>
+Example of the nmap scan results output text file: </br>
+![image](https://user-images.githubusercontent.com/59119926/183596975-f0468622-0a52-454d-8abe-cbc61fd70bbe.png)
 
 
-
-
-Other scans save results inside the subdirectory named by the full hostname + subdomain. </br>
+All scans save results inside the subdirectory named as the full hostname + subdomain. </br>
 Example: `results/hostname_com/www_hostname_com/results...txt`
 
 * The default path for results is the current working directory. It can be changed by passing the path following the argument: `--set-results-directory`
