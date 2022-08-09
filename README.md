@@ -1,10 +1,10 @@
 **READ THE DISCLAIMER** </br>
-</br> A pentesting tool for target websites, that performs several vulnerability scans. 
+</br> A collection of pentesting tools that perform vulnerability scans websites. 
 
 ![image](https://user-images.githubusercontent.com/59119926/183597854-04f267ff-7d08-46be-9aab-67a512081ed9.png)
 
 # Requirements
-Make sure to set the right file permissions: `chmod u+x WebRecon.py`
+Make sure to set appropriate file permissions: `chmod u+x WebRecon.py`
 
 ### Dependencies
 Python library dependencies are listed inside `requirements.txt`, and should be installed using `pip3` command. </br>
@@ -12,7 +12,7 @@ NMAP should be installed as well.
 
 ### OS
 
-Currently only Kali LINUX OS is supported.
+Currently only LINUX OS is supported.
 
 # Types of Scans
 By default `-sA` (scanAll) argument is true, which means all scanners would run. </br> It is possible to pass a custom list of scans by using the argument `-sC` (scanCustom) followed by a list of scans. The nicknames of the scans are listed in the parenthesis next to each scanner header name below. </br>
