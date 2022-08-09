@@ -44,7 +44,7 @@ A result is considered successful if the request status code is one of the follo
 
 ### Bypass403 (`403bypass`)
 
-Probes a url using different methods in order to bypass a `403` forbidden status code. </br> This scan is a subscan and shoudl only be invoked by  `Content Scan`.
+Probes a url using different methods in order to bypass a `403` forbidden status code. </br> This scan is a subscan and should only be invoked by  `Content Scan`.
 
 * If listing a custom scan list rather than using the `-sA` option, this scan should be listed as well, otherwise it would be disabled
 * Most of the methods in this scanner were converted from another known GitHub repo, credit goes to https://github.com/iamj0ker/bypass-403
@@ -63,7 +63,7 @@ Total results and subdomain scan results are saved in a `.txt` file inside the m
 Example of the total results output text file:
 ![image](https://user-images.githubusercontent.com/59119926/183238731-79eb3f9b-0934-4b30-bf43-1446070c81a4.png)
 </br>
-Example of the subdomain scan resuls output text file:</br>
+Example of the subdomain scan results output text file:</br>
 ![image](https://user-images.githubusercontent.com/59119926/183390260-095cae93-5b9e-44cc-8ab7-e83035f38f43.png)
 </br>
 Example of the content scan results output text file:</br>
@@ -89,6 +89,6 @@ No exceptions (other than the ones handled inside the code) are allowed. Any oth
 
 # Disclaimer
 
-This tool is only for testing and can only be used where strict consent has been given. Do not use it for illegal purposes! It is the end user’s responsibility to obey all applicable local, state and federal laws. I assume no liability and are not responsible for any misuse or damage caused by this tool and software.
+This tool is only for testing and can only be used where strict consent has been given. Do not use it for illegal purposes! It is the end user’s responsibility to obey all applicable local, state and federal laws. I assume no liability and am not responsible for any misuse or damage caused by this tool and software.
 
 Distributed under the GNU License.
