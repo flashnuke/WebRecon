@@ -215,8 +215,8 @@ class ScanManager(object):
 
     @staticmethod
     def truncate_str(text: str) -> str:
-        if len(text) > OutputDefaultParams.StrTruncLimit:
-            return f"...{text[:-OutputDefaultParams.StrTruncLimit-3]}"
+        return f"...{text[:-OutputDefaultParams.StrTruncLimit-3]}" if \
+            len(text) > OutputDefaultParams.StrTruncLimit else text
 
 
 class Scanner(ScanManager):
