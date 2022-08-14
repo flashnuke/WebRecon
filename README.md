@@ -19,7 +19,7 @@ By default `-sA` (scanAll) argument is true, which means all scanners would run.
 
 An example of a command that would start all scans, without cache, using custom wordlists on target `www.____.com`:
 
-```
+```bash
 ./WebRecon.py https://www.___.com -sA --set-contentscan-wl /root/PycharmProjects/content_wl.txt2 --set-dnsscan-wl /root/PycharmProjects/dns_wl.txt2 --disable-cache
 ```
 
@@ -74,7 +74,7 @@ Example of the nmap scan results output text file: </br>
 
 
 All scans save results inside the subdirectory named as the full hostname + subdomain. </br>
-Example: `results/hostname_com/www_hostname_com/results...txt`
+Example: ```results/hostname_com/www_hostname_com/results...txt`
 
 * The default path for results is the current working directory. It can be changed by passing the path following the argument: `--set-results-directory`
 
