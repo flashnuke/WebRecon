@@ -48,7 +48,7 @@ class ScanManager(object):
         if not self._use_prev_cache and self._WRITE_RESULTS:
             self._remove_old_results()
         if self._output_manager.is_key_in_status(OutputStatusKeys.UsingCache):  # WebRecon cls doesn't have this
-            self._log_status(OutputStatusKeys.UsingCached, OutputValues.BoolTrue if self._use_prev_cache else OutputValues.BoolFalse)
+            self._log_status(OutputStatusKeys.UsingCache, OutputValues.BoolTrue if self._use_prev_cache else OutputValues.BoolFalse)
 
         self._current_progress_mutex = threading.RLock()
         self._current_progress_perc = int()
@@ -104,7 +104,7 @@ class ScanManager(object):
     def _define_status_output(self) -> Dict[str, Any]:
         status = dict()
         status[OutputStatusKeys.State] = OutputValues.StateSetup
-        status[OutputStatusKeys.UsingCached] = OutputValues.EmptyStatusVal
+        status[OutputStatusKeys.UsingCache] = OutputValues.EmptyStatusVal
 
         return status
 

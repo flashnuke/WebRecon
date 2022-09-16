@@ -55,7 +55,7 @@ class OutputStatusKeys(_ExtendedEnum):
     ResultsPath = "ResultsPath"
     Found = "Found"
     Left = "Left"
-    UsingCached = "UsingCached"
+    UsingCache = "UsingCache"
 
 
 class OutputProgBarParams(_ExtendedEnum):
