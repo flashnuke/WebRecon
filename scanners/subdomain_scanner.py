@@ -4,10 +4,10 @@ import queue
 import time
 
 from urllib3.exceptions import HTTPError
-from .utils import *
-from .base_scanner import Scanner, ScanManager
 from functools import lru_cache
 from typing import Dict, Any
+from .utils import *
+from .base_scanner import Scanner, ScanManager
 
 #   --------------------------------------------------------------------------------------------------------------------
 #
@@ -36,6 +36,7 @@ class DNSScanner(Scanner):
                 found = res.status_code
                 if found:
                     self._save_results(f"{url_path}\n")
+                    self._log_progress(f"found -> {url_path}")
                     self.domains_queue.put(url_path)
             except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout,
                     requests.exceptions.ReadTimeout, HTTPError):

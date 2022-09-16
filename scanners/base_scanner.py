@@ -1,4 +1,3 @@
-import os
 import threading
 
 import requests
@@ -6,6 +5,7 @@ import queue
 import time
 import json
 import urllib3
+import datetime
 
 from typing import Any, Dict
 from pathlib import Path
@@ -41,21 +41,24 @@ class ScanManager(object):
         self.results_path = kwargs.get("results_path")
         self.results_path_full = self._setup_results_path() if self.results_path else None
 
+        self._output_manager = self._output_manager_setup()
+
         self._use_prev_cache = False
         self._cache_dict: dict = self._load_cache_if_exists()
         if not self._use_prev_cache and self._WRITE_RESULTS:
             self._remove_old_results()
+        if self._output_manager.is_key_in_status(self._get_scanner_name(), OutputStatusKeys.UsingCache):  # WebRecon cls doesn't have this
+            self._log_status(OutputStatusKeys.UsingCache, OutputValues.BoolTrue if self._use_prev_cache else OutputValues.BoolFalse)
 
         self._current_progress_mutex = threading.RLock()
         self._current_progress_perc = int()
-        self._output_manager = self._output_manager_setup()
 
     def _output_manager_setup(self) -> OutputManager:
         om = OutputManager()
         keys = self._define_status_output()
         if keys:
             om.insert_output(self._get_scanner_name(), OutputType.Status, keys)
-        om.insert_output(ScannerDefaultParams.ErrorLogName, OutputType.Lines)
+        om.insert_output(ScannerDefaultParams.ProgLogName, OutputType.Lines)
         return om
 
     @lru_cache()
@@ -68,14 +71,17 @@ class ScanManager(object):
         return full_path
 
     def _log_line(self, log_name, line: str):
-        self._output_manager.update_lines(log_name, line)
+        self._output_manager.update_lines(log_name, f"{datetime.datetime.now().strftime('%H:%M:%S')}" + line)
 
     def _log_status(self, lkey: str, lval: Any, refresh_output=True):
         self._output_manager.update_status(self._get_scanner_name(), lkey, lval, refresh_output)
 
     def _log_exception(self, exc_text, abort: bool):
-        self._log_line(ScannerDefaultParams.ErrorLogName, f" {self.__class__.__name__} exception - {exc_text},"
-                                                          f" aborting - {abort}")
+        self._log_line(ScannerDefaultParams.ProgLogName, f" {self.__class__.__name__} exception - {exc_text},"
+                                                         f" aborting - {abort}")
+
+    def _log_progress(self, prog_text):
+        self._log_line(ScannerDefaultParams.ProgLogName, f" {self.__class__.__name__} {prog_text}")
 
     def _save_results(self, results: str, mode="a"):
         if self._WRITE_RESULTS:
@@ -98,7 +104,7 @@ class ScanManager(object):
     def _define_status_output(self) -> Dict[str, Any]:
         status = dict()
         status[OutputStatusKeys.State] = OutputValues.StateSetup
-        status[OutputStatusKeys.UsingCached] = OutputValues.BoolTrue if self._use_prev_cache else OutputValues.BoolFalse
+        status[OutputStatusKeys.UsingCache] = OutputValues.EmptyStatusVal
 
         return status
 
@@ -122,9 +128,11 @@ class ScanManager(object):
                                         run_id != ScanManager._RUN_ID:
                                     self._use_prev_cache = True
                                     scan_cache["run_id"] = ScanManager._RUN_ID
+                                    self._log_progress(f"loading up old cache...")
                                     return scan_cache
                     else:  # create file
                         with open(cache_path, mode='w') as cf:
+                            self._log_progress(f"no cache file found, creating a new one...")
                             json.dump(self._init_cache_file_dict(self.target_url), cf)
         except Exception as exc:
             pass  # failed to load cache
@@ -266,9 +274,11 @@ class Scanner(ScanManager):
 
     def start_scanner(self) -> Any:
         try:
+            self._log_progress("starting...")
             self._log_status(OutputStatusKeys.State, OutputValues.StateSetup)
             scan_results = self._start_scanner()
             self._log_status(OutputStatusKeys.State, OutputValues.StateComplete)
+            self._log_progress("status finished")
             return scan_results
         except Exception as exc:
             ScanManager._SHOULD_ABORT = True

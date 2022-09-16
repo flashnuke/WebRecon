@@ -42,7 +42,7 @@ class OutputColors(_ExtendedEnum):
 class OutputDefaultParams(_ExtendedEnum):
     LineRemove = "\x1b[1A\x1b[2K"
     LineWidth = 150
-    MaxLen = 5
+    MaxLen = 8
     StrTruncLimit = 105
     Delimiter = f"{OutputColors.Purple}{LineWidth * '='}{OutputColors.White}"
     LinePrefix = f"{OutputColors.Gray}>{OutputColors.White}"
@@ -55,7 +55,7 @@ class OutputStatusKeys(_ExtendedEnum):
     ResultsPath = "ResultsPath"
     Found = "Found"
     Left = "Left"
-    UsingCached = "UsingCached"
+    UsingCache = "UsingCache"
 
 
 class OutputProgBarParams(_ExtendedEnum):
@@ -98,7 +98,7 @@ class ScannerDefaultParams(_ExtendedEnum):
     AcceptedSchemes = ["http", "https"]
     DefaultCacheDirectory = os.path.join("scanners/cache_scan")
     DefaultSubdomain = "www"
-    ErrorLogName = f"{OutputColors.Red}error_log{OutputColors.White}"
+    ProgLogName = f"{OutputColors.Blue}progress_log{OutputColors.White}"
     FileExtensions = list()  # i.e: [".php", ".bak", ".orig", ".inc"]
     ForbiddenSCode = 403
     LimitRateSCode = 429

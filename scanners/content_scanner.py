@@ -3,8 +3,8 @@ import urllib.parse
 import threading
 import time
 import requests
-from typing import Any, Dict
 
+from typing import Any, Dict
 from urllib3.exceptions import HTTPError
 
 from .base_scanner import Scanner, ScanManager
@@ -79,6 +79,7 @@ class ContentScanner(Scanner):
 
                     if scode in ScannerDefaultParams.SuccessStatusCodes:  # after bypass to make sure we save all results
                         self.ret_results[scode].append(url)
+                        self._log_progress(f"{path} -> [{scode}]")
                         found_any = True
 
                 except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout,
@@ -86,6 +87,7 @@ class ContentScanner(Scanner):
                     continue
                 except requests.exceptions.TooManyRedirects:
                     self.ret_results[ScannerDefaultParams.TooManyRedirectsSCode].append(url)
+                    self._log_progress(f"{path} -> [{ScannerDefaultParams.TooManyRedirectsSCode}]")
                     found_any = True
                 except Exception as exc:
                     self.abort_scan(reason=f"target {url}, exception - {exc}")

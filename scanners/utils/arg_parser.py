@@ -33,8 +33,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("-sC", "--scan-custom", dest='scan_custom', action="store", nargs="+", metavar=("", "s1, s2"),
                         type=str, help="custom scans (case-sensitive)")
 
-    parser.add_argument("-dC", "--disable-cache", dest='disable_cache', action="store_true",
-                        default=False, help="disable cache (enabled by default)")
+    parser.add_argument("-c", "--cache", dest='disable_cache', action="store_false",
+                        default=True, help="enable cache (disabled by default)")
 
     parser.add_argument(f"--set-{ScannerNames.DnsScan}scan-wl", dest=f'wl_{ScannerNames.DnsScan}', action='store',
                         metavar="PATH_TO_WORDLIST",

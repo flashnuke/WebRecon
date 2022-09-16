@@ -1,7 +1,7 @@
 **READ THE DISCLAIMER** </br>
 </br> A collection of pentesting tools that perform vulnerability scans websites. 
 
-![image](https://user-images.githubusercontent.com/59119926/183597854-04f267ff-7d08-46be-9aab-67a512081ed9.png)
+![image](https://user-images.githubusercontent.com/59119926/190631672-4a2e65a3-9127-4e07-b9dd-539b050bab38.png)
 
 # Requirements
 Make sure to set appropriate file permissions: `chmod u+x WebRecon.py`
@@ -23,7 +23,7 @@ An example of a command that would start all scans, without cache, using custom 
 ./WebRecon.py https://www.___.com -sA --set-contentscan-wl /root/PycharmProjects/content_wl.txt2 --set-dnsscan-wl /root/PycharmProjects/dns_wl.txt2 --disable-cache
 ```
 
-* The default wordlists are basic. You can pass custom ones using cmdline arguments
+* The default wordlists are basic / kali ones. You can pass custom ones using cmdline arguments
 * A good source for wordlists: https://github.com/danielmiessler/SecLists
 
 ### Subdomain Scan (`dns`)
@@ -41,6 +41,7 @@ Iterates over a wordlist and probes (in a brute manner) different endpoints by a
 A result is considered successful if the request status code is one of the following: `200`, `301`, `302`. If a forbidden status code is returned (`403`) and `403bypass` scan is enabled, further probing takes place where different kind of methods are attempted in order to bypass the forbidden status. Those attempts are also considered as success only if they manage to retrieve one of the aformentioned successful status code. <br>
 
 * In order to use a custom wordlist, "--set-contentscan-wl" argument should be passed, followed by the path
+* The default wordlist used here is dirbuster's `directory-list-2.3-medium.txt` list, which is also located under `/usr/share/wordlists/dirbuster`
 
 ### Bypass403 (`403bypass`)
 
@@ -60,9 +61,6 @@ Performs a simple NMAP scan on the host target.
 ### Results
 For each hostname, a directory is created with the hostname as its name. Inside the directory, subdirectories are created with the full name of the subdomain and hostname. (each subdomain has its own subdirectory). </br>
 Total results and subdomain scan results are saved in a `.txt` file inside the main hostname directory. <br>
-Example of the total results output text file:
-![image](https://user-images.githubusercontent.com/59119926/183238731-79eb3f9b-0934-4b30-bf43-1446070c81a4.png)
-</br>
 Example of the subdomain scan results output text file:</br>
 ![image](https://user-images.githubusercontent.com/59119926/183390260-095cae93-5b9e-44cc-8ab7-e83035f38f43.png)
 </br>
@@ -79,9 +77,10 @@ Example: ```results/hostname_com/www_hostname_com/results...txt`
 * The default path for results is the current working directory. It can be changed by passing the path following the argument: `--set-results-directory`
 
 ### Cache
-By default, cache is enabled. Cache files that are older than 30 minutes would be disregarded.
+By default, cache is disabled. Cache files that are older than 30 minutes would be disregarded. </br>
+This can be useful for long runs that have the potential of crashing midway.
 
-* It is possible to disable cache by passing the following argument: `--disable-cache`
+* It is possible to enable cache by passing the following argument: `-c / --cache`
 
 ### Exceptions
 No exceptions (other than the ones handled inside the code) are allowed. Any other exception would be logged under `error log` and abort the scan. </br>

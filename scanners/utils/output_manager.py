@@ -71,6 +71,11 @@ class OutputManager(object):
         valstr = f"{status_text}".rjust(OutputDefaultParams.LineWidth - len(output_key), " ")
         return f"{output_key}{status_color}{valstr}{OutputColors.White}"
 
+    @staticmethod
+    def is_key_in_status(source_name: str, output_key: str):
+        with OutputManager._OUTPUT_MUTEX:
+            return output_key in OutputManager._OUTPUT_CONT[OutputType.Status][source_name]
+
     def update_status(self, source_name: str, output_key: str, output_val: Any, refresh_output=True):
         with OutputManager._OUTPUT_MUTEX:
             if output_key not in OutputManager._OUTPUT_CONT[OutputType.Status][source_name]:
@@ -96,7 +101,7 @@ class OutputManager(object):
         for source, line_deq in OutputManager._OUTPUT_CONT[OutputType.Lines].items():
             sys.stdout.write(self._construct_output(OutputDefaultParams.Delimiter))
             sys.stdout.write(f"{OutputColors.BOLD}{self._construct_output(source)}{OutputColors.White}\n")
-            for line in line_deq:
+            for line in reversed(line_deq):
                 sys.stdout.write(self._construct_output(line))
         sys.stdout.flush()
 
