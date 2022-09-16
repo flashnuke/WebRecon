@@ -79,9 +79,10 @@ Example: ```results/hostname_com/www_hostname_com/results...txt`
 * The default path for results is the current working directory. It can be changed by passing the path following the argument: `--set-results-directory`
 
 ### Cache
-By default, cache is enabled. Cache files that are older than 30 minutes would be disregarded.
+By default, cache is disabled. Cache files that are older than 30 minutes would be disregarded. </br>
+This can be useful for long runs that have the potential of crashing midway.
 
-* It is possible to disable cache by passing the following argument: `--disable-cache`
+* It is possible to enable cache by passing the following argument: `-c / --cache`
 
 ### Exceptions
 No exceptions (other than the ones handled inside the code) are allowed. Any other exception would be logged under `error log` and abort the scan. </br>

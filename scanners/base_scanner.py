@@ -1,4 +1,3 @@
-import os
 import threading
 
 import requests
@@ -6,6 +5,7 @@ import queue
 import time
 import json
 import urllib3
+import datetime
 
 from typing import Any, Dict
 from pathlib import Path
@@ -32,6 +32,9 @@ class ScanManager(object):
     def __init__(self, scheme, target_hostname, target_url, *args, **kwargs):
         if kwargs.get("disable_cache", False):
             self.__class__._SUPPORTS_CACHE = False
+            self._log_progress(f"cache mode disabled...")
+        else:
+            self._log_progress(f"cache mode enabled...")
         self.target_hostname = target_hostname
         self.target_url = target_url
         self.scheme = scheme
@@ -68,7 +71,7 @@ class ScanManager(object):
         return full_path
 
     def _log_line(self, log_name, line: str):
-        self._output_manager.update_lines(log_name, line)
+        self._output_manager.update_lines(f"{datetime.datetime.now().strftime('%H:%M:%S')}" + log_name, line)
 
     def _log_status(self, lkey: str, lval: Any, refresh_output=True):
         self._output_manager.update_status(self._get_scanner_name(), lkey, lval, refresh_output)
@@ -78,7 +81,7 @@ class ScanManager(object):
                                                          f" aborting - {abort}")
 
     def _log_progress(self, prog_text):
-        self._log_line(ScannerDefaultParams.ProgLogName, f" {self.__class__.__name__} update - {prog_text}")
+        self._log_line(ScannerDefaultParams.ProgLogName, f" {self.__class__.__name__} {prog_text}")
 
     def _save_results(self, results: str, mode="a"):
         if self._WRITE_RESULTS:
@@ -125,9 +128,11 @@ class ScanManager(object):
                                         run_id != ScanManager._RUN_ID:
                                     self._use_prev_cache = True
                                     scan_cache["run_id"] = ScanManager._RUN_ID
+                                    self._log_progress(f"loading up old cache...")
                                     return scan_cache
                     else:  # create file
                         with open(cache_path, mode='w') as cf:
+                            self._log_progress(f"no cache file found, creating a new one...")
                             json.dump(self._init_cache_file_dict(self.target_url), cf)
         except Exception as exc:
             pass  # failed to load cache
@@ -269,9 +274,11 @@ class Scanner(ScanManager):
 
     def start_scanner(self) -> Any:
         try:
+            self._log_progress("setting up...")
             self._log_status(OutputStatusKeys.State, OutputValues.StateSetup)
             scan_results = self._start_scanner()
             self._log_status(OutputStatusKeys.State, OutputValues.StateComplete)
+            self._log_progress("status finished")
             return scan_results
         except Exception as exc:
             ScanManager._SHOULD_ABORT = True

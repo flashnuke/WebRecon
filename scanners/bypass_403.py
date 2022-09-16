@@ -160,6 +160,7 @@ class Bypass403(Scanner):
             if len(all_results[scode]):
                 success = True
         if success:
+            self._log_progress(f"success -> {self.target_keyword}")
             Bypass403._FOUND += 1
         self._log_status(OutputStatusKeys.Found, Bypass403._FOUND)
 
