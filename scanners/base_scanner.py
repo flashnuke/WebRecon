@@ -273,7 +273,7 @@ class Scanner(ScanManager):
 
     def start_scanner(self) -> Any:
         try:
-            self._log_progress("setting up...")
+            self._log_progress("starting...")
             self._log_status(OutputStatusKeys.State, OutputValues.StateSetup)
             scan_results = self._start_scanner()
             self._log_status(OutputStatusKeys.State, OutputValues.StateComplete)
