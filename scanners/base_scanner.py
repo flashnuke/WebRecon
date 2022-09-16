@@ -80,6 +80,7 @@ class ScanManager(object):
                                                          f" aborting - {abort}")
 
     def _log_progress(self, prog_text):
+        return
         self._log_line(ScannerDefaultParams.ProgLogName, f" {self.__class__.__name__} {prog_text}")
 
     def _save_results(self, results: str, mode="a"):
