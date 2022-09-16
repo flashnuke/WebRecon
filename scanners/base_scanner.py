@@ -32,9 +32,6 @@ class ScanManager(object):
     def __init__(self, scheme, target_hostname, target_url, *args, **kwargs):
         if kwargs.get("disable_cache", False):
             self.__class__._SUPPORTS_CACHE = False
-            self._log_progress(f"cache mode disabled...")
-        else:
-            self._log_progress(f"cache mode enabled...")
         self.target_hostname = target_hostname
         self.target_url = target_url
         self.scheme = scheme
@@ -44,14 +41,16 @@ class ScanManager(object):
         self.results_path = kwargs.get("results_path")
         self.results_path_full = self._setup_results_path() if self.results_path else None
 
+        self._output_manager = self._output_manager_setup()
+
         self._use_prev_cache = False
         self._cache_dict: dict = self._load_cache_if_exists()
         if not self._use_prev_cache and self._WRITE_RESULTS:
             self._remove_old_results()
+        self._log_status(OutputStatusKeys.UsingCached, OutputValues.BoolTrue if self._use_prev_cache else OutputValues.BoolFalse)
 
         self._current_progress_mutex = threading.RLock()
         self._current_progress_perc = int()
-        self._output_manager = self._output_manager_setup()
 
     def _output_manager_setup(self) -> OutputManager:
         om = OutputManager()
@@ -104,7 +103,6 @@ class ScanManager(object):
     def _define_status_output(self) -> Dict[str, Any]:
         status = dict()
         status[OutputStatusKeys.State] = OutputValues.StateSetup
-        status[OutputStatusKeys.UsingCached] = OutputValues.BoolTrue if self._use_prev_cache else OutputValues.BoolFalse
 
         return status
 
