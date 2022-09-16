@@ -1,7 +1,7 @@
 **READ THE DISCLAIMER** </br>
 </br> A collection of pentesting tools that perform vulnerability scans websites. 
 
-![image](https://user-images.githubusercontent.com/59119926/183597854-04f267ff-7d08-46be-9aab-67a512081ed9.png)
+![image](https://user-images.githubusercontent.com/59119926/190631672-4a2e65a3-9127-4e07-b9dd-539b050bab38.png)
 
 # Requirements
 Make sure to set appropriate file permissions: `chmod u+x WebRecon.py`
@@ -60,9 +60,6 @@ Performs a simple NMAP scan on the host target.
 ### Results
 For each hostname, a directory is created with the hostname as its name. Inside the directory, subdirectories are created with the full name of the subdomain and hostname. (each subdomain has its own subdirectory). </br>
 Total results and subdomain scan results are saved in a `.txt` file inside the main hostname directory. <br>
-Example of the total results output text file:
-![image](https://user-images.githubusercontent.com/59119926/183238731-79eb3f9b-0934-4b30-bf43-1446070c81a4.png)
-</br>
 Example of the subdomain scan results output text file:</br>
 ![image](https://user-images.githubusercontent.com/59119926/183390260-095cae93-5b9e-44cc-8ab7-e83035f38f43.png)
 </br>
