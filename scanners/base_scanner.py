@@ -47,7 +47,7 @@ class ScanManager(object):
         self._cache_dict: dict = self._load_cache_if_exists()
         if not self._use_prev_cache and self._WRITE_RESULTS:
             self._remove_old_results()
-        self._log_status(OutputStatusKeys.UsingCached, OutputValues.BoolTrue if self._use_prev_cache else OutputValues.BoolFalse)
+        # self._log_status(OutputStatusKeys.UsingCached, OutputValues.BoolTrue if self._use_prev_cache else OutputValues.BoolFalse)
 
         self._current_progress_mutex = threading.RLock()
         self._current_progress_perc = int()
