@@ -79,6 +79,7 @@ class ContentScanner(Scanner):
 
                     if scode in ScannerDefaultParams.SuccessStatusCodes:  # after bypass to make sure we save all results
                         self.ret_results[scode].append(url)
+                        self._log_progress(f"[{scode}] -> {path}")
                         found_any = True
 
                 except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout,
@@ -86,6 +87,7 @@ class ContentScanner(Scanner):
                     continue
                 except requests.exceptions.TooManyRedirects:
                     self.ret_results[ScannerDefaultParams.TooManyRedirectsSCode].append(url)
+                    self._log_progress(f"[{ScannerDefaultParams.TooManyRedirectsSCode}] -> {path}")
                     found_any = True
                 except Exception as exc:
                     self.abort_scan(reason=f"target {url}, exception - {exc}")

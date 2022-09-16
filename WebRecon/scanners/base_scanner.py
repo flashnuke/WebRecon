@@ -55,7 +55,7 @@ class ScanManager(object):
         keys = self._define_status_output()
         if keys:
             om.insert_output(self._get_scanner_name(), OutputType.Status, keys)
-        om.insert_output(ScannerDefaultParams.ErrorLogName, OutputType.Lines)
+        om.insert_output(ScannerDefaultParams.ProgLogName, OutputType.Lines)
         return om
 
     @lru_cache()
@@ -74,8 +74,11 @@ class ScanManager(object):
         self._output_manager.update_status(self._get_scanner_name(), lkey, lval, refresh_output)
 
     def _log_exception(self, exc_text, abort: bool):
-        self._log_line(ScannerDefaultParams.ErrorLogName, f" {self.__class__.__name__} exception - {exc_text},"
-                                                          f" aborting - {abort}")
+        self._log_line(ScannerDefaultParams.ProgLogName, f" {self.__class__.__name__} exception - {exc_text},"
+                                                         f" aborting - {abort}")
+
+    def _log_progress(self, prog_text):
+        self._log_line(ScannerDefaultParams.ProgLogName, f" {self.__class__.__name__} update - {prog_text}")
 
     def _save_results(self, results: str, mode="a"):
         if self._WRITE_RESULTS:

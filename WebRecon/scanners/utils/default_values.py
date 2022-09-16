@@ -98,7 +98,7 @@ class ScannerDefaultParams(_ExtendedEnum):
     AcceptedSchemes = ["http", "https"]
     DefaultCacheDirectory = os.path.join("scanners/cache_scan")
     DefaultSubdomain = "www"
-    ErrorLogName = f"{OutputColors.Red}error_log{OutputColors.White}"
+    ProgLogName = f"{OutputColors.Blue}progress_log{OutputColors.White}"
     FileExtensions = list()  # i.e: [".php", ".bak", ".orig", ".inc"]
     ForbiddenSCode = 403
     LimitRateSCode = 429
