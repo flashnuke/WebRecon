@@ -23,7 +23,7 @@ An example of a command that would start all scans, without cache, using custom 
 ./WebRecon.py https://www.___.com -sA --set-contentscan-wl /root/PycharmProjects/content_wl.txt2 --set-dnsscan-wl /root/PycharmProjects/dns_wl.txt2 --disable-cache
 ```
 
-* The default wordlists are basic. You can pass custom ones using cmdline arguments
+* The default wordlists are basic / kali ones. You can pass custom ones using cmdline arguments
 * A good source for wordlists: https://github.com/danielmiessler/SecLists
 
 ### Subdomain Scan (`dns`)
@@ -41,6 +41,7 @@ Iterates over a wordlist and probes (in a brute manner) different endpoints by a
 A result is considered successful if the request status code is one of the following: `200`, `301`, `302`. If a forbidden status code is returned (`403`) and `403bypass` scan is enabled, further probing takes place where different kind of methods are attempted in order to bypass the forbidden status. Those attempts are also considered as success only if they manage to retrieve one of the aformentioned successful status code. <br>
 
 * In order to use a custom wordlist, "--set-contentscan-wl" argument should be passed, followed by the path
+* The default wordlist used here is dirbuster's `directory-list-2.3-medium.txt` list, which is also located under `/usr/share/wordlists/dirbuster`
 
 ### Bypass403 (`403bypass`)
 
