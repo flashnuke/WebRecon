@@ -47,7 +47,7 @@ class ScanManager(object):
         self._cache_dict: dict = self._load_cache_if_exists()
         if not self._use_prev_cache and self._WRITE_RESULTS:
             self._remove_old_results()
-        # self._log_status(OutputStatusKeys.UsingCached, OutputValues.BoolTrue if self._use_prev_cache else OutputValues.BoolFalse)
+        self._log_status(OutputStatusKeys.UsingCached, OutputValues.BoolTrue if self._use_prev_cache else OutputValues.BoolFalse)
 
         self._current_progress_mutex = threading.RLock()
         self._current_progress_perc = int()
@@ -80,7 +80,6 @@ class ScanManager(object):
                                                          f" aborting - {abort}")
 
     def _log_progress(self, prog_text):
-        return
         self._log_line(ScannerDefaultParams.ProgLogName, f" {self.__class__.__name__} {prog_text}")
 
     def _save_results(self, results: str, mode="a"):
@@ -104,6 +103,7 @@ class ScanManager(object):
     def _define_status_output(self) -> Dict[str, Any]:
         status = dict()
         status[OutputStatusKeys.State] = OutputValues.StateSetup
+        status[OutputStatusKeys.UsingCached] = OutputValues.EmptyStatusVal
 
         return status
 
