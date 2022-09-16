@@ -71,6 +71,11 @@ class OutputManager(object):
         valstr = f"{status_text}".rjust(OutputDefaultParams.LineWidth - len(output_key), " ")
         return f"{output_key}{status_color}{valstr}{OutputColors.White}"
 
+    @staticmethod
+    def is_key_in_status(source_name: str, output_key: str):
+        with OutputManager._OUTPUT_MUTEX:
+            return output_key in OutputManager._OUTPUT_CONT[OutputType.Status][source_name]
+
     def update_status(self, source_name: str, output_key: str, output_val: Any, refresh_output=True):
         with OutputManager._OUTPUT_MUTEX:
             if output_key not in OutputManager._OUTPUT_CONT[OutputType.Status][source_name]:
