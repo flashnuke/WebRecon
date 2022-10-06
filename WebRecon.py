@@ -115,9 +115,9 @@ class WebRecon(ScanManager):
 
     def _parse_target_url(self, target_url: str) -> Tuple[str, Union[str, None], str]:
         try:
-            scheme, ip = target_url.split('://')
-            ip = ipaddress.ip_address(ip)  # check for valid ip address
-            return scheme, None, target_url
+            scheme, ip_hostname = target_url.split('://')
+            ip_test = ipaddress.ip_address(ip_hostname)  # check for valid ip address
+            return scheme, None, ip_hostname
         except Exception as exc:  # not an IP address
             parsed_target = urllib.parse.urlparse(target_url)
             scheme = parsed_target.scheme
@@ -211,8 +211,8 @@ class WebRecon(ScanManager):
 
 
 if __name__ == "__main__":
-    if "linux" not in platform:
-        raise UnsupportedOS(platform)
+    # if "linux" not in platform:
+    #     raise UnsupportedOS(platform)
     with open("requirements.txt", "r") as reqs:
         pkg_resources.require(reqs.readlines())
 
