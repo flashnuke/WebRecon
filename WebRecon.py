@@ -69,8 +69,7 @@ class WebRecon(ScanManager):
         self._scans = self._parse_scan_list(scans)  # only the ones we call using `_do_scan()`
 
         self.scheme, self.subdomain, self.target_hostname = self._parse_target_url(target_url)
-        if self.subdomain is None:
-            self.host_is_resolved = True
+        self.host_is_resolved = self.subdomain is None
         self._default_general_scanner_args = {
             "scheme": self.scheme,
             "target_hostname": self.target_hostname,
