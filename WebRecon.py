@@ -115,7 +115,8 @@ class WebRecon(ScanManager):
 
     def _parse_target_url(self, target_url: str) -> Tuple[str, Union[str, None], str]:
         try:
-            scheme, ip = ipaddress.ip_address(target_url.split('://')[1])
+            scheme, ip = target_url.split('://')[1]
+            ip = ipaddress.ip_address(ip)  # check for valid ip address
             return f"{scheme}://", None, target_url
         except Exception as exc:  # not an IP address
             parsed_target = urllib.parse.urlparse(target_url)
@@ -125,7 +126,6 @@ class WebRecon(ScanManager):
                 target_url) else ScannerDefaultParams.DefaultSubdomain
             hostname = netloc.split(".", 1)[-1] if self._contains_subdomain(target_url) else netloc
             return scheme, sub, hostname
-
 
     def _start_scans_for_target(self, target: str) -> List[threading.Thread]:
         scanner_threads = list()
