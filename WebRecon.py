@@ -117,7 +117,7 @@ class WebRecon(ScanManager):
         try:
             scheme, ip = target_url.split('://')
             ip = ipaddress.ip_address(ip)  # check for valid ip address
-            return f"{scheme}://", None, target_url
+            return scheme, None, target_url
         except Exception as exc:  # not an IP address
             parsed_target = urllib.parse.urlparse(target_url)
             scheme = parsed_target.scheme
