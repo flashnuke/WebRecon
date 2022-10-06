@@ -195,7 +195,8 @@ class ScanManager(object):
 
     @lru_cache(maxsize=5)
     def generate_url_base_path(self, dnsname: str) -> str:
-        return f"{self.scheme}://{dnsname}.{self.target_hostname}"
+        return f"{self.scheme}://{dnsname}.{self.target_hostname}" if \
+            dnsname is not None else f"{self.scheme}://{self.target_hostname}"
 
     @lru_cache(maxsize=5)
     def _format_name_for_path(self, name: str) -> str:
