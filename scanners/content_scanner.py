@@ -47,12 +47,8 @@ class ContentScanner(Scanner):
             attempt = self.words_queue.get().strip("/")
             found_any = False
 
-            # check if there is a file extension, if not then it's a directory we're bruting
-            if "." not in attempt:
-                attempt_list.append(f"/{attempt}/")
-            else:
-                attempt_list.append(f"/{attempt}")
-
+            attempt_list.extend([f"/{attempt}/", f"/{attempt}"])
+            if "." in attempt: # check if there is a file extension
                 if ScannerDefaultParams.FileExtensions:
                     for extension in ScannerDefaultParams.FileExtensions:
                         attempt_post = "." + attempt.split(".")[-1]
