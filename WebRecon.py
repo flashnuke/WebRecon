@@ -4,6 +4,7 @@ import copy
 import urllib.parse
 import pprint
 import pkg_resources
+import ipaddress
 
 from sys import platform
 from typing import Tuple, Type
@@ -68,6 +69,7 @@ class WebRecon(ScanManager):
         self._scans = self._parse_scan_list(scans)  # only the ones we call using `_do_scan()`
 
         self.scheme, self.subdomain, self.target_hostname = self._parse_target_url(target_url)
+        self.host_is_resolved = self.subdomain is None
         self._default_general_scanner_args = {
             "scheme": self.scheme,
             "target_hostname": self.target_hostname,
@@ -111,14 +113,19 @@ class WebRecon(ScanManager):
                 scans.append(scanner)
         return scans
 
-    def _parse_target_url(self, target_url: str) -> Tuple[str, str, str]:
-        parsed_target = urllib.parse.urlparse(target_url)
-        scheme = parsed_target.scheme
-        netloc = parsed_target.netloc
-        sub = netloc.split(".")[0] if self._contains_subdomain(target_url) else ScannerDefaultParams.DefaultSubdomain
-        hostname = netloc.split(".", 1)[-1] if self._contains_subdomain(target_url) else netloc
-
-        return scheme, sub, hostname
+    def _parse_target_url(self, target_url: str) -> Tuple[str, Union[str, None], str]:
+        try:
+            scheme, ip_hostname = target_url.split('://')
+            ip_test = ipaddress.ip_address(ip_hostname)  # check for valid ip address
+            return scheme, None, ip_hostname
+        except Exception as exc:  # not an IP address
+            parsed_target = urllib.parse.urlparse(target_url)
+            scheme = parsed_target.scheme
+            netloc = parsed_target.netloc
+            sub = netloc.split(".")[0] if self._contains_subdomain(
+                target_url) else ScannerDefaultParams.DefaultSubdomain
+            hostname = netloc.split(".", 1)[-1] if self._contains_subdomain(target_url) else netloc
+            return scheme, sub, hostname
 
     def _start_scans_for_target(self, target: str) -> List[threading.Thread]:
         scanner_threads = list()
@@ -162,6 +169,9 @@ class WebRecon(ScanManager):
         domains = queue.Queue()
         domains.put(self.target_url)
         if self.dns_recursion:
+            if self.host_is_resolved:
+                self._log_progress("skipping dns scan, host is resolved...")
+                return domains
             subdomain_scanner.DNSScanner(target_url=self.target_hostname, domains_queue=domains,
                                          **self._generate_scanner_args(DNSScanner.SCAN_NICKNAME)).start_scanner()
         return domains
@@ -201,8 +211,8 @@ class WebRecon(ScanManager):
 
 
 if __name__ == "__main__":
-    if "linux" not in platform:
-        raise UnsupportedOS(platform)
+    # if "linux" not in platform:
+    #     raise UnsupportedOS(platform)
     with open("requirements.txt", "r") as reqs:
         pkg_resources.require(reqs.readlines())
 
