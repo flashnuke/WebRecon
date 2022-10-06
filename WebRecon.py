@@ -115,7 +115,7 @@ class WebRecon(ScanManager):
 
     def _parse_target_url(self, target_url: str) -> Tuple[str, Union[str, None], str]:
         try:
-            scheme, ip = target_url.split('://')[1]
+            scheme, ip = target_url.split('://')
             ip = ipaddress.ip_address(ip)  # check for valid ip address
             return f"{scheme}://", None, target_url
         except Exception as exc:  # not an IP address
