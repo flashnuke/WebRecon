@@ -47,14 +47,16 @@ class ContentScanner(Scanner):
             attempt = self.words_queue.get().strip("/")
             found_any = False
 
-            attempt_list.extend([f"/{attempt}/", f"/{attempt}"])
-            if "." in attempt: # check if there is a file extension
+            attempt_list.append(f"/{attempt}")
+            if "." in attempt:  # check if there is a file extension
                 if ScannerDefaultParams.FileExtensions:
                     for extension in ScannerDefaultParams.FileExtensions:
                         attempt_post = "." + attempt.split(".")[-1]
 
                         if attempt_post != extension:
                             attempt_list.append(f"/{attempt.replace(attempt_post, extension)}")
+            else:
+                attempt_list.append(f"/{attempt}/")
 
             for brute in attempt_list:
                 path = urllib.parse.quote(brute)
@@ -88,11 +90,11 @@ class ContentScanner(Scanner):
                 except Exception as exc:
                     self.abort_scan(reason=f"target {url}, exception - {exc}")
                 finally:
-                    attempt_list.clear()
                     if found_any:
                         self._save_results()
                     time.sleep(self.request_cooldown)
 
+            attempt_list.clear()
             self._update_count(attempt, found_any)
 
     def _start_scanner(self):
