@@ -30,7 +30,8 @@ class ContentScanner(Scanner):
 
         self.do_bypass = kwargs.get("do_bypass", False)
         if self.do_bypass:
-            self.ret_results['bypass'] = {scode: list() for scode in ScannerDefaultParams.SuccessStatusCodes}
+            for scode in ScannerDefaultParams.SuccessStatusCodes:
+                self.ret_results[f'bypass_{scode}'] = list()
 
     def _save_results(self, *args, **kwargs):
         results_str = str()
@@ -72,7 +73,7 @@ class ContentScanner(Scanner):
                                                    target_hostname=self.target_hostname,
                                                    scheme=self.scheme).start_scanner()
                         for bypass_scode, bypass_urls in bypass_results.items():
-                            self.ret_results["bypass"][bypass_scode].extend(bypass_urls)
+                            self.ret_results[f'bypass_{scode}'].extend(bypass_urls)
                             found_any = True
 
                     if scode in ScannerDefaultParams.SuccessStatusCodes:  # after bypass to make sure we save all results
