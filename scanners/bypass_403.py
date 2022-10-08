@@ -177,6 +177,4 @@ class Bypass403(Scanner):
 
 
 if __name__ == "__main__":
-    bruter = Bypass403("host", "endpoint")
-    x = bruter.start_scanner()
-    print(x)
+    pass
