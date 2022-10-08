@@ -140,7 +140,7 @@ class Bypass403(Scanner):
         time.sleep(self.request_cooldown)
         try:
             response = self._make_request(method=method, url=path, headers=headers,
-                                          verify=False, allow_redirects=True).status_code
+                                          allow_redirects=True).status_code
         except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout,
                 requests.exceptions.ReadTimeout, HTTPError):
             pass
