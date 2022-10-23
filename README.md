@@ -1,7 +1,7 @@
 **READ THE DISCLAIMER** </br>
 </br> A collection of pentesting tools that perform vulnerability scans websites. 
 
-![image](https://user-images.githubusercontent.com/59119926/190631672-4a2e65a3-9127-4e07-b9dd-539b050bab38.png)
+![image](https://user-images.githubusercontent.com/59119926/197377152-94a8b51b-28e5-4edf-a99e-79b863f91c2e.png)
 
 # Requirements
 Make sure to set appropriate file permissions: `chmod u+x WebRecon.py`
@@ -17,10 +17,10 @@ Currently only LINUX OS is supported.
 # Types of Scans
 By default `-sA` (scanAll) argument is true, which means all scanners would run. </br> It is possible to pass a custom list of scans by using the argument `-sC` (scanCustom) followed by a list of scans. The nicknames of the scans are listed in the parenthesis next to each scanner header name below. </br>
 
-An example of a command that would start all scans, without cache, using custom wordlists on target `www.____.com`:
+An example of a command that would launch all scans, using custom wordlists on target `www.____.com`:
 
 ```bash
-./WebRecon.py https://www.___.com -sA --set-contentscan-wl /root/PycharmProjects/content_wl.txt2 --set-dnsscan-wl /root/PycharmProjects/dns_wl.txt2 --disable-cache
+./WebRecon.py https://www.___.com -sA --set-contentscan-wl /root/PycharmProjects/content_wl.txt2 --set-dnsscan-wl /root/PycharmProjects/dns_wl.txt2
 ```
 
 * The default wordlists are basic / kali ones. You can pass custom ones using cmdline arguments
