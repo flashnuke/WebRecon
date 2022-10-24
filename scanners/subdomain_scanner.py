@@ -33,9 +33,10 @@ class DNSScanner(Scanner):
 
         while not self.words_queue.empty() and not ScanManager._SHOULD_ABORT:
             subdomain = self.words_queue.get()
-            if subdomain == self.original_subdomain:
-                continue
             url_path = self.generate_url_base_path(subdomain)
+            if subdomain == self.original_subdomain:
+                self._update_count(url_path, True)
+                continue
             found = False
             try:
                 res = self._make_request(method="GET", url=url_path)
@@ -58,7 +59,7 @@ class DNSScanner(Scanner):
 
     def _record_found(self, url_path: str):
         self._save_results(f"{url_path}\n")
-        self._log_progress(f"found -> {url_path}")
+        self._log_progress(f"added to queue -> {url_path}")
 
     def _start_scanner(self) -> queue.Queue:
         threads = list()
