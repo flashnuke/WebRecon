@@ -172,7 +172,9 @@ class WebRecon(ScanManager):
             if self.host_is_resolved:
                 self._log_progress("skipping dns scan, host is resolved...")
                 return domains
-            subdomain_scanner.DNSScanner(target_url=self.target_hostname, domains_queue=domains,
+            subdomain_scanner.DNSScanner(target_url=self.target_hostname,
+                                         domains_queue=domains,
+                                         original_subdomain=self.subdomain,
                                          **self._generate_scanner_args(DNSScanner.SCAN_NICKNAME)).start_scanner()
         return domains
 
