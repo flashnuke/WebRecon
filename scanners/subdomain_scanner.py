@@ -25,6 +25,9 @@ class DNSScanner(Scanner):
     def __init__(self, domains_queue=None, original_subdomain=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.original_subdomain = original_subdomain
+        if self.original_subdomain:
+            url_path = self.generate_url_base_path(self.original_subdomain)
+            self._save_results(f"{url_path}\n")
         self.domains_queue = domains_queue if domains_queue else queue.Queue()
 
     def single_bruter(self):
