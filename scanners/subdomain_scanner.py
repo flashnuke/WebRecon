@@ -22,14 +22,18 @@ class DNSScanner(Scanner):
     _SUPPORTS_CACHE = True
     _WRITE_RESULTS = True
 
-    def __init__(self, domains_queue=None, *args, **kwargs):
+    def __init__(self, domains_queue=None, original_subdomain=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.original_subdomain = original_subdomain
         self.domains_queue = domains_queue if domains_queue else queue.Queue()
 
     def single_bruter(self):
 
         while not self.words_queue.empty() and not ScanManager._SHOULD_ABORT:
-            url_path = self.generate_url_base_path(self.words_queue.get())
+            subdomain = self.words_queue.get()
+            if subdomain == self.original_subdomain:
+                continue
+            url_path = self.generate_url_base_path(subdomain)
             found = False
             try:
                 res = self._make_request(method="GET", url=url_path)
