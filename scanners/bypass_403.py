@@ -136,7 +136,7 @@ class Bypass403(Scanner):
         return results
 
     def send_request(self, method, path, headers=None) -> int:
-        response = str()
+        response = 0
         time.sleep(self.request_cooldown)
         try:
             response = self._make_request(method=method, url=path, headers=headers,
@@ -147,6 +147,8 @@ class Bypass403(Scanner):
         except requests.exceptions.TooManyRedirects:
             self._log_exception(requests.exceptions.TooManyRedirects.__name__, abort=False)
             return ScannerDefaultParams.TooManyRedirectsSCode
+        except Exception as exc:  # error -> return 0
+            pass
         return response
 
     def _start_scanner(self, results_filename=None) -> Dict[int, List[str]]:
