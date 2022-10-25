@@ -1,5 +1,5 @@
 **READ THE DISCLAIMER** </br>
-</br> A collection of pentesting tools that perform vulnerability scans websites. 
+</br> A collection of web-penetration tools that perform enumeration 
 
 ![image](https://user-images.githubusercontent.com/59119926/197377152-94a8b51b-28e5-4edf-a99e-79b863f91c2e.png)
 
