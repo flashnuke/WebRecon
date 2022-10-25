@@ -72,9 +72,9 @@ class ContentScanner(Scanner):
                                                    scheme=self.scheme).start_scanner()
                         for bypass_scode, bypass_urls in bypass_results.items():
                             self.ret_results[f'bypass {scode}'].extend(bypass_urls)
-                            found_any = True
 
-                    if scode in ScannerDefaultParams.SuccessStatusCodes:  # after bypass to make sure we save all results
+                    if scode in ScannerDefaultParams.SuccessStatusCodes or \
+                            scode == ScannerDefaultParams.ForbiddenSCode:
                         self.ret_results[scode].append(url)
                         self._log_progress(f"{path} -> [{scode}]")
                         found_any = True
