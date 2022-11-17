@@ -48,7 +48,7 @@ A result is considered successful if the request status code is one of the follo
 Probes a url using different methods in order to bypass a `403` forbidden status code. </br> This scan is a subscan and should only be invoked by  `Content Scan`.
 
 * If listing a custom scan list rather than using the `-sA` option, this scan should be listed as well, otherwise it would be disabled
-* Most of the methods in this scanner were converted from another known GitHub repo, credit goes to https://github.com/iamj0ker/bypass-403
+* Most of the methods in this scanner were converted from 2 other known GitHub repos, credit goes to https://github.com/iamj0ker/bypass-403 and https://github.com/yunemse48/403bypasser
 
 ### NMAP Scan (`nmap`)
 
