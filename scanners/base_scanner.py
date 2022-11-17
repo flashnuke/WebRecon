@@ -303,14 +303,14 @@ class Scanner(ScanManager):
 
         self._session = requests.Session()
 
-    def _make_request(self, method: str, url: str, headers=None, **kwargs):
+    def _make_request(self, method: str, url: str, headers=None, timeout=None, **kwargs):
         if not self._session_refresh_count % self._session_refresh_interval:
             self._setup_session()
         if not headers:
             headers = dict()
         headers.update(self._default_headers)
 
-        res = self._session.request(method=method, url=url, headers=headers, timeout=self.request_timeout,
+        res = self._session.request(method=method, url=url, headers=headers, timeout=timeout or self.request_timeout,
                                     verify=False, **kwargs)
 
         if res.status_code == ScannerDefaultParams.LimitRateSCode:

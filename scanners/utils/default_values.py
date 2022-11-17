@@ -104,7 +104,7 @@ class ScannerDefaultParams(_ExtendedEnum):
     LimitRateSCode = 429
     TooManyRedirectsSCode = 301
     SuccessStatusCodes = [200, 301, 302]
-    ThreadCount = 8
+    ThreadCount = 16
 
 
 class WordlistDefaultPath(_ExtendedEnum):
