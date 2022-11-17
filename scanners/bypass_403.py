@@ -83,23 +83,16 @@ class Bypass403(Scanner):
                 scode, size = self.send_request("GET", original_path, headers=headers)
                 results[scode].append(f"size {size}\t\tGET {original_path} -H {header}: {host_nickname}")
 
-        req_path = f"{self.target_url}"
-        headers = {"X-rewrite-url": self.target_keyword}
-        scode, size = self.send_request("GET", req_path, headers=headers)
-        results[scode].append(f"size {size}\t\tGET {req_path} -H 'X-rewrite-url: {self.target_keyword}'")
+        for header in ["X-rewrite-url", "X-Original-URL"]:
+            req_path = f"{self.target_url}"
+            headers = {header: self.target_keyword}
+            scode, size = self.send_request("GET", req_path, headers=headers)
+            results[scode].append(f"size {size}\t\tGET {req_path} -H '{header}: {self.target_keyword}'")
 
-        req_path = f"{self.target_url}"
-        headers = {"X-Original-URL": self.target_keyword}
-        scode, size = self.send_request("GET", req_path, headers=headers)
-        results[scode].append(f"size {size}\t\tGET {req_path} -H 'X-Original-URL: {self.target_keyword}'")
-
-        headers = {"Content-Length": "0"}
-        scode, size = self.send_request("POST", original_path, headers=headers)
-        results[scode].append(f"size {size}\t\tPOST {original_path} -H 'Content-Length: 0'")
-
-        headers = {"Content-Length": "0"}
-        scode, size = self.send_request("PUT", original_path, headers=headers)
-        results[scode].append(f"size {size}\t\tPUT {original_path} -H 'Content-Length: 0'")
+        for method in ["POST", "PUT"]:
+            headers = {"Content-Length": "0"}
+            scode, size = self.send_request(method, original_path, headers=headers)
+            results[scode].append(f"size {size}\t\t{method} {original_path} -H 'Content-Length: 0'")
 
         return results
 
