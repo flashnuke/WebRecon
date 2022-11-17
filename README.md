@@ -39,7 +39,8 @@ The results are then contained inside a queue object and used for further scans.
 
 Iterates over a wordlist and probes (in a brute manner) different endpoints by appending the words to the target hostname. </br>
 A result is considered successful if the request status code is one of the following: `200`, `301`, `302`. If a forbidden status code is returned (`403`) and `403bypass` scan is enabled, further probing takes place where different kind of methods are attempted in order to bypass the forbidden status. Those attempts are also considered as success only if they manage to retrieve one of the aformentioned successful status code. <br>
-
+</br>
+The output in the progress log (and the results file) contains the status code and the page content size.
 * In order to use a custom wordlist, "--set-contentscan-wl" argument should be passed, followed by the path
 * The default wordlist used here is dirbuster's `directory-list-2.3-medium.txt` list, which is also located under `/usr/share/wordlists/dirbuster`
 
@@ -48,7 +49,7 @@ A result is considered successful if the request status code is one of the follo
 Probes a url using different methods in order to bypass a `403` forbidden status code. </br> This scan is a subscan and should only be invoked by  `Content Scan`.
 
 * If listing a custom scan list rather than using the `-sA` option, this scan should be listed as well, otherwise it would be disabled
-* Most of the methods in this scanner were converted from another known GitHub repo, credit goes to https://github.com/iamj0ker/bypass-403
+* Most of the methods in this scanner were converted from 2 other known GitHub repos, credit goes to https://github.com/iamj0ker/bypass-403 and https://github.com/yunemse48/403bypasser
 
 ### NMAP Scan (`nmap`)
 

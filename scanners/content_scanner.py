@@ -75,15 +75,16 @@ class ContentScanner(Scanner):
 
                     if scode in ScannerDefaultParams.SuccessStatusCodes or \
                             scode == ScannerDefaultParams.ForbiddenSCode:
-                        self.ret_results[scode].append(url)
-                        self._log_progress(f"{path} -> [{scode}]")
+                        res_size = len(response.text)
+                        self.ret_results[scode].append(f"size {res_size}\t\t{url}")
+                        self._log_progress(f"{path} -> [{scode}, {res_size}]")
                         found_any = True
 
                 except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout,
                         requests.exceptions.ReadTimeout, HTTPError):
                     continue
                 except requests.exceptions.TooManyRedirects:
-                    self.ret_results[ScannerDefaultParams.TooManyRedirectsSCode].append(url)
+                    self.ret_results[ScannerDefaultParams.TooManyRedirectsSCode].append(f"size 0\t\t{url}")
                     self._log_progress(f"{path} -> [{ScannerDefaultParams.TooManyRedirectsSCode}]")
                     found_any = True
                 except Exception as exc:
