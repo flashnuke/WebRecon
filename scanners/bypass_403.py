@@ -113,7 +113,7 @@ class Bypass403(Scanner):
         return results
 
     def send_request(self, method, path, headers=None) -> Tuple[int, int]:  # returns status_code, size
-        time.sleep(self.request_cooldown)
+        time.sleep(0.25 * self.request_cooldown)
         try:
             response = self._make_request(method=method, url=path, headers=headers,
                                           allow_redirects=True)
