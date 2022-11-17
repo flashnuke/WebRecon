@@ -39,7 +39,8 @@ The results are then contained inside a queue object and used for further scans.
 
 Iterates over a wordlist and probes (in a brute manner) different endpoints by appending the words to the target hostname. </br>
 A result is considered successful if the request status code is one of the following: `200`, `301`, `302`. If a forbidden status code is returned (`403`) and `403bypass` scan is enabled, further probing takes place where different kind of methods are attempted in order to bypass the forbidden status. Those attempts are also considered as success only if they manage to retrieve one of the aformentioned successful status code. <br>
-
+</br>
+The output in the progress log (and the results file) contains the status code and the page size.
 * In order to use a custom wordlist, "--set-contentscan-wl" argument should be passed, followed by the path
 * The default wordlist used here is dirbuster's `directory-list-2.3-medium.txt` list, which is also located under `/usr/share/wordlists/dirbuster`
 
