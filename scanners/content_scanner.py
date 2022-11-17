@@ -75,8 +75,9 @@ class ContentScanner(Scanner):
 
                     if scode in ScannerDefaultParams.SuccessStatusCodes or \
                             scode == ScannerDefaultParams.ForbiddenSCode:
-                        self.ret_results[scode].append(url)
-                        self._log_progress(f"{path} -> [{scode}, {len(response.text)}]")
+                        res_size = len(response.text)
+                        self.ret_results[scode].append(f"{url}\tsize {res_size}")
+                        self._log_progress(f"{path} -> [{scode}, {res_size}]")
                         found_any = True
 
                 except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout,
