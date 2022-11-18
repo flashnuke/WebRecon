@@ -62,15 +62,14 @@ Performs a simple NMAP scan on the host target.
 ### Results
 For each hostname, a directory is created with the hostname as its name. Inside the directory, subdirectories are created with the full name of the subdomain and hostname. (each subdomain has its own subdirectory). </br>
 Total results and subdomain scan results are saved in a `.txt` file inside the main hostname directory. <br>
-Example of the subdomain scan results output text file:</br>
+Example of a **subdomain scan** results output text file:</br>
 ![image](https://user-images.githubusercontent.com/59119926/183390260-095cae93-5b9e-44cc-8ab7-e83035f38f43.png)
 </br>
-Example of the content scan results output text file:</br>
-![image](https://user-images.githubusercontent.com/59119926/183390779-8c7ff458-1b4a-4a01-9ac7-50be69ff9e23.png)
+Example of a **content scan** results output text file:</br>
+<img width="450" alt="image" src="https://user-images.githubusercontent.com/59119926/202641585-2355faf8-ce3a-4d60-aec8-30e06e854876.png">
 </br>
-Example of the nmap scan results output text file: </br>
-![image](https://user-images.githubusercontent.com/59119926/183596975-f0468622-0a52-454d-8abe-cbc61fd70bbe.png)
-
+Example of an **nmap scan** results output text file: </br>
+<img width="1100" alt="image" src="https://user-images.githubusercontent.com/59119926/183596975-f0468622-0a52-454d-8abe-cbc61fd70bbe.png">
 
 All scans save results inside the subdirectory named as the full hostname + subdomain. </br>
 Example: ```results/hostname_com/www_hostname_com/results...txt`
