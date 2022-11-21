@@ -166,7 +166,7 @@ class WebRecon(ScanManager):
             self.abort_scan(reason=f"exception - {exc}")
 
         except KeyboardInterrupt:
-            self._log_progress("Stopping...")
+            self._log_progress("Interrupted by user...")
             self.abort_scan()
 
     def _setup_targets(self) -> queue.Queue:
