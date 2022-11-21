@@ -162,6 +162,10 @@ class WebRecon(ScanManager):
             if CacheDefaultParams.ClearWhenFinished:
                 self._clear_cache_file()
 
+        except KeyboardInterrupt:
+            self._log_progress("interrupted by user...")
+            self.abort_scan()
+
         except Exception as exc:
             self.abort_scan(reason=f"exception - {exc}")
 
