@@ -162,12 +162,12 @@ class WebRecon(ScanManager):
             if CacheDefaultParams.ClearWhenFinished:
                 self._clear_cache_file()
 
-        except Exception as exc:
-            self.abort_scan(reason=f"exception - {exc}")
-
         except KeyboardInterrupt:
             self._log_progress("Interrupted by user...")
             self.abort_scan()
+
+        except Exception as exc:
+            self.abort_scan(reason=f"exception - {exc}")
 
     def _setup_targets(self) -> queue.Queue:
         domains = queue.Queue()
