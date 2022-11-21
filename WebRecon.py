@@ -163,7 +163,7 @@ class WebRecon(ScanManager):
                 self._clear_cache_file()
 
         except KeyboardInterrupt:
-            self._log_progress("Interrupted by user...")
+            self._log_progress("interrupted by user...")
             self.abort_scan()
 
         except Exception as exc:
