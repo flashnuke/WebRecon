@@ -216,10 +216,11 @@ class ScanManager(object):
             self._log_status(OutputStatusKeys.Current, current, refresh_output=False)
             self._log_status(OutputStatusKeys.Left, f"{total_c - finished_c} out of {total_c}")
 
-    def abort_scan(self, reason: str):
+    def abort_scan(self, reason=None):
         ScanManager._SHOULD_ABORT = True
         self._log_status(OutputStatusKeys.State, OutputValues.StateFail)
-        self._log_exception(reason, ScanManager._SHOULD_ABORT)
+        if reason:
+            self._log_exception(reason, ScanManager._SHOULD_ABORT)
         os.kill(os.getpid(), 9)
 
     @staticmethod

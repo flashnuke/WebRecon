@@ -165,6 +165,10 @@ class WebRecon(ScanManager):
         except Exception as exc:
             self.abort_scan(reason=f"exception - {exc}")
 
+        except KeyboardInterrupt:
+            self._log_progress("Stopping...")
+            self.abort_scan()
+
     def _setup_targets(self) -> queue.Queue:
         domains = queue.Queue()
         domains.put(self.target_url)
