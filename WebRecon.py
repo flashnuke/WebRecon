@@ -16,32 +16,10 @@ from tld import get_tld, get_tld_names
 #
 #   Perform a full web reconnaissance report
 #
-#   * Scan for subdomains and content brute
-#   * Test 403 with different bypass methods
-#   * Nmap for open ports and services
-#
-#         self.recon_results = {
-#             "domain_name": {
-#                 "ContentScanner": {
-#                     "code": [results],
-#                     "code2": [results],
-#                     "bypass": {
-#                         "url": {
-#                             "code": ["curl cmd"],
-#                             "code2": ["curl_cmd"]
-#                         },
-#                         "url2": {
-#                             "code": ["curl cmd"],
-#                             "code2": ["curl_cmd"]
-#                         }
-#                     }
-#                 }
-#                 "NmapScanner": {
-#                   ```nmap scan report format```
-#               }
-#             },
-#         }
-#
+#   * ContentScanner -> Perform content brute (scanning for endpoints)
+#   * Bypass403      -> Test 403 with different bypass methods
+#   * DNSScanner     -> Scan for subdomains
+#   * NmapScanner    -> Nmap for open ports and services
 #
 #   --------------------------------------------------------------------------------------------------------------------
 
@@ -92,6 +70,7 @@ class WebRecon(ScanManager):
                                        for s_name in ScannerNames}
 
         default_custom_scanner_args[ScannerNames.ContentScan]["do_bypass"] = ScannerNames.BypassScan in self._all_scans
+        default_custom_scanner_args[ScannerNames.ContentScan]["extensions"] = kwargs.get("extensions")
 
         default_custom_scanner_args[ScannerNames.NmapScan]["cmdline_args"] = kwargs.get("nmap_cmdline")
         default_custom_scanner_args[ScannerNames.NmapScan]["ports"] = kwargs.get("nmap_ports")
@@ -116,7 +95,7 @@ class WebRecon(ScanManager):
     def _parse_target_url(self, target_url: str) -> Tuple[str, Union[str, None], str]:
         try:
             scheme, ip_hostname = target_url.split('://')
-            ip_test = ipaddress.ip_address(ip_hostname)  # check for valid ip address
+            ipaddress.ip_address(ip_hostname)  # check for valid ip address
             return scheme, None, ip_hostname
         except Exception as exc:  # not an IP address
             parsed_target = urllib.parse.urlparse(target_url)
@@ -231,4 +210,5 @@ if __name__ == "__main__":
              results_path=arguments.results_path,
              nmap_cmdline=getattr(arguments, ArgParserArgName.NmapCmdlineargs),
              nmap_ports=getattr(arguments, ArgParserArgName.NmapPorts),
-             disable_cache=arguments.disable_cache).start_recon()
+             disable_cache=arguments.disable_cache,
+             extensions=arguments.extensions).start_recon()

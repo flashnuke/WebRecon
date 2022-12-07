@@ -36,6 +36,10 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("-c", "--cache", dest='disable_cache', action="store_false",
                         default=True, help="enable cache (disabled by default)")
 
+    parser.add_argument("-e", f"--set-{ScannerNames.ContentScan}scan-ext", dest='extensions', action="store",
+                        default=str(), metavar="ext1,ext2",
+                        help='test various file extensions for each attempt in the wordlist (example: "php,bak,html")')
+
     parser.add_argument(f"--set-{ScannerNames.DnsScan}scan-wl", dest=f'wl_{ScannerNames.DnsScan}', action='store',
                         metavar="PATH_TO_WORDLIST",
                         type=str, default=ArgParserDefaultParams.DNSDefaultWL,
