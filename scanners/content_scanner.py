@@ -33,7 +33,7 @@ class ContentScanner(Scanner):
             for scode in ScannerDefaultParams.SuccessStatusCodes:
                 self.ret_results[f'bypass {scode}'] = list()
 
-        self.extensions: List[str] = [f".{ext}" for ext in kwargs.get("do_bypass", str()).split(',')]
+        self.extensions: List[str] = [f".{ext}" for ext in kwargs.get("extensions", str()).split(',')]
 
     def _save_results(self, *args, **kwargs):
         results_str = str()
