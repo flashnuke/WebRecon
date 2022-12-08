@@ -42,7 +42,8 @@ A result is considered successful if the request status code is one of the follo
 </br>
 The output in the progress log (and the results file) contains the status code and the page content size.
 * In order to use a custom wordlist, "--set-contentscan-wl" argument should be passed, followed by the path
-* The default wordlist used here is dirbuster's `directory-list-2.3-medium.txt` list, which is also located under `/usr/share/wordlists/dirbuster`
+* The default wordlist used here is dirb's `common.txt` list, which is also located under `/usr/share/wordlists/dirb/`
+* Use the `-e` argument to append custom extensions to each word attempt (i.e -> `-e "php,html"`)
 
 ### Bypass403 (`403bypass`)
 
