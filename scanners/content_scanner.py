@@ -33,6 +33,8 @@ class ContentScanner(Scanner):
             for scode in ScannerDefaultParams.SuccessStatusCodes:
                 self.ret_results[f'bypass {scode}'] = list()
 
+        self.extensions: List[str] = [f".{ext}" for ext in kwargs.get("extensions", str()).split(',')]
+
     def _save_results(self, *args, **kwargs):
         results_str = str()
         for code, urls in self.ret_results.items():
@@ -49,13 +51,8 @@ class ContentScanner(Scanner):
             found_any = False
 
             attempt_list.append(f"/{attempt}")
-            if "." in attempt:  # check if there is a file extension
-                if ScannerDefaultParams.FileExtensions:
-                    for extension in ScannerDefaultParams.FileExtensions:
-                        attempt_post = "." + attempt.split(".")[-1]
-
-                        if attempt_post != extension:
-                            attempt_list.append(f"/{attempt.replace(attempt_post, extension)}")
+            for ext in self.extensions:
+                attempt_list.append(f"/{attempt}{ext}")
 
             for brute in attempt_list:
                 path = urllib.parse.quote(brute)
