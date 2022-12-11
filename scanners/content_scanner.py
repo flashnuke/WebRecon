@@ -35,7 +35,7 @@ class ContentScanner(Scanner):
 
         self.extensions: List[str] = [f".{ext}" for ext in kwargs.get("extensions", str()).split(',')]
         self._count_multiplier += len(self.extensions)
-        self.ignore_size = kwargs.get("content_ignoresize")
+        self.ignore_size = kwargs.get("ignore_size")
 
     def _save_results(self, *args, **kwargs):
         results_str = str()
