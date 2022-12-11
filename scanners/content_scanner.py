@@ -34,6 +34,7 @@ class ContentScanner(Scanner):
                 self.ret_results[f'bypass {scode}'] = list()
 
         self.extensions: List[str] = [f".{ext}" for ext in kwargs.get("extensions", str()).split(',')]
+        self._count_multiplier += len(self.extensions)
         self.ignore_size = kwargs.get("content_ignoresize")
 
     def _save_results(self, *args, **kwargs):

@@ -52,6 +52,7 @@ class ScanManager(object):
 
         self._current_progress_mutex = threading.RLock()
         self._current_progress_perc = int()
+        self._count_multiplier = 1  # for content extensions, etc... purely visual to avoid messing cache
 
     def _output_manager_setup(self) -> OutputManager:
         om = OutputManager()
@@ -213,10 +214,12 @@ class ScanManager(object):
                 prog_str = f"[{('#' * prog_count).ljust(OutputProgBarParams.ProgressMax, '-')}]"
                 self._log_status(OutputStatusKeys.Progress, prog_str, refresh_output=False)
                 self._current_progress_perc = progress
-            left = total_c - finished_c
+            left = self._count_multiplier * (total_c - finished_c)
             if finished_c % OutputProgBarParams.ProgLeftIntvl == 0 or left == 0:
                 self._log_status(OutputStatusKeys.Current, current, refresh_output=False)
-                self._log_status(OutputStatusKeys.Left, f"{total_c - finished_c} out of {total_c}")
+                self._log_status(OutputStatusKeys.Left,
+                                 f"{self._count_multiplier * total_c - self._count_multiplier * finished_c} "
+                                 f"out of {self._count_multiplier * total_c}")
 
     def abort_scan(self, reason=None):
         ScanManager._SHOULD_ABORT = True
@@ -252,10 +255,6 @@ class Scanner(ScanManager):
         self._default_headers = dict()  # for rotating user agents
         self._session: Union[requests.Session, None] = None
         self._setup_session()
-
-        self._session_refresh_interval = kwargs.get("session_refresh_interval",
-                                                    NetworkDefaultParams.SessionRefreshInterval)
-        self._session_refresh_count = 0
 
     def load_words(self) -> queue.Queue:
         try:
@@ -307,8 +306,6 @@ class Scanner(ScanManager):
         self._session = requests.Session()
 
     def _make_request(self, method: str, url: str, headers=None, timeout=None, **kwargs):
-        if not self._session_refresh_count % self._session_refresh_interval:
-            self._setup_session()
         if not headers:
             headers = dict()
         headers.update(self._default_headers)
