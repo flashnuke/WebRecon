@@ -196,8 +196,8 @@ class WebRecon(ScanManager):
 
 
 if __name__ == "__main__":
-    # if "linux" not in platform:
-    #     raise UnsupportedOS(platform)
+    if "linux" not in platform:
+        raise UnsupportedOS(platform)
     with open("requirements.txt", "r") as reqs:
         pkg_resources.require(reqs.readlines())
 
