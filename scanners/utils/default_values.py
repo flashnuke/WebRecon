@@ -112,7 +112,7 @@ class WordlistDefaultPath(_ExtendedEnum):
 
 class NetworkDefaultParams(_ExtendedEnum):
     RequestCooldown = 0.0
-    RequestTimeout = 5
+    RequestTimeout = 10
     SessionRefreshInterval = 1000
     TooManyReqSleep = 10
 
