@@ -39,16 +39,16 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     parser.add_argument("-to", "--timeout", dest='request_timeout', action="store", type=int,
                         default=NetworkDefaultParams.RequestTimeout, metavar="<time>",
-                        help=f"request timeout (default -> {NetworkDefaultParams.RequestTimeout}")
+                        help=f"request timeout (default -> {NetworkDefaultParams.RequestTimeout})")
 
     parser.add_argument("-tc", "--thread-count", dest='thread_count', action="store", type=int,
                         default=ScannerDefaultParams.ThreadCount, metavar="<count>",
-                        help=f"workers (thread) count (default -> {ScannerDefaultParams.ThreadCount}")
+                        help=f"workers (thread) count (default -> {ScannerDefaultParams.ThreadCount})")
 
     parser.add_argument("-s", "--request-cooldown", dest='request_cooldown', action="store", type=float,
                         default=NetworkDefaultParams.RequestCooldown, metavar="<count>",
                         help=f"sleep duration between requests for each worker "
-                             f"(default -> {NetworkDefaultParams.RequestCooldown}[s]")
+                             f"(default -> {NetworkDefaultParams.RequestCooldown}[s])")
 
     parser.add_argument("-e", f"--set-{ScannerNames.ContentScan}-ext", dest='extensions', action="store",
                         type=str, default=str(), metavar="<ext1,ext2...>",
