@@ -58,7 +58,7 @@ class OutputStatusKeys(_ExtendedEnum):
 
 class OutputProgBarParams(_ExtendedEnum):
     ProgBarIntvl = 1
-    ProgLeftIntvl = 100
+    ProgLeftIntvl = 10
     ProgressMod = 3
     ProgressMax = (100 // ProgressMod)
 
@@ -112,7 +112,7 @@ class WordlistDefaultPath(_ExtendedEnum):
 
 class NetworkDefaultParams(_ExtendedEnum):
     RequestCooldown = 0.0
-    RequestTimeout = 10
+    RequestTimeout = 5
     SessionRefreshInterval = 1000
     TooManyReqSleep = 10
 
