@@ -20,7 +20,7 @@ By default `-sA` (scanAll) argument is true, which means all scanners would run.
 An example of a command that would launch all scans, using custom wordlists on target `www.____.com`:
 
 ```bash
-./WebRecon.py https://www.___.com -sA --set-contentscan-wl /root/PycharmProjects/content_wl.txt2 --set-dnsscan-wl /root/PycharmProjects/dns_wl.txt2
+./WebRecon.py https://www.___.com -sA --set-content-wl /root/PycharmProjects/content_wl.txt2 --set-dns-wl /root/PycharmProjects/dns_wl.txt2
 ```
 
 * The default wordlists are basic / kali ones. You can pass custom ones using cmdline arguments
@@ -32,7 +32,7 @@ Iterates over a wordlist and probes the target host with each word set as the su
 The results are then contained inside a queue object and used for further scans.
 
 * A host name can be passed with or without a subdomain. This scan performs probes on the target hostname, by replacing the passed subdomain with words from the wordlist
-* In order to use a custom wordlist, `"--set-dnsscan-wl"` argument should be passed, followed by the path
+* In order to use a custom wordlist, `"--set-dns-wl"` argument should be passed, followed by the path
 
 
 ### Content Scan (`content`)
@@ -41,7 +41,7 @@ Iterates over a wordlist and probes (in a brute manner) different endpoints by a
 A result is considered successful if the request status code is one of the following: `200`, `301`, `302`. If a forbidden status code is returned (`403`) and `403bypass` scan is enabled, further probing takes place where different kind of methods are attempted in order to bypass the forbidden status. Those attempts are also considered as success only if they manage to retrieve one of the aformentioned successful status code. <br>
 </br>
 The output in the progress log (and the results file) contains the status code and the page content size.
-* In order to use a custom wordlist, "--set-contentscan-wl" argument should be passed, followed by the path
+* In order to use a custom wordlist, "--set-content-wl" argument should be passed, followed by the path
 * The default wordlist used here is dirb's `common.txt` list, which is also located under `/usr/share/wordlists/dirb/`
 * Use the `-e` argument to append custom extensions to each word attempt (i.e -> `-e "php,html"`)
 

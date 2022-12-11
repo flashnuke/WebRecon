@@ -213,8 +213,10 @@ class ScanManager(object):
                 prog_str = f"[{('#' * prog_count).ljust(OutputProgBarParams.ProgressMax, '-')}]"
                 self._log_status(OutputStatusKeys.Progress, prog_str, refresh_output=False)
                 self._current_progress_perc = progress
-            self._log_status(OutputStatusKeys.Current, current, refresh_output=False)
-            self._log_status(OutputStatusKeys.Left, f"{total_c - finished_c} out of {total_c}")
+            left = total_c - finished_c
+            if finished_c % OutputProgBarParams.ProgLeftIntvl == 0 or left == 0:
+                self._log_status(OutputStatusKeys.Current, current, refresh_output=False)
+                self._log_status(OutputStatusKeys.Left, f"{total_c - finished_c} out of {total_c}")
 
     def abort_scan(self, reason=None):
         ScanManager._SHOULD_ABORT = True
@@ -243,9 +245,9 @@ class Scanner(ScanManager):
         self._success_count = 0
         self._count_mutex = threading.RLock()
 
-        self.request_cooldown = kwargs.get("request_cooldown", NetworkDefaultParams.RequestCooldown)
-        self.thread_count = kwargs.get("thread_count", ScannerDefaultParams.ThreadCount)
-        self.request_timeout = kwargs.get("request_timeout", NetworkDefaultParams.RequestTimeout)
+        self.request_cooldown = kwargs.get("request_cooldown")
+        self.thread_count = kwargs.get("thread_count")
+        self.request_timeout = kwargs.get("request_timeout")
 
         self._default_headers = dict()  # for rotating user agents
         self._session: Union[requests.Session, None] = None
@@ -319,6 +321,10 @@ class Scanner(ScanManager):
             time.sleep(NetworkDefaultParams.TooManyReqSleep)
 
         return res
+
+    def _sleep_after_request(self):
+        if self.request_cooldown:
+            time.sleep(self.request_cooldown)
 
 
 if __name__ == "__main__":
