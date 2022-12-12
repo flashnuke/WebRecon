@@ -84,7 +84,7 @@ class Bypass403(Scanner):
                 results[scode].append(f"size {size}".ljust(OutputDefaultParams.SizeToResPad) +
                                       f"GET {original_path} -H {header}: {host_nickname}")
 
-        for header in ["X-rewrite-url", "X-Original-URL"]:
+        for header in ["X-Rewrite-URL", "X-Original-URL"]:
             req_path = f"{self.target_url}"
             header_val = self.target_keyword if self.target_keyword.startswith("/") else f"/{self.target_keyword}"
             headers = {header: header_val}
