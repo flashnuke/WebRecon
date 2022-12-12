@@ -132,7 +132,7 @@ class WebRecon(ScanManager):
                 target = domains.get()
                 if total_count and target == self.target_url:
                     continue
-                self._update_progress_status(total_count, domains_count, target)
+                self._update_progress_status(total_count, domains_count, target, force_update=True)
                 self.recon_results[target] = dict()
                 scanner_threads = self._start_scans_for_target(target)
                 for t in scanner_threads:
@@ -141,7 +141,7 @@ class WebRecon(ScanManager):
                 results_str = pprint.pformat(self.recon_results,
                                              compact=PPrintDefaultParams.Compact, width=PPrintDefaultParams.Width)
                 self._save_results(results_str, mode='w')
-                self._update_progress_status(total_count, domains_count, target)
+                self._update_progress_status(total_count, domains_count, target, force_update=True)
             self._log_status(OutputStatusKeys.State, OutputValues.StateComplete)
 
             if CacheDefaultParams.ClearWhenFinished:
