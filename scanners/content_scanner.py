@@ -73,12 +73,13 @@ class ContentScanner(Scanner):
                         for bypass_scode, bypass_urls in bypass_results.items():
                             if scode != ScannerDefaultParams.ForbiddenSCode:
                                 self.ret_results[f'bypass {scode}'].extend(bypass_urls)
+                                found_any = True
 
                     if scode in ScannerDefaultParams.SuccessStatusCodes or \
                             scode == ScannerDefaultParams.ForbiddenSCode:
                         res_size = len(response.text)
                         if res_size != self.filter_size:
-                            self.ret_results[scode].append(f"size {res_size}\t\t{url}")
+                            self.ret_results[scode].append(f"size {res_size}".ljust(30) + url)
                             self._log_progress(f"{path} -> [{scode}, {res_size}]")
                             found_any = True
 

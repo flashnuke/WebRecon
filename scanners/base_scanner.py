@@ -89,7 +89,7 @@ class ScanManager(object):
             with ScanManager._CACHE_MUTEX:
                 path = self._get_results_fullpath()
                 with open(path, mode) as res_file:
-                    res_file.write(f"{results}")
+                    res_file.write(results)
                 self._update_cache_results()
 
     def _update_cache_results(self):
