@@ -14,8 +14,6 @@ class _ExtendedEnum(Enum):
 # ========= OutputManager Settings
 
 
-
-
 class OutputType(_ExtendedEnum):
     Lines = "lines"
     Status = "status"
@@ -60,6 +58,7 @@ class OutputStatusKeys(_ExtendedEnum):
 
 class OutputProgBarParams(_ExtendedEnum):
     ProgBarIntvl = 1
+    ProgLeftIntvl = 10
     ProgressMod = 3
     ProgressMax = (100 // ProgressMod)
 
@@ -112,8 +111,8 @@ class WordlistDefaultPath(_ExtendedEnum):
 
 
 class NetworkDefaultParams(_ExtendedEnum):
-    RequestCooldown = 0.01
-    RequestTimeout = 1
+    RequestCooldown = 0.0
+    RequestTimeout = 10
     SessionRefreshInterval = 1000
     TooManyReqSleep = 10
 

@@ -34,6 +34,8 @@ class ContentScanner(Scanner):
                 self.ret_results[f'bypass {scode}'] = list()
 
         self.extensions: List[str] = [f".{ext}" for ext in kwargs.get("extensions", str()).split(',')]
+        self._count_multiplier += len(self.extensions)
+        self.filter_size = kwargs.get("filter_size")
 
     def _save_results(self, *args, **kwargs):
         results_str = str()
@@ -66,7 +68,8 @@ class ContentScanner(Scanner):
                         bypass_results = Bypass403(target_url=self.target_url,
                                                    target_keyword=path,
                                                    target_hostname=self.target_hostname,
-                                                   scheme=self.scheme).start_scanner()
+                                                   scheme=self.scheme,
+                                                   ).start_scanner()
                         for bypass_scode, bypass_urls in bypass_results.items():
                             if scode != ScannerDefaultParams.ForbiddenSCode:
                                 self.ret_results[f'bypass {scode}'].extend(bypass_urls)
@@ -74,9 +77,10 @@ class ContentScanner(Scanner):
                     if scode in ScannerDefaultParams.SuccessStatusCodes or \
                             scode == ScannerDefaultParams.ForbiddenSCode:
                         res_size = len(response.text)
-                        self.ret_results[scode].append(f"size {res_size}\t\t{url}")
-                        self._log_progress(f"{path} -> [{scode}, {res_size}]")
-                        found_any = True
+                        if res_size != self.filter_size:
+                            self.ret_results[scode].append(f"size {res_size}\t\t{url}")
+                            self._log_progress(f"{path} -> [{scode}, {res_size}]")
+                            found_any = True
 
                 except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout,
                         requests.exceptions.ReadTimeout, HTTPError):
@@ -90,7 +94,7 @@ class ContentScanner(Scanner):
                 finally:
                     if found_any:
                         self._save_results()
-                    time.sleep(self.request_cooldown)
+                    self._sleep_after_request()
 
             attempt_list.clear()
             self._update_count(attempt, found_any)

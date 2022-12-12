@@ -37,35 +37,52 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("-c", "--cache", dest='disable_cache', action="store_false",
                         default=True, help="enable cache (disabled by default)")
 
-    parser.add_argument("-e", f"--set-{ScannerNames.ContentScan}scan-ext", dest='extensions', action="store",
-                        type=str, default=str(), metavar="ext1,ext2",
+    parser.add_argument("-to", "--timeout", dest='request_timeout', action="store", type=int,
+                        default=NetworkDefaultParams.RequestTimeout, metavar="<time>",
+                        help=f"request timeout (default -> {NetworkDefaultParams.RequestTimeout})")
+
+    parser.add_argument("-tc", "--thread-count", dest='thread_count', action="store", type=int,
+                        default=ScannerDefaultParams.ThreadCount, metavar="<count>",
+                        help=f"workers (thread) count (default -> {ScannerDefaultParams.ThreadCount})")
+
+    parser.add_argument("-s", "--request-cooldown", dest='request_cooldown', action="store", type=float,
+                        default=NetworkDefaultParams.RequestCooldown, metavar="<count>",
+                        help=f"sleep duration between requests for each worker "
+                             f"(default -> {NetworkDefaultParams.RequestCooldown}[s])")
+
+    parser.add_argument("-e", f"--set-{ScannerNames.ContentScan}-ext", dest='extensions', action="store",
+                        type=str, default=str(), metavar="<ext1,ext2...>",
                         help='test various file extensions for each attempt in the wordlist (example: "php,bak,html")')
 
-    parser.add_argument(f"--set-{ScannerNames.DnsScan}scan-wl", dest=f'wl_{ScannerNames.DnsScan}', action='store',
-                        metavar="PATH_TO_WORDLIST",
+    parser.add_argument("-fs", f"--set-{ScannerNames.ContentScan}-filtersize", dest='content_filtersize',
+                        action="store", type=int, default=-1, metavar="<size>",
+                        help='content scan - filter pages that are of size <N> (default -> 0)')
+
+    parser.add_argument(f"--set-{ScannerNames.DnsScan}-wl", dest=f'wl_{ScannerNames.DnsScan}', action='store',
+                        metavar="<path>",
                         type=str, default=ArgParserDefaultParams.DNSDefaultWL,
                         help=f"path to the dns scan wordlist"
                              f" (default: {ArgParserDefaultParams.DNSDefaultWL})")
 
-    parser.add_argument(f"--set-{ScannerNames.ContentScan}scan-wl", action='store',
-                        dest=f'wl_{ScannerNames.ContentScan}', metavar="PATH_TO_WORDLIST",
+    parser.add_argument(f"--set-{ScannerNames.ContentScan}-wl", action='store',
+                        dest=f'wl_{ScannerNames.ContentScan}', metavar="<path>",
                         type=str, default=ArgParserDefaultParams.ContentDefaultWL,
                         help=f"path to the content scan wordlist"
                              f" (default: {ArgParserDefaultParams.ContentDefaultWL})")
 
-    parser.add_argument("--set-results-directory", dest='results_path', metavar="PATH_TO_DIRECTORY",
+    parser.add_argument("--set-results-directory", dest='results_path', metavar="<path>",
                         type=str, default=ArgParserDefaultParams.ResultsDefaultPath,
                         help=f"path to the main results directory"
                              f" (default: {ArgParserDefaultParams.ResultsDefaultPath})")
 
-    parser.add_argument(f"--set-{ScannerNames.NmapScan}scan-cmdline_args", action='store',
-                        dest=ArgParserArgName.NmapCmdlineargs, metavar="CMDLINE_ARGS",
+    parser.add_argument(f"--set-{ScannerNames.NmapScan}-cmdline_args", action='store',
+                        dest=ArgParserArgName.NmapCmdlineargs, metavar="<args>",
                         type=str, default=ArgParserDefaultParams.NmapCmdlineargs,
                         help=f"cmdline arguments to be passed into the nmap scan"
                              f" (default: {ArgParserDefaultParams.NmapCmdlineargs})")
 
-    parser.add_argument(f"--set-{ScannerNames.NmapScan}scan-ports", action='store',
-                        dest=ArgParserArgName.NmapPorts, metavar="PORTS",
+    parser.add_argument(f"--set-{ScannerNames.NmapScan}-ports", action='store',
+                        dest=ArgParserArgName.NmapPorts, metavar="<ports>",
                         type=str, default=ArgParserDefaultParams.NmapPorts,
                         help=f"ports to be scanned by the nmap scanner"
                              f" (default: {len(ArgParserDefaultParams.NmapPorts)} common ports)")
