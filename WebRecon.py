@@ -77,7 +77,7 @@ class WebRecon(ScanManager):
 
         default_custom_scanner_args[ScannerNames.ContentScan]["do_bypass"] = ScannerNames.BypassScan in self._all_scans
         default_custom_scanner_args[ScannerNames.ContentScan]["extensions"] = kwargs.get("extensions")
-        default_custom_scanner_args[ScannerNames.ContentScan]["ignore_size"] = kwargs.get("content_ignoresize")
+        default_custom_scanner_args[ScannerNames.ContentScan]["filter_size"] = kwargs.get("content_filtersize")
 
         default_custom_scanner_args[ScannerNames.NmapScan]["cmdline_args"] = kwargs.get("nmap_cmdline")
         default_custom_scanner_args[ScannerNames.NmapScan]["ports"] = kwargs.get("nmap_ports")
@@ -217,7 +217,7 @@ if __name__ == "__main__":
              results_path=arguments.results_path,
              nmap_cmdline=getattr(arguments, ArgParserArgName.NmapCmdlineargs),
              nmap_ports=getattr(arguments, ArgParserArgName.NmapPorts),
-             content_ignoresize=arguments.content_ignoresize,
+             content_filtersize=arguments.content_filtersize,
              disable_cache=arguments.disable_cache,
              extensions=arguments.extensions,
              request_timeout=arguments.request_timeout,

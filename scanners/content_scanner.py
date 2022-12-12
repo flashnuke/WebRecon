@@ -35,7 +35,7 @@ class ContentScanner(Scanner):
 
         self.extensions: List[str] = [f".{ext}" for ext in kwargs.get("extensions", str()).split(',')]
         self._count_multiplier += len(self.extensions)
-        self.ignore_size = kwargs.get("ignore_size")
+        self.filter_size = kwargs.get("filter_size")
 
     def _save_results(self, *args, **kwargs):
         results_str = str()
@@ -77,7 +77,7 @@ class ContentScanner(Scanner):
                     if scode in ScannerDefaultParams.SuccessStatusCodes or \
                             scode == ScannerDefaultParams.ForbiddenSCode:
                         res_size = len(response.text)
-                        if res_size != self.ignore_size:
+                        if res_size != self.filter_size:
                             self.ret_results[scode].append(f"size {res_size}\t\t{url}")
                             self._log_progress(f"{path} -> [{scode}, {res_size}]")
                             found_any = True

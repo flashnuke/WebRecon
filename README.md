@@ -44,7 +44,7 @@ The output in the progress log (and the results file) contains the status code a
 * In order to use a custom wordlist, "--set-content-wl" argument should be passed, followed by the path
 * The default wordlist used here is dirb's `common.txt` list, which is also located under `/usr/share/wordlists/dirb/`
 * Use the `-e` argument to append custom extensions to each word attempt (i.e -> `-e "php,html"`)
-* Use the `-is` argument to ignore certain pages sizes (useful when nonexistent pages redirect to the same page)
+* Use the `-fs` argument to filter certain pages sizes (useful when nonexistent pages redirect to the same page)
 
 ### Bypass403 (`403bypass`)
 

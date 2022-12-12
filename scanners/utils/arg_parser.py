@@ -54,9 +54,9 @@ def get_argument_parser() -> argparse.ArgumentParser:
                         type=str, default=str(), metavar="<ext1,ext2...>",
                         help='test various file extensions for each attempt in the wordlist (example: "php,bak,html")')
 
-    parser.add_argument("-is", f"--set-{ScannerNames.ContentScan}-ignoresize", dest='content_ignoresize',
+    parser.add_argument("-fs", f"--set-{ScannerNames.ContentScan}-filtersize", dest='content_filtersize',
                         action="store", type=int, default=-1, metavar="<size>",
-                        help='content scan - ignore pages that are of size <N> (default -> 0)')
+                        help='content scan - filter pages that are of size <N> (default -> 0)')
 
     parser.add_argument(f"--set-{ScannerNames.DnsScan}-wl", dest=f'wl_{ScannerNames.DnsScan}', action='store',
                         metavar="<path>",
