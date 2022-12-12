@@ -55,7 +55,7 @@ class Bypass403(Scanner):
 
         for method in ["GET", "POST", "PUT", "TRACE", "DELETE"]:
             scode, size = self.send_request(method, original_path)
-            results[scode].append(f"size {size}\t\t{method} {original_path}")
+            results[scode].append(f"size {size}".ljust(OutputDefaultParams.SizeToResPad) + f"{method} {original_path}")
 
         # encoding / path traversal
 
@@ -66,14 +66,14 @@ class Bypass403(Scanner):
                          f"{self.target_url}/{self.target_keyword}?", f"{self.target_url}/{self.target_keyword}#",
                          f"{self.target_url}/{self.target_keyword}/*"]:
             scode, size = self.send_request("GET", req_path)
-            results[scode].append(f"size {size}\t\tGET {req_path}")
+            results[scode].append(f"size {size}".ljust(OutputDefaultParams.SizeToResPad) + f"GET {req_path}")
 
         # file extensions
 
         for file_ext in ["html", "php", "json"]:
             req_path = f"{original_path}.{file_ext}"
             scode, size = self.send_request("GET", req_path)
-            results[scode].append(f"size {size}\t\tGET {req_path}\t\tsize {size}")
+            results[scode].append(f"size {size}".ljust(OutputDefaultParams.SizeToResPad) + f"GET {req_path}")
 
         # headers
 
@@ -81,18 +81,22 @@ class Bypass403(Scanner):
             for host_nickname in Bypass403._LHOST_NICKNAMES:
                 headers = {header: host_nickname}
                 scode, size = self.send_request("GET", original_path, headers=headers)
-                results[scode].append(f"size {size}\t\tGET {original_path} -H {header}: {host_nickname}")
+                results[scode].append(f"size {size}".ljust(OutputDefaultParams.SizeToResPad) +
+                                      f"GET {original_path} -H {header}: {host_nickname}")
 
         for header in ["X-rewrite-url", "X-Original-URL"]:
             req_path = f"{self.target_url}"
-            headers = {header: self.target_keyword}
+            header_val = self.target_keyword if self.target_keyword.startswith("/") else f"/{self.target_keyword}"
+            headers = {header: header_val}
             scode, size = self.send_request("GET", req_path, headers=headers)
-            results[scode].append(f"size {size}\t\tGET {req_path} -H '{header}: {self.target_keyword}'")
+            results[scode].append(f"size {size}".ljust(OutputDefaultParams.SizeToResPad) +
+                                  f"GET {req_path} -H '{header}: {header_val}'")
 
         for method in ["POST", "PUT"]:
             headers = {"Content-Length": "0"}
             scode, size = self.send_request(method, original_path, headers=headers)
-            results[scode].append(f"size {size}\t\t{method} {original_path} -H 'Content-Length: 0'")
+            results[scode].append(f"size {size}".ljust(OutputDefaultParams.SizeToResPad) + f"{method} {original_path}"
+                                                                                           f" -H 'Content-Length: 0'")
 
         return results
 
