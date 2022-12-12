@@ -30,6 +30,8 @@ class OutputManager(object):
         pass
 
     def insert_output(self, source_name: str, output_type: OutputType, status_keys: Union[Dict[str, Any], None] = None,):
+        if source_name in OutputManager._OUTPUT_CONT[output_type]:
+            return
         with OutputManager._OUTPUT_MUTEX:
             self._clear()
             if output_type == OutputType.Status:
