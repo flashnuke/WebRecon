@@ -71,14 +71,16 @@ class ContentScanner(Scanner):
                                                    scheme=self.scheme,
                                                    ).start_scanner()
                         for bypass_scode, bypass_urls in bypass_results.items():
-                            if scode != ScannerDefaultParams.ForbiddenSCode:
-                                self.ret_results[f'bypass {scode}'].extend(bypass_urls)
+                            if bypass_scode != ScannerDefaultParams.ForbiddenSCode:
+                                self.ret_results[f'bypass {bypass_scode}'].extend(bypass_urls)
+                                found_any = True
 
                     if scode in ScannerDefaultParams.SuccessStatusCodes or \
                             scode == ScannerDefaultParams.ForbiddenSCode:
                         res_size = len(response.text)
                         if res_size != self.filter_size:
-                            self.ret_results[scode].append(f"size {res_size}\t\t{url}")
+                            self.ret_results[scode].append(f"size {res_size}".ljust(OutputDefaultParams.SizeToResPad)
+                                                           + url)
                             self._log_progress(f"{path} -> [{scode}, {res_size}]")
                             found_any = True
 
@@ -86,7 +88,8 @@ class ContentScanner(Scanner):
                         requests.exceptions.ReadTimeout, HTTPError):
                     continue
                 except requests.exceptions.TooManyRedirects:
-                    self.ret_results[ScannerDefaultParams.TooManyRedirectsSCode].append(f"size 0\t\t{url}")
+                    self.ret_results[ScannerDefaultParams.TooManyRedirectsSCode].append(
+                        "size 0".ljust(OutputDefaultParams.SizeToResPad) + url)
                     self._log_progress(f"{path} -> [{ScannerDefaultParams.TooManyRedirectsSCode}]")
                     found_any = True
                 except Exception as exc:

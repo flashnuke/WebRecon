@@ -41,6 +41,7 @@ class OutputDefaultParams(_ExtendedEnum):
     LineRemove = "\x1b[1A\x1b[2K"
     LineWidth = 150
     MaxLen = 8
+    SizeToResPad = 30
     StrTruncLimit = 105
     Delimiter = f"{OutputColors.Purple}{LineWidth * '='}{OutputColors.White}"
     LinePrefix = f"{OutputColors.Gray}>{OutputColors.White}"
