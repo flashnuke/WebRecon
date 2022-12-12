@@ -55,7 +55,7 @@ class DNSScanner(Scanner):
                 self.abort_scan(reason=f"target {url_path}, exception - {exc}")
             finally:
                 self._update_count(url_path, found)
-                time.sleep(self.request_cooldown)
+                self._sleep_after_request()
 
     def _record_found(self, url_path: str):
         self._save_results(f"{url_path}\n")
