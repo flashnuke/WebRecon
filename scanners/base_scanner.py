@@ -42,6 +42,7 @@ class ScanManager(object):
         self.results_path_full = self._setup_results_path() if self.results_path else None
 
         self._output_manager = self._output_manager_setup()
+        self._log_status(OutputStatusKeys.ResultsPath, self.truncate_str(self.results_path_full))
 
         self._use_prev_cache = False
         self._cache_dict: dict = self._load_cache_if_exists()
@@ -203,19 +204,21 @@ class ScanManager(object):
     def _format_name_for_path(self, name: str) -> str:
         return name.replace(f'{self.scheme}://', '').replace('.', '_')
 
-    def _update_progress_status(self, finished_c, total_c, current: str):
+    def _update_progress_status(self, finished_c, total_c, current: str, force_update=False):
         with self._current_progress_mutex:
             progress = (100 * finished_c) // total_c
             with ScanManager._CACHE_MUTEX:
                 self._cache_dict["finished"] = finished_c
-            if progress % OutputProgBarParams.ProgBarIntvl == 0 and progress > self._current_progress_perc:
+            if progress % OutputProgBarParams.ProgBarIntvl == 0 and progress > self._current_progress_perc or \
+                    force_update:
                 print_prog_mod = OutputProgBarParams.ProgressMod
                 prog_count = progress // print_prog_mod
                 prog_str = f"[{('#' * prog_count).ljust(OutputProgBarParams.ProgressMax, '-')}]"
                 self._log_status(OutputStatusKeys.Progress, prog_str, refresh_output=False)
                 self._current_progress_perc = progress
+                force_update = True  # update current also
             left = self._count_multiplier * (total_c - finished_c)
-            if finished_c % OutputProgBarParams.ProgLeftIntvl == 0 or left == 0:
+            if finished_c % OutputProgBarParams.ProgLeftIntvl == 0 or left == 0 or force_update:
                 self._log_status(OutputStatusKeys.Current, current, refresh_output=False)
                 self._log_status(OutputStatusKeys.Left,
                                  f"{self._count_multiplier * total_c - self._count_multiplier * finished_c} "

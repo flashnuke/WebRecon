@@ -29,7 +29,7 @@ class OutputManager(object):
     def __init__(self):
         pass
 
-    def insert_output(self, source_name: str, output_type: OutputType, status_keys: Union[Dict[str, Any], None] = None):
+    def insert_output(self, source_name: str, output_type: OutputType, status_keys: Union[Dict[str, Any], None] = None,):
         if source_name in OutputManager._OUTPUT_CONT[output_type]:
             return
         with OutputManager._OUTPUT_MUTEX:
