@@ -71,7 +71,7 @@ class ContentScanner(Scanner):
                                                    scheme=self.scheme,
                                                    ).start_scanner()
                         for bypass_scode, bypass_urls in bypass_results.items():
-                            if scode != ScannerDefaultParams.ForbiddenSCode:
+                            if bypass_scode != ScannerDefaultParams.ForbiddenSCode:
                                 self.ret_results[f'bypass {scode}'].extend(bypass_urls)
                                 found_any = True
 
