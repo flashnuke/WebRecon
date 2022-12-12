@@ -3,7 +3,6 @@
 import copy
 import urllib.parse
 import pprint
-import pkg_resources
 import ipaddress
 
 from sys import platform
@@ -198,8 +197,6 @@ class WebRecon(ScanManager):
 if __name__ == "__main__":
     if "linux" not in platform:
         raise UnsupportedOS(platform)
-    with open("requirements.txt", "r") as reqs:
-        pkg_resources.require(reqs.readlines())
 
     parser = arg_parser.get_argument_parser()
     arguments = parser.parse_args()
