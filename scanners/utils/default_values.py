@@ -126,7 +126,7 @@ class CacheDefaultParams(_ExtendedEnum):
 
 
 class ArgParserDefaultParams(_ExtendedEnum):
-    NmapCmdlineargs = "-sV -sU -sS"
+    NmapCmdlineargs = "-sV -sC -A -p- --fast"
     NmapPorts = get_common_ports()
 
     DNSDefaultWL = os.path.join(os.getcwd(), WordlistDefaultPath.DNSScanner)
