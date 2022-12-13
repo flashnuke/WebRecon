@@ -42,7 +42,7 @@ class ScanManager(object):
         self.results_path_full = self._setup_results_path() if self.results_path else None
 
         self._output_manager = self._output_manager_setup()
-        if self.results_path_full:
+        if self._output_manager.is_key_in_status(self._get_scanner_name(), OutputStatusKeys.ResultsPath):
             self._log_status(OutputStatusKeys.ResultsPath, self.truncate_str(self.results_path_full))
 
         self._use_prev_cache = False
