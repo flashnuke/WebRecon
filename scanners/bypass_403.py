@@ -57,6 +57,12 @@ class Bypass403(Scanner):
             scode, size = self.send_request(method, original_path)
             results[scode].append(f"size {size}".ljust(OutputDefaultParams.SizeToResPad) + f"{method} {original_path}")
 
+        # swap upper/lower case
+
+        swapped_path = original_path.swapcase()
+        scode, size = self.send_request("GET", swapped_path)
+        results[scode].append(f"size {size}".ljust(OutputDefaultParams.SizeToResPad) + f"GET {swapped_path}")
+
         # encoding / path traversal
 
         for req_path in [f"{self.target_url}/%2e/{self.target_keyword}", f"{self.target_url}/{self.target_keyword}/.",
